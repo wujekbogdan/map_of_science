@@ -10,8 +10,9 @@ Navigate continents of scientific fields, dive into countries of subfields, and 
 
 ### Prerequisites
 
-1. Installed [Node.js](https://nodejs.org/en/download/)
-2. Installed [npm](https://www.npmjs.com/get-npm) (Node Package Manager), which comes with Node.js.
+1. Required: [Node.js@^22](https://nodejs.org/en/download/)
+2. Required: [npm](https://www.npmjs.com/get-npm) (Node Package Manager), which comes with Node.js.
+3. Optional: [nvm](https://github.com/nvm-sh/nvm) for managing Node.js versions.
 
 You can verify the installation by running in the command line:
 
@@ -20,13 +21,22 @@ node -v
 npm -v
 ```
 
+If you're an `nvm` user, you can install the required Node.js version by running:
+
+```
+nvm install
+```
+
+````bash
+
 ### Build and run
 
 1. Clone this repository.
 2. Install dependencies:
    ```bash
    npm install
-   ```
+````
+
 3. Build the application:
    ```bash
    npm run build

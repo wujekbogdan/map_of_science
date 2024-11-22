@@ -8,7 +8,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack build",
     "build:prod": "webpack --mode production",
-    "prepare": "husky"
+    "prepare": "husky",
+    "commit": "cz"
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown",
@@ -18,12 +19,16 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@commitlint/cli": "^19.6.0",
+    "@commitlint/config-conventional": "^19.6.0",
     "@changesets/cli": "^2.27.10",
     "@eslint/js": "^9.13.0",
     "autoprefixer": "^10.4.19",
+    "commitizen": "^4.3.1",
     "copy-webpack-plugin": "^12.0.2",
     "css-loader": "^7.1.2",
     "csv-loader": "^3.0.5",
+    "cz-conventional-changelog": "^3.3.0",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.0",
     "eslint-config-standard": "^17.1.0",

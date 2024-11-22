@@ -4,8 +4,16 @@ on:
   push:
     branches:
       - main
+      - fix/changesets-workflow-disable-husky # TODO: Remove before merging to main
+
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+# The changesets action, after processing the changesets, commits the changes to the repository.
+# It won't follow the commitizen format, so we need to bypass git hooks by setting the HUSKY env variable to 0.
+# https://typicode.github.io/husky/how-to.html#ci-server-and-docker
+env:
+  HUSKY: 0
 
 jobs:
   release:

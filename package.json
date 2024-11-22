@@ -11,10 +11,6 @@
     "prepare": "husky",
     "commit": "cz"
   },
-  "lint-staged": {
-    "**/*": "prettier --write --ignore-unknown",
-    "**/*.{js,jsx}": "eslint"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",

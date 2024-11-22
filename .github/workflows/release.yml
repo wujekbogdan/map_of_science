@@ -7,6 +7,12 @@ on:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
+# The changesets action, after processing the changesets, commits the changes to the repository.
+# It won't follow the commitizen format, so we need to bypass git hooks by setting the HUSKY env variable to 0.
+# https://typicode.github.io/husky/how-to.html#ci-server-and-docker
+env:
+  HUSKY: 0
+
 jobs:
   release:
     name: Release
@@ -23,7 +29,13 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
+      - name: Set Date Environment Variable
+        run: echo "RELEASE_DATE=$(date '+%Y-%m-%d')" >> $GITHUB_ENV
+
       - name: Create Release Pull Request
         uses: changesets/action@v1
+        with:
+          commit: "chore(release): apply changesets"
+          title: "Release: ${{ env.RELEASE_DATE }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

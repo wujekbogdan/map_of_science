@@ -27,16 +27,13 @@ If you're an `nvm` user, you can install the required Node.js version by running
 nvm install
 ```
 
-````bash
-
 ### Build and run
 
 1. Clone this repository.
 2. Install dependencies:
    ```bash
    npm install
-````
-
+   ```
 3. Build the application:
    ```bash
    npm run build

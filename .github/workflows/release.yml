@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-      - fix/changesets-workflow-disable-husky # TODO: Remove before merging to main
-
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 

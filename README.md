@@ -13,6 +13,7 @@ Navigate continents of scientific fields, dive into countries of subfields, and 
 1. Required: [Node.js@^22](https://nodejs.org/en/download/)
 2. Required: [npm](https://www.npmjs.com/get-npm) (Node Package Manager), which comes with Node.js.
 3. Optional: [nvm](https://github.com/nvm-sh/nvm) for managing Node.js versions.
+4. Optional: [Docker](https://docs.docker.com/get-docker/) for running the application in a container.
 
 You can verify the installation by running in the command line:
 
@@ -27,7 +28,7 @@ If you're an `nvm` user, you can install the required Node.js version by running
 nvm install
 ```
 
-### Build and run
+### Build and run for development
 
 1. Clone this repository.
 2. Install dependencies:
@@ -43,6 +44,15 @@ nvm install
    npm run start
    ```
 5. Open the application in the browser at the address displayed in the logs, probably [http://localhost:8080/](http://localhost:8080/)
+
+### Run in Docker
+
+1. Install and run [Docker](https://docs.docker.com/get-docker/).
+2. Build and run the application:
+   ```bash
+   docker compose up # or docker-compose up
+   ```
+3. Open the application in the browser at [http://localhost:8080/](http://localhost:8080/)
 
 ## Editing
 

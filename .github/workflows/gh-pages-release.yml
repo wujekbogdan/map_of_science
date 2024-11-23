@@ -4,9 +4,13 @@ on:
   push:
     branches: ["main"]
 
+env:
+  HUSKY: 0
+
 jobs:
   build:
-    runs-on: ubuntu-latest
+    name: GitHub Pages
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout the repository
@@ -18,10 +22,10 @@ jobs:
           node-version-file: .nvmrc
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build the site
-        run: npm run build:prod
+        run: npm run build
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

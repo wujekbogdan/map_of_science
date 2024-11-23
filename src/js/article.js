@@ -135,19 +135,22 @@ export function isArticleAvailable(articleName) {
 }
 
 export async function fetchAvailableArticlesList() {
-  if (cachedArticleList) {
-    return Promise.resolve(cachedArticleList);
-  }
-
-  try {
-    const response = await fetch("articlesList.json");
-    const articleList = await response.json();
-    cachedArticleList = articleList;
-    return articleList;
-  } catch (error) {
-    console.error("Error fetching article list:", error);
-    return [];
-  }
+  // TODO: Restore
+  // Temporarily disabled due to removal of the Webpack ArticleListGeneratorPlugin
+  // Likely the plugin won't be needed anymore after React migration
+  // if (cachedArticleList) {
+  //   return Promise.resolve(cachedArticleList);
+  // }
+  //
+  // try {
+  //   const response = await fetch("articlesList.json");
+  //   const articleList = await response.json();
+  //   cachedArticleList = articleList;
+  //   return articleList;
+  // } catch (error) {
+  //   console.error("Error fetching article list:", error);
+  //   return [];
+  // }
 }
 
 export function getAvailableArticleList() {

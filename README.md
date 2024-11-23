@@ -4,8 +4,6 @@ Discover the landscape of human knowledge through an interactive map.
 
 Navigate continents of scientific fields, dive into countries of subfields, and discover cities - whose size reflects the volume of research on each topic. The proximity of areas on the map mirrors how closely related the fields are.
 
-[**👉 LIVE DEMO HERE**](https://dsonyy.github.io/map_of_science/)
-
 ## Installation
 
 ### Prerequisites
@@ -28,24 +26,21 @@ If you're an `nvm` user, you can install the required Node.js version by running
 nvm install
 ```
 
-### Build and run for development
+### Building and running
 
-1. Clone this repository.
-2. Install dependencies:
+#### Running for development
+
+1. Install dependencies:
    ```bash
    npm install
    ```
-3. Build the application:
+2. Start the application locally:
    ```bash
-   npm run build
+   npm run dev
    ```
-4. Start the application locally:
-   ```bash
-   npm run start
-   ```
-5. Open the application in the browser at the address displayed in the logs, probably [http://localhost:8080/](http://localhost:8080/)
+3. Open the application in the browser at the address displayed in the logs, probably [http://localhost:5173/](http://localhost:5173/)
 
-### Run in Docker
+#### Running inside a Docker container
 
 1. Install and run [Docker](https://docs.docker.com/get-docker/).
 2. Build and run the application:
@@ -53,6 +48,22 @@ nvm install
    docker compose up # or docker-compose up
    ```
 3. Open the application in the browser at [http://localhost:8080/](http://localhost:8080/)
+
+#### Building for production
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Build the application:
+   ```bash
+   npm run build
+   ```
+3. Compiled files will be located in the `dist` directory.
+4. Serve the application using a static server, e.g., [http-server](https://www.npmjs.com/package/http-server):
+   ```bash
+   npx http-server dist
+   ```
 
 ## Editing
 

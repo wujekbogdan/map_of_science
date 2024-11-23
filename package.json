@@ -8,7 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack build",
     "build:prod": "webpack --mode production",
-    "prepare": "husky",
+    "prepare": "husky || true",
     "commit": "cz"
   },
   "keywords": [],
@@ -60,5 +60,6 @@
   },
   "engines": {
     "node": "^22"
-  }
+  },
+  "packageManager": "npm@10.9.0"
 }

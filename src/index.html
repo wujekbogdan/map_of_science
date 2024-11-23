@@ -1,22 +1,12 @@
 <!doctype html>
 <html>
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mapa nauki Lamża-CSET</title>
   </head>
   <body>
-    <div id="article" class="content">
-      <div id="article-content"></div>
-    </div>
-
-    <div id="chart">
-      <div id="chart-d3"></div>
-      <div id="foreground"><%= htmlWebpackPlugin.options.foregroundSvg %></div>
-    </div>
-
-    <div id="loading" class="loading-container">
-      <div class="loading-spinner"></div>
-    </div>
+    <div id="root"></div>
+    <script type="module" src="main.tsx"></script>
   </body>
 </html>

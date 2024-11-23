@@ -17,12 +17,6 @@ class Label {
 }
 
 export function initLabels(xScale, yScale, kZoom) {
-  article.fetchAvailableArticlesList().then(() => {
-    initLabelsAfterFetchingArticlesList(xScale, yScale, kZoom);
-  });
-}
-
-function initLabelsAfterFetchingArticlesList(xScale, yScale, kZoom) {
   buildLabelsDiv();
 
   getForegroundLayers().forEach((layer, layer_no) => {
@@ -31,13 +25,15 @@ function initLabelsAfterFetchingArticlesList(xScale, yScale, kZoom) {
 
     getLabelsFromSvgGroup(layer).forEach((label) => {
       const orgFontSize = getFontSizeInPx(LabelsDivLayer);
+      const isAvailable = article.isArticleAvailable(label.html);
+
       LabelsDivLayer.append("div")
         .attr("x", label.x)
         .attr("y", label.y)
         .attr("org-font-size", orgFontSize)
         .classed("label", true)
-        .classed("label-available", article.isArticleAvailable(label.html))
-        .classed("label-unavailable", !article.isArticleAvailable(label.html))
+        .classed("label-available", isAvailable)
+        .classed("label-unavailable", !isAvailable)
         .text(label.html);
     });
   });
@@ -137,8 +133,10 @@ function getLabelFromSvgElement(svgElement) {
 }
 
 function handleClickLabel(isAvailable, label) {
+  // TODO: restore this line before merge
   if (!isAvailable) return;
 
   const labelId = label.innerHTML;
+
   article.enableLabelArticle(labelId);
 }

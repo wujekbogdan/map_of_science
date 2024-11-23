@@ -1,6 +1,12 @@
-import { PATH_TO_ARTICLES } from "./config";
-
-let cachedArticleList = null;
+const articles = Object.entries(import.meta.glob("../articles/*.html")).reduce(
+  (acc, [path, importFn]) => {
+    return {
+      ...acc,
+      [path.replace("../articles/", "").replace(".html", "")]: importFn,
+    };
+  },
+  {},
+);
 
 function disableArticleInAnimation(article) {
   article.classList.remove("animate__animated");
@@ -90,22 +96,29 @@ function labelTextToLabelId(labelText) {
     .replace(/[^a-z0-9]/g, "_"); // Replace non-alphanumeric characters with underscores
 }
 
-function labelTextToArticleUri(labelText) {
-  const labelId = labelTextToLabelId(labelText);
-  return PATH_TO_ARTICLES + `${labelId}.html`; // Assuming the HTML files are in the 'articles' directory
-}
-
 async function fetchArticle(labelText) {
-  const articleUri = labelTextToArticleUri(labelText);
+  const labelId = labelTextToLabelId(labelText);
+
   try {
-    const response = await fetch(articleUri);
-    if (response.ok) {
-      const content = await response.text();
-      return content;
+    const path = (await articles[labelId]())?.default;
+    if (!path) {
+      console.error("Article not found:", {
+        id: labelId,
+      });
+      return null;
     }
-    return null;
+
+    const response = await fetch(path);
+    if (!response.ok) {
+      console.error("Error fetching article content", {
+        id: labelId,
+      });
+      return null;
+    }
+
+    return await response.text();
   } catch (error) {
-    console.error("Error fetching article content:", error);
+    console.error("Error fetching article content:", error?.message);
     return null;
   }
 }
@@ -129,30 +142,6 @@ function buildLabelArticle(labelText) {
 }
 
 export function isArticleAvailable(articleName) {
-  const articleFilename = labelTextToLabelId(articleName) + ".html";
-  const is = getAvailableArticleList().includes(articleFilename);
-  return is;
-}
-
-export async function fetchAvailableArticlesList() {
-  // TODO: Restore
-  // Temporarily disabled due to removal of the Webpack ArticleListGeneratorPlugin
-  // Likely the plugin won't be needed anymore after React migration
-  // if (cachedArticleList) {
-  //   return Promise.resolve(cachedArticleList);
-  // }
-  //
-  // try {
-  //   const response = await fetch("articlesList.json");
-  //   const articleList = await response.json();
-  //   cachedArticleList = articleList;
-  //   return articleList;
-  // } catch (error) {
-  //   console.error("Error fetching article list:", error);
-  //   return [];
-  // }
-}
-
-export function getAvailableArticleList() {
-  return cachedArticleList;
+  const labelId = labelTextToLabelId(articleName);
+  return labelId in articles;
 }

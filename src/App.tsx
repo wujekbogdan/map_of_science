@@ -2,11 +2,14 @@ import { useEffect } from 'react'
 import { init } from './js/main.js'
 import Map from '../asset/foreground.svg?react';
 
+let isInitialized = false;
+
 function App() {
-  // Ensure the init function is called only once
+  // Ensure the init function is called only once, even in React strict mode
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    if (isInitialized) return;
     init();
+    isInitialized = true;
   }, []);
 
   return (

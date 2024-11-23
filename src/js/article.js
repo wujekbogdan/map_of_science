@@ -1,8 +1,8 @@
-const articles = Object.entries(import.meta.glob("../articles/*.html")).reduce(
+const articles = Object.entries(import.meta.glob("../articles/*.md")).reduce(
   (acc, [path, importFn]) => {
     return {
       ...acc,
-      [path.replace("../articles/", "").replace(".html", "")]: importFn,
+      [path.replace("../articles/", "").replace(".md", "")]: importFn,
     };
   },
   {},
@@ -96,6 +96,12 @@ function labelTextToLabelId(labelText) {
     .replace(/[^a-z0-9]/g, "_"); // Replace non-alphanumeric characters with underscores
 }
 
+const markdownToHtml = async (markdown) => {
+  const { marked } = await import("marked");
+
+  return marked.parse(markdown);
+};
+
 async function fetchArticle(labelText) {
   const labelId = labelTextToLabelId(labelText);
 
@@ -116,7 +122,7 @@ async function fetchArticle(labelText) {
       return null;
     }
 
-    return await response.text();
+    return markdownToHtml(await response.text());
   } catch (error) {
     console.error("Error fetching article content:", error?.message);
     return null;

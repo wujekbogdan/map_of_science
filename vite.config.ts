@@ -5,5 +5,5 @@ import svgr from "vite-plugin-svgr";
 export default defineConfig({
   plugins: [react(), svgr()],
   root: 'src',
-  assetsInclude: ['src/articles/*.html'],
+  assetsInclude: ['src/articles/*.md'],
 })

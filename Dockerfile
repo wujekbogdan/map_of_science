@@ -4,6 +4,7 @@ FROM base AS builder
 
 WORKDIR /home/node
 
+# Copy just the package.json and package-lock.json to utilize Docker's caching mechanism and cache the npm install step.
 COPY package.json package-lock.json ./
 
 ENV HUSKY=0
@@ -14,20 +15,10 @@ COPY . .
 RUN export HUSKY=0
 RUN npm run build:prod
 
-FROM base AS installer
+# Use a separate image as a runner to reduce the final image size.
+FROM nginx:1.27.2-alpine AS runner
 
-USER node
-WORKDIR /home/node
+COPY --from=builder /home/node/dist /usr/share/nginx/html
 
-COPY --from=builder --chown=node:node /home/node/dist ./dist
-COPY --from=builder --chown=node:node /home/node/package.json ./package.json
-COPY --from=builder --chown=node:node /home/node/package-lock.json ./package-lock.json
-
-RUN npm ci --only=production
-
-FROM base AS runner
-
-USER node
-WORKDIR /home/node
-
-COPY --from=installer --chown=node:node /home/node/dist ./dist
+# The app doesn't include any backend, so we need to serve the app using a standalone server.
+CMD ["nginx", "-g", "daemon off;"]

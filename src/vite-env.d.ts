@@ -1,2 +1,7 @@
 /// <reference types="vite/client" />
-/// <reference types="vite-plugin-svgr/client" />
+
+declare module '*.svg?parse' {
+  import { MapSvgRepresentation } from '../vite-plugin/svg-map-parser';
+  const content: MapSvgRepresentation
+  export default content;
+}

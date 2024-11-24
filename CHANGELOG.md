@@ -11,10 +11,10 @@
     - Defines the schema for the SVG map.
     - Parses the given SVG file and validates it against the schema.
     - Returns a strongly typed object with the map data.
-  - Add a React-rendered map that utilizes the `vite-plugin/svg-map-parser` plugin. The map is rendered as an SVG element that
+  - Add a React-rendered map that utilizes the `vite-plugin/svg-map-parser` plugin. This will allow us to use a
+    declarative approach for SVG manipulation rather than direct DOM manipulation. The map is rendered as an SVG element that
     is (mostly) backwards compatible with the previous implementation. The only difference is that the custom
-    `inkscape:label` attribute has been replaced with the standard `data-label` attribute. This will allow us to use a
-    declarative approach for SVG manipulation rather than direct DOM manipulation.
+    `inkscape:label` attribute has been replaced with the standard `data-label` attribute.
   - Add [Vitest](https://vitest.dev/).
 
 ## 1.2.0
@@ -63,7 +63,7 @@
   - mini-css-extract-plugin
   - svg-injector
 
-- 19cf5a2: Turn the Release GitHub Workflow into a manually triggered one
+- 19cf5a2: Turn the Release GitHub Workflow into a manually triggered one.
 - b9dad5d: - Add `Dockerfile`
   - Add `docker-compose.yml`
   - Add corresponding instructions to `README.md`
@@ -87,7 +87,7 @@
 
   - Updating the `README.md` with the required Node.js version.
   - Specifying the Node.js version in `.nvmrc`.
-  - Specifying the Node.js version in `package.jso`n via the `engines` field.
+  - Specifying the Node.js version in `package.json` via the `engines` field.
 
 - 492ea49: Add a GitHub workflow that applies changesets and makes a release on push to `main`.
 - 906b33a: Add [Changesets](https://github.com/changesets/changesets)

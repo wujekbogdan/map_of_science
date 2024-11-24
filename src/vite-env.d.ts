@@ -3,11 +3,11 @@
 // TODO: This is redundant. The following declaration should be enough:
 // declare module '*.svg?parse' {
 //   import { MapSvgRepresentation } from '../vite-plugin/svg-map-parser';
-//   const content: MapSvgRepresentation
+//   const content: MapSvgRepresentation;
 //   export default content;
 // }
-// But for some reason, it doesn't work, even if the /vite-plugin/svg-map-parser.ts file is included in tsconfig.app.json
-declare module '*.svg?parse' {
+// But for some reason, it doesn’t work, even if the ../vite-plugin/svg-map-parser.ts file is included in tsconfig.app.json.
+declare module "*.svg?parse" {
   const content: {
     layer1: {
       attributes: {
@@ -57,6 +57,6 @@ declare module '*.svg?parse' {
         }[];
       }[];
     };
-  }
+  };
   export default content;
 }

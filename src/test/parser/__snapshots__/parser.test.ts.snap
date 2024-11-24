@@ -133,38 +133,72 @@ exports[`SVG Map Parser Vite Plugin > should parse a valid SVG 1`] = `
         "display": "inline",
       },
     },
-    "group": {
-      "attributes": {
-        "id": "layer4",
-        "label": "L3-maszyny",
+    "groups": [
+      {
+        "attributes": {
+          "id": "layer4",
+          "label": "L3-maszyny",
+        },
+        "rects": [
+          {
+            "height": "6.172729",
+            "id": "rect31",
+            "label": "#Urządzenia mechaniczne",
+            "style": {
+              "display": "inline",
+              "fill": "#000000",
+            },
+            "width": "6.0274882",
+            "x": "-322.79126",
+            "y": "-217.16087",
+          },
+          {
+            "height": "6.172729",
+            "id": "rect27",
+            "label": "#Robotyka",
+            "style": {
+              "display": "inline",
+              "fill": "#000000",
+            },
+            "width": "6.0274882",
+            "x": "-300.85992",
+            "y": "-234.00879",
+          },
+        ],
       },
-      "rects": [
-        {
-          "height": "6.172729",
-          "id": "rect31",
-          "label": "#Urządzenia mechaniczne",
-          "style": {
-            "display": "inline",
-            "fill": "#000000",
-          },
-          "width": "6.0274882",
-          "x": "-322.79126",
-          "y": "-217.16087",
+      {
+        "attributes": {
+          "id": "layer6",
+          "label": "L3-Ziemia",
         },
-        {
-          "height": "6.172729",
-          "id": "rect27",
-          "label": "#Robotyka",
-          "style": {
-            "display": "inline",
-            "fill": "#000000",
+        "rects": [
+          {
+            "height": "6.172729",
+            "id": "rect32",
+            "label": "#Asfalt",
+            "style": {
+              "display": "inline",
+              "fill": "#000000",
+            },
+            "width": "6.0274882",
+            "x": "-144.07349",
+            "y": "-296.1134",
           },
-          "width": "6.0274882",
-          "x": "-300.85992",
-          "y": "-234.00879",
-        },
-      ],
-    },
+          {
+            "height": "6.172729",
+            "id": "rect33",
+            "label": "#Wydobywanie węglowodorów",
+            "style": {
+              "display": "inline",
+              "fill": "#000000",
+            },
+            "width": "6.0274882",
+            "x": "3.6539009",
+            "y": "-300.74899",
+          },
+        ],
+      },
+    ],
   },
 }
 `;

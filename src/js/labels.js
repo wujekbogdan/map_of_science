@@ -116,7 +116,7 @@ function selectLabelsDivLayer(layer_no) {
 
 function getLabelTextFromSvgElement(svgElement) {
   const element = d3.select(svgElement);
-  const inkscapeLabel = element.attr(":inkscape:label");
+  const inkscapeLabel = element.attr(":data-label");
   const id = element.attr("id");
   const text = inkscapeLabel ?? id;
   if (text[0] == "#") return text.slice(1);

@@ -1,7 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { parse } from "../../../vite-plugin/svg-map-parser.ts";
 import validSvg from "./valid-svg.test.svg?raw";
-import foreground from "../../../asset/foreground_cp.svg?raw";
 import { ZodError } from "zod";
 
 // TODO: Move this test to /vite-plugin/parser.test.ts
@@ -9,10 +8,6 @@ import { ZodError } from "zod";
 describe("SVG Map Parser Vite Plugin", () => {
   it("should parse a valid SVG", async () => {
     expect(await parse(validSvg)).toMatchSnapshot();
-  });
-
-  it("should parse a valid SVG", async () => {
-    expect(await parse(foreground)).toEqual({})
   });
 
   it("should throw an error if the provided string isn't a valid SVG", async () => {

@@ -1,4 +1,4 @@
-import map from "./test/parser/valid-svg.test.svg?parse";
+import map from "../asset/foreground.svg?parse";
 
 export default function Map() {
   return (
@@ -21,7 +21,7 @@ export default function Map() {
 
       <g
         id={map.layer2.attributes.id}
-        style={ map.layer2.attributes.style}
+        style={map.layer2.attributes.style}
         data-label={map.layer2.attributes.label}
       >
         {map.layer2.paths.map((path) => (
@@ -30,7 +30,6 @@ export default function Map() {
             id={path.id}
             d={path.d}
             style={path.style}
-            className={path.label}
             data-label={path.label}
           />
         ))}
@@ -41,23 +40,26 @@ export default function Map() {
         style={map.layer3.attributes.style}
         data-label={map.layer3.attributes.label}
       >
-        <g
-          id={map.layer3.group.attributes.id}
-          data-label={map.layer3.group.attributes.label}
-        >
-          {map.layer3.group.rects.map((rect) => (
-            <rect
-              key={rect.id}
-              id={rect.id}
-              width={rect.width}
-              height={rect.height}
-              x={rect.x}
-              y={rect.y}
-              style={rect.style}
-              data-label={rect.label}
-            />
-          ))}
-        </g>
+        {map.layer3.groups.map((group) => (
+          <g
+            key={group.attributes.id}
+            id={group.attributes.id}
+            data-label={group.attributes.label}
+          >
+            {group.rects.map((rect) => (
+              <rect
+                key={rect.id}
+                id={rect.id}
+                width={parseFloat(rect.width)}
+                height={parseFloat(rect.height)}
+                x={parseFloat(rect.x)}
+                y={parseFloat(rect.y)}
+                style={rect.style}
+                data-label={rect.label}
+              />
+            ))}
+          </g>
+        ))}
       </g>
     </svg>
   );

@@ -68,5 +68,26 @@
                     y="-234.00879"
                     inkscape:label="#Robotyka"/>
         </g>
+        <g
+                inkscape:groupmode="layer"
+                id="layer6"
+                inkscape:label="L3-Ziemia">
+            <rect
+                    style="display:inline;fill:#000000"
+                    id="rect32"
+                    width="6.0274882"
+                    height="6.172729"
+                    x="-144.07349"
+                    y="-296.1134"
+                    inkscape:label="#Asfalt"/>
+            <rect
+                    style="display:inline;fill:#000000"
+                    id="rect33"
+                    width="6.0274882"
+                    height="6.172729"
+                    x="3.6539009"
+                    y="-300.74899"
+                    inkscape:label="#Wydobywanie węglowodorów"/>
+        </g>
     </g>
 </svg>

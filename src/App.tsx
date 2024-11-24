@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import Map from './Map'
+import { init } from './js/main'
 
 let isInitialized = false;
 
@@ -8,7 +9,7 @@ function App() {
   // Ensure the init function is called only once, even in React strict mode
   useEffect(() => {
     if (isInitialized) return;
-    // init();
+    init();
     isInitialized = true;
   }, []);
 

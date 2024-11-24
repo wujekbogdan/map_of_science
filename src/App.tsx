@@ -1,10 +1,11 @@
 import { useEffect } from 'react'
-import { init } from './js/main.js'
-import Map from '../asset/foreground.svg?react';
+import Map from './Map'
+import { init } from './js/main'
 
 let isInitialized = false;
 
 function App() {
+
   // Ensure the init function is called only once, even in React strict mode
   useEffect(() => {
     if (isInitialized) return;
@@ -21,7 +22,7 @@ function App() {
       <div id="chart">
         <div id="chart-d3"></div>
         <div id="foreground">
-          <Map width="1920" height="1080" />
+          <Map />
         </div>
       </div>
 

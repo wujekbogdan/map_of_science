@@ -1,5 +1,17 @@
 # map_of_science
 
+## 1.2.0
+
+### Minor Changes
+
+- e4836e2: Add Markdown support for articles.
+
+## 1.1.1
+
+### Patch Changes
+
+- 7cb2ad5: Restore the `ArticleListGeneratorPlugin` plugin functionality using [Vite Glob import](https://vite.dev/guide/features#glob-import).
+
 ## 1.1.0
 
 ### Minor Changes

@@ -16,6 +16,8 @@ class Label {
   }
 }
 
+// TODO: remove eslint-disable
+// eslint-disable-next-line no-unused-vars
 export function initLabels(xScale, yScale, kZoom) {
   buildLabelsDiv();
 
@@ -38,7 +40,7 @@ export function initLabels(xScale, yScale, kZoom) {
     });
   });
 
-  updateLabels(xScale, yScale, kZoom);
+  // updateLabels(xScale, yScale, kZoom);
 }
 
 function calcLabelFontSize(orgFontSizeInPx, kZoom) {
@@ -81,7 +83,7 @@ export function updateLabels(xScale, yScale, kZoom) {
   });
 }
 
-export function getLabelsFromSvgGroup(svgGroup) {
+function getLabelsFromSvgGroup(svgGroup) {
   const labels = [];
   d3.select(svgGroup)
     .selectAll("path, rect")

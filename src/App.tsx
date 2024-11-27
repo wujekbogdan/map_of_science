@@ -1,11 +1,11 @@
-import { useEffect } from 'react'
-import Map from './Map'
-import { init } from './js/main'
+import { useEffect } from "react";
+import Map from "./Map";
+import { init } from "./js/main";
+import map from "../asset/foreground.svg?parse";
 
 let isInitialized = false;
 
 function App() {
-
   // Ensure the init function is called only once, even in React strict mode
   useEffect(() => {
     if (isInitialized) return;
@@ -22,7 +22,9 @@ function App() {
       <div id="chart">
         <div id="chart-d3"></div>
         <div id="foreground">
-          <Map />
+          <Map
+            map={map}
+          />
         </div>
       </div>
 
@@ -30,7 +32,7 @@ function App() {
         <div className="loading-spinner"></div>
       </div>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

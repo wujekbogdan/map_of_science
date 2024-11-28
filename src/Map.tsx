@@ -23,16 +23,17 @@ type Label = {
 };
 
 const scaledFontSize = (fontSize: number, zoom: number) => {
-  const LABEL_ZOOM_SCALE_FACTOR_MIN = 0.5;
-  const LABEL_ZOOM_SCALE_FACTOR_MAX = 16.0;
-  const LABEL_ZOOM_SCALE_FACTOR_K = 0.5;
+  const SCALE_FACTOR_MIN = 0.5;
+  const SCALE_FACTOR_MAX = 16;
+  const ZOOM_SCALE_FACTOR = 0.5;
 
-  const scaleFactor = Math.min(
-    Math.max(LABEL_ZOOM_SCALE_FACTOR_MIN, zoom * LABEL_ZOOM_SCALE_FACTOR_K),
-    LABEL_ZOOM_SCALE_FACTOR_MAX,
-  );
+  const baseScaleFactor = 1 / zoom;
+  const scaleFactor = Math.sqrt(Math.min(
+    Math.max(SCALE_FACTOR_MIN, zoom * ZOOM_SCALE_FACTOR),
+    SCALE_FACTOR_MAX,
+  ));
 
-  return fontSize * Math.sqrt(scaleFactor)
+  return fontSize * baseScaleFactor * scaleFactor;
 };
 
 const Label = (props: Label) => {
@@ -85,8 +86,8 @@ export default function Map({ map, visibility, zoom }: Props) {
   const getLabelPropsByRect = (
     rect: (typeof map.layer3.groups)[number]["children"][number]["rect"],
   ) => {
-    const x = rect.x + rect.width / 2;
-    const y = rect.y + rect.height / 2;
+    // const x = rect.x + rect.width / 2;
+    // const y = rect.y + rect.height / 2;
 
     return {
       // The original label.js code uses some kind of scaling here, but it's not clear why.
@@ -95,8 +96,8 @@ export default function Map({ map, visibility, zoom }: Props) {
       //   top: `${scale.y(-y)} px}`,
       // },
       key: rect.id + rect.label,
-      x,
-      y,
+      x: rect.x,
+      y: rect.y,
       text: replaceHash(rect.label),
     };
   };
@@ -106,7 +107,7 @@ export default function Map({ map, visibility, zoom }: Props) {
     ...map.layer1.children.map(({ path }) => ({
       ...getLabelPropsByPath(path),
       color: "#995b99",
-      fontSize: scaledFontSize(11.3, zoom),
+      fontSize: scaledFontSize(16, zoom),
       opacity: visibility[0],
     })),
     ...map.layer2.children.map(({ path }) => ({
@@ -119,7 +120,7 @@ export default function Map({ map, visibility, zoom }: Props) {
       group.children.map(({ rect }) => ({
         ...getLabelPropsByRect(rect),
         color: "red",
-        fontSize: scaledFontSize(6, zoom),
+        fontSize: scaledFontSize(6.4, zoom),
         opacity: visibility[2],
       })),
     ),

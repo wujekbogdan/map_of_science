@@ -15,7 +15,7 @@ function hideForegroundRects() {
 }
 
 // TODO: remove eslint-disable
-// eslint-disable-next-line no-unused-vars
+
 export function initForeground(xScale, yScale, kZoom) {
   selectForegroundSvg()
     .attr("width", "100%")
@@ -25,8 +25,7 @@ export function initForeground(xScale, yScale, kZoom) {
   const initialZoom = 1.0;
   updateForeground(xScale, yScale, initialZoom);
 
-  // TODO: Restore labels scaling
-  // labels.initLabels(xScale, yScale, kZoom);
+  labels.initLabels(xScale, yScale, kZoom);
   hideForegroundRects();
 }
 
@@ -106,7 +105,7 @@ function sortForegroundLayers(layers) {
 
 export function getForegroundLayers() {
   const layers = selectForegroundSvg()
-    .selectAll(":scope > g")
+    .selectAll(":scope > g:not(#labels)")
     .filter(function () {
       // Filter out <g> elements where the display property is set to 'none'
       return d3.select(this).style("display") !== "none";

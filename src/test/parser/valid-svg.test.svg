@@ -1,4 +1,6 @@
-<svg>
+<svg    width="500"
+        height="500"
+        viewBox="0 0 500 500">
     <g inkscape:label="L1"
        inkscape:groupmode="layer"
        id="layer1"

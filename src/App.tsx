@@ -1,7 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Map from "./Map";
 import { init } from "./js/main";
 import map from "../asset/foreground.svg?parse";
+import { eventBus, Events } from "./event-bus.ts";
+import { scaleLinear } from "d3";
 
 let isInitialized = false;
 
@@ -11,6 +13,27 @@ function App() {
     if (isInitialized) return;
     init();
     isInitialized = true;
+  }, []);
+  const [{ xScale, yScale, zoom, visibility }, setScale] = useState<Events['labelsUpdate']>({
+    visibility: [0, 0, 0],
+    xScale: scaleLinear(),
+    yScale: scaleLinear(),
+    zoom: 1,
+  });
+
+  useEffect(() => {
+    eventBus.on("labelsUpdate", ({ xScale, yScale, zoom, visibility }) => {
+      setScale({
+        visibility,
+        xScale: xScale,
+        yScale: yScale,
+        zoom: zoom,
+      });
+    })
+
+    return () => {
+      eventBus.off("labelsUpdate");
+    };
   }, []);
 
   return (
@@ -23,7 +46,7 @@ function App() {
         <div id="chart-d3"></div>
         <div id="foreground">
           <Map
-            map={map}
+            map={map} scale={{ x: xScale, y: yScale }} zoom={zoom} visibility={visibility}
           />
         </div>
       </div>

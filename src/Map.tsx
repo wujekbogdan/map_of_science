@@ -74,9 +74,6 @@ export default function Map({ map, visibility, zoom }: Props) {
   const getLabelPropsByRect = (
     rect: (typeof map.layer3.groups)[number]["children"][number]["rect"],
   ) => {
-    // const x = rect.x + rect.width / 2;
-    // const y = rect.y + rect.height / 2;
-
     return {
       // The original label.js code uses some kind of scaling here, but it's not clear why.
       // style: {

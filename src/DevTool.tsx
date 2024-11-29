@@ -14,7 +14,6 @@ export const DevTool = () => {
   const scaleFactors = ["min", "max", "zoom"] as const;
 
   const onMinimizeClick = () => {
-    console.log("onMinimizeClick");
     setVisibility(visibility === "expanded" ? "collapsed" : "expanded");
   };
 

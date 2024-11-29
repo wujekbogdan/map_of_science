@@ -14,8 +14,6 @@ function hideForegroundRects() {
   selectForegroundSvg().selectAll("rect").style("opacity", "0.0");
 }
 
-// TODO: remove eslint-disable
-
 export function initForeground(xScale, yScale, kZoom) {
   selectForegroundSvg()
     .attr("width", "100%")

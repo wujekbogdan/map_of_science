@@ -4,6 +4,8 @@ import { init } from "./js/main";
 import map from "../asset/foreground.svg?parse";
 import { eventBus, Events } from "./event-bus.ts";
 import { scaleLinear } from "d3";
+import { DevTool } from "./Debug.tsx";
+import styled from "styled-components";
 
 let isInitialized = false;
 
@@ -54,8 +56,21 @@ function App() {
       <div id="loading" className="loading-container">
         <div className="loading-spinner"></div>
       </div>
+
+      <DevToolsWrapper>
+        <DevTool />
+      </DevToolsWrapper>
     </>
   );
 }
+
+const DevToolsWrapper = styled.div`
+    z-index: 1000;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.7);
+    padding: 10px;
+`;
 
 export default App;

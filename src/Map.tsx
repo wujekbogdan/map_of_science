@@ -1,6 +1,7 @@
 import { MapSvgRepresentation } from "../vite-plugin/svg-map-parser.ts";
 import { svgPathBbox } from "svg-path-bbox";
 import { ScaleLinear } from "d3";
+import { useStore } from "./store";
 
 type Props = {
   map: MapSvgRepresentation;
@@ -22,20 +23,6 @@ type Label = {
   opacity: number;
 };
 
-const scaledFontSize = (fontSize: number, zoom: number) => {
-  const SCALE_FACTOR_MIN = 0.5;
-  const SCALE_FACTOR_MAX = 16;
-  const ZOOM_SCALE_FACTOR = 0.5;
-
-  const baseScaleFactor = 1 / zoom;
-  const scaleFactor = Math.sqrt(Math.min(
-    Math.max(SCALE_FACTOR_MIN, zoom * ZOOM_SCALE_FACTOR),
-    SCALE_FACTOR_MAX,
-  ));
-
-  return fontSize * baseScaleFactor * scaleFactor;
-};
-
 const Label = (props: Label) => {
   return (
     <text
@@ -48,8 +35,8 @@ const Label = (props: Label) => {
       style={{
         fontSize: props.fontSize,
         fill: props.color,
+        opacity: props.opacity,
       }}
-      opacity={props.opacity}
     >
       {props.text}
     </text>
@@ -57,6 +44,8 @@ const Label = (props: Label) => {
 };
 
 export default function Map({ map, visibility, zoom }: Props) {
+  const { scaleFactor, fontSize } = useStore();
+
   const getPathBoundingBoxCenter = (d: string) => {
     const [minx, miny, maxX, maxY] = svgPathBbox(d);
 
@@ -102,25 +91,42 @@ export default function Map({ map, visibility, zoom }: Props) {
     };
   };
 
+  const scaleFontSize = (size: number) => {
+    const baseScaleFactor = 1 / zoom;
+    const factor = Math.sqrt(
+      Math.min(
+        Math.max(scaleFactor.min, zoom * scaleFactor.zoom),
+        scaleFactor.max,
+      ),
+    );
+
+    return size * baseScaleFactor * factor;
+  };
+  const scaledFontSize = {
+    layer1: scaleFontSize(fontSize.layer1),
+    layer2: scaleFontSize(fontSize.layer2),
+    layer3: scaleFontSize(fontSize.layer3),
+  };
+
   // TODO: Adjust font sizes
   const labels = [
     ...map.layer1.children.map(({ path }) => ({
       ...getLabelPropsByPath(path),
       color: "#995b99",
-      fontSize: scaledFontSize(16, zoom),
+      fontSize: scaledFontSize.layer1,
       opacity: visibility[0],
     })),
     ...map.layer2.children.map(({ path }) => ({
       ...getLabelPropsByPath(path),
       color: "#393939",
-      fontSize: scaledFontSize(12.8, zoom),
+      fontSize: scaledFontSize.layer2,
       opacity: visibility[1],
     })),
     ...map.layer3.groups.flatMap((group) =>
       group.children.map(({ rect }) => ({
         ...getLabelPropsByRect(rect),
         color: "red",
-        fontSize: scaledFontSize(6.4, zoom),
+        fontSize: scaledFontSize.layer3,
         opacity: visibility[2],
       })),
     ),

@@ -2,21 +2,28 @@ import { create } from "zustand";
 import { combine } from "zustand/middleware";
 
 const defaults = {
+  zoom: 1,
   fontSize: {
     layer1: 16,
     layer2: 12.8,
     layer3: 6.4,
-  } as const,
+  },
   scaleFactor: {
     min: 0.5,
     max: 16,
     zoom: 0.5,
-  } as const,
-} as const;
+  },
+};
 
 export const useStore = create(
   combine(defaults, (set) => ({
-    setFontSize: (layer: keyof typeof defaults.fontSize, size: number | string) => {
+    setZoom: (zoom: number) => {
+      set({ zoom });
+    },
+    setFontSize: (
+      layer: keyof typeof defaults.fontSize,
+      size: number | string,
+    ) => {
       const parsedSize = typeof size === "string" ? parseFloat(size) : size;
       set((state) => ({
         fontSize: {
@@ -25,7 +32,10 @@ export const useStore = create(
         },
       }));
     },
-    setScaleFactor: (factor: keyof typeof defaults.scaleFactor, value: number | string) => {
+    setScaleFactor: (
+      factor: keyof typeof defaults.scaleFactor,
+      value: number | string,
+    ) => {
       const parsedValue = typeof value === "string" ? parseFloat(value) : value;
       set((state) => ({
         scaleFactor: {
@@ -33,6 +43,6 @@ export const useStore = create(
           [factor]: parsedValue || defaults.scaleFactor[factor],
         },
       }));
-    }
+    },
   })),
 );

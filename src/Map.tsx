@@ -181,7 +181,7 @@ export default function Map({ map, visibility, zoom }: Props) {
 
       <g id="labels">
         {labels.map((label) => (
-          <Label {...label} />
+          <Label {...label} key={label.key} />
         ))}
       </g>
     </svg>

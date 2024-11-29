@@ -42,10 +42,10 @@ const l3Schema = z.object({
           attributes: z.object({
             id: z.string(),
             style: z.string(),
-            width: z.string(),
-            height: z.string(),
-            x: z.string(),
-            y: z.string(),
+            width: z.coerce.number(),
+            height: z.coerce.number(),
+            x: z.coerce.number(),
+            y: z.coerce.number(),
             "inkscape:label": z.string(),
           }),
         }),
@@ -78,11 +78,13 @@ export const parse = async (svgString: string) => {
       label: layer.attributes["inkscape:label"],
       style: style(layer.attributes.style),
     },
-    paths: layer.path.map(({ attributes }) => ({
-      id: attributes.id,
-      label: attributes["inkscape:label"],
-      style: style(attributes.style),
-      d: attributes.d,
+    children: layer.path.map(({ attributes }) => ({
+      path: {
+        id: attributes.id,
+        label: attributes["inkscape:label"],
+        style: style(attributes.style),
+        d: attributes.d,
+      }
     })),
   });
 
@@ -97,15 +99,17 @@ export const parse = async (svgString: string) => {
         id: group.attributes.id,
         label: group.attributes["inkscape:label"],
       },
-      rects: group.rect.map(({ attributes }) => ({
-        id: attributes.id,
-        label: attributes["inkscape:label"],
-        style: style(attributes.style),
-        width: attributes.width,
-        height: attributes.height,
-        x: attributes.x,
-        y: attributes.y,
-      })),
+      children: group.rect.map(({ attributes }) => ({
+        rect: {
+          id: attributes.id,
+          label: attributes["inkscape:label"],
+          style: style(attributes.style),
+          width: attributes.width,
+          height: attributes.height,
+          x: attributes.x,
+          y: attributes.y,
+        }
+      }))
     })),
   });
 

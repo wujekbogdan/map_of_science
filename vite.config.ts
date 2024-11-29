@@ -8,6 +8,7 @@ export default defineConfig({
   envDir: "../",
   build: {
     outDir: "../dist",
+    emptyOutDir: true,
   },
   assetsInclude: ["src/articles/*.md"],
 });

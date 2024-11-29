@@ -2,6 +2,7 @@ import { MapSvgRepresentation } from "../vite-plugin/svg-map-parser.ts";
 import { svgPathBbox } from "svg-path-bbox";
 import { ScaleLinear } from "d3";
 import { useStore } from "./store";
+import styled from "styled-components";
 
 type Props = {
   map: MapSvgRepresentation;
@@ -15,31 +16,29 @@ type Props = {
 
 type Label = {
   key: string;
-  color: string;
   x: number;
   y: number;
   text: string;
-  fontSize: string | number;
+  fontSize: number;
   opacity: number;
+  level: 1 | 2 | 3;
 };
 
 const Label = (props: Label) => {
   return (
-    <text
+    <LabelText
       display={props.opacity ? "block" : "none"}
       key={props.key}
       textAnchor="middle"
       alignmentBaseline="middle"
       x={props.x}
       y={props.y}
-      style={{
-        fontSize: props.fontSize,
-        fill: props.color,
-        opacity: props.opacity,
-      }}
+      $fontSize={props.fontSize}
+      $opacity={props.opacity}
+      $level={props.level}
     >
       {props.text}
-    </text>
+    </LabelText>
   );
 };
 
@@ -108,27 +107,35 @@ export default function Map({ map, visibility, zoom }: Props) {
     layer3: scaleFontSize(fontSize.layer3),
   };
 
-  // TODO: Adjust font sizes
-  const labels = [
-    ...map.layer1.children.map(({ path }) => ({
-      ...getLabelPropsByPath(path),
-      color: "#995b99",
-      fontSize: scaledFontSize.layer1,
-      opacity: visibility[0],
-    })),
-    ...map.layer2.children.map(({ path }) => ({
-      ...getLabelPropsByPath(path),
-      color: "#393939",
-      fontSize: scaledFontSize.layer2,
-      opacity: visibility[1],
-    })),
+  const labels: Label[] = [
+    ...map.layer1.children.map(
+      ({ path }) =>
+        ({
+          ...getLabelPropsByPath(path),
+          fontSize: scaledFontSize.layer1,
+          opacity: visibility[0],
+          level: 1,
+        }) as const,
+    ),
+    ...map.layer2.children.map(
+      ({ path }) =>
+        ({
+          ...getLabelPropsByPath(path),
+          fontSize: scaledFontSize.layer2,
+          opacity: visibility[1],
+          level: 2,
+        }) as const,
+    ),
     ...map.layer3.groups.flatMap((group) =>
-      group.children.map(({ rect }) => ({
-        ...getLabelPropsByRect(rect),
-        color: "red",
-        fontSize: scaledFontSize.layer3,
-        opacity: visibility[2],
-      })),
+      group.children.map(
+        ({ rect }) =>
+          ({
+            ...getLabelPropsByRect(rect),
+            fontSize: scaledFontSize.layer3,
+            opacity: visibility[2],
+            level: 3,
+          }) as const,
+      ),
     ),
   ];
 
@@ -181,9 +188,41 @@ export default function Map({ map, visibility, zoom }: Props) {
 
       <g id="labels">
         {labels.map((label) => (
-          <Label {...label} key={label.key} />
+          <Label {...label} key={label.key} level={label.level} />
         ))}
       </g>
     </svg>
   );
 }
+
+const LabelText = styled.text<{
+  $opacity: number;
+  $fontSize: number;
+  $level: 1 | 2 | 3;
+}>`
+  font-size: ${(props) => props.$fontSize}px;
+  opacity: ${(props) => props.$opacity};
+  font-weight: bold;
+  // TODO: It can be, very likely, replaced with a simplified text-shadow
+  text-shadow:
+    0 0 1px #f2efe9,
+    0 0 2px #f2efe9,
+    0 0 5px #f2efe9,
+    0 0 5px #f2efe9,
+    0 0 5px #f2efe9,
+    0 0 5px #f2efe9,
+    0 0 5px #f2efe9,
+    0 0 5px #f2efe9,
+    0 0 5px #f2efe9,
+    0 0 5px #f2efe9;
+  fill: ${(props) => {
+    switch (props.$level) {
+      case 1:
+        return "rgb(153, 91, 153)";
+      case 2:
+        return "rgb(57, 57, 57)";
+      case 3:
+        return "rgb(101, 91, 153)";
+    }
+  }};
+`;

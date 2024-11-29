@@ -1,5 +1,23 @@
 # map_of_science
 
+## 1.4.0
+
+### Minor Changes
+
+- bb5288f: - Drop the original labels implementation that rendered the labels outside the map SVG as absolutely positioned elements.
+  - Re-implement the functionality with React, rendering labels within the SVG to simplify positioning and enable dynamic styling.
+- 0107cde: Add a Dev Tools widget for dynamic label size adjustment. The widget is disabled by default. To enable it, set the `VITE_DEV_TOOL_ENABLED` environment variable to `true`.
+
+### Patch Changes
+
+- bb5288f: Fix Vite config bugs caused by a non-standard project `root` setting:
+
+  - Set `envDir` to `../`
+  - Set `build.outDir` to `../dist`
+
+- bb5288f: Sync `assets/foreground.svg` with the original repo.
+  https://github.com/dsonyy/map_of_science/commit/541e0d48131da5564beca1b5748b69138fa8dea4
+
 ## 1.3.0
 
 ### Minor Changes

@@ -24,7 +24,6 @@ export function initForeground(xScale, yScale, kZoom) {
   updateForeground(xScale, yScale, initialZoom);
 
   labels.initLabels(xScale, yScale, kZoom);
-
   hideForegroundRects();
 }
 
@@ -104,7 +103,7 @@ function sortForegroundLayers(layers) {
 
 export function getForegroundLayers() {
   const layers = selectForegroundSvg()
-    .selectAll(":scope > g")
+    .selectAll(":scope > g:not(#labels)")
     .filter(function () {
       // Filter out <g> elements where the display property is set to 'none'
       return d3.select(this).style("display") !== "none";

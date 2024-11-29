@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- 
-.d8888. db    db  d888b       db       .d8b.  db    db d88888b d8888b. 
-88'  YP 88    88 88' Y8b      88      d8' `8b `8b  d8' 88'     88  `8D 
-`8bo.   Y8    8P 88           88      88ooo88  `8bd8'  88ooooo 88oobY' 
-  `Y8b. `8b  d8' 88  ooo      88      88~~~88    88    88~~~~~ 88`8b   
-db   8D  `8bd8'  88. ~8~      88booo. 88   88    88    88.     88 `88. 
-`8888Y'    YP     Y888P       Y88888P YP   YP    YP    Y88888P 88   YD 
+<!--
+.d8888. db    db  d888b       db       .d8b.  db    db d88888b d8888b.
+88'  YP 88    88 88' Y8b      88      d8' `8b `8b  d8' 88'     88  `8D
+`8bo.   Y8    8P 88           88      88ooo88  `8bd8'  88ooooo 88oobY'
+  `Y8b. `8b  d8' 88  ooo      88      88~~~88    88    88~~~~~ 88`8b
+db   8D  `8bd8'  88. ~8~      88booo. 88   88    88    88.     88 `88.
+`8888Y'    YP     Y888P       Y88888P YP   YP    YP    Y88888P 88   YD
 
-d888888b d88888b .88b  d88. d8888b. db       .d8b.  d888888b d88888b   
-`~~88~~' 88'     88'YbdP`88 88  `8D 88      d8' `8b `~~88~~' 88'       
-   88    88ooooo 88  88  88 88oodD' 88      88ooo88    88    88ooooo   
-   88    88~~~~~ 88  88  88 88~~~   88      88~~~88    88    88~~~~~   
-   88    88.     88  88  88 88      88booo. 88   88    88    88.       
-   YP    Y88888P YP  YP  YP 88      Y88888P YP   YP    YP    Y88888P   
+d888888b d88888b .88b  d88. d8888b. db       .d8b.  d888888b d88888b
+`~~88~~' 88'     88'YbdP`88 88  `8D 88      d8' `8b `~~88~~' 88'
+   88    88ooooo 88  88  88 88oodD' 88      88ooo88    88    88ooooo
+   88    88~~~~~ 88  88  88 88~~~   88      88~~~88    88    88~~~~~
+   88    88.     88  88  88 88      88booo. 88   88    88    88.
+   YP    Y88888P YP  YP  YP 88      Y88888P YP   YP    YP    Y88888P
 -->
 
 <svg

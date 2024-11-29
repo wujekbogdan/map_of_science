@@ -68,12 +68,11 @@ function App() {
         <div className="loading-spinner"></div>
       </div>
 
-      {config.devTool ||
-        (true && (
-          <DevToolsWrapper>
-            <DevTool />
-          </DevToolsWrapper>
-        ))}
+      {config.devTool && (
+        <DevToolsWrapper>
+          <DevTool />
+        </DevToolsWrapper>
+      )}
     </>
   );
 }

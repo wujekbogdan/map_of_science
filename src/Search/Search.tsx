@@ -25,11 +25,10 @@ export const Search = (props: Props) => {
     },
   );
 
-  const dropdownOptions = results.map(({ id, label, center }) => ({
+  const dropdownOptions = results.map(({ id, label, boundingBox }) => ({
     id,
     label,
-    x: center.x,
-    y: center.y,
+    boundingBox,
   }));
 
   const onInput = useMemo(

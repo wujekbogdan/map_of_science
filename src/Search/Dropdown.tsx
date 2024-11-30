@@ -12,8 +12,11 @@ import { i18n } from "../i18n.ts";
 export type Option = {
   label: string;
   id: string;
-  x: number;
-  y: number;
+  boundingBox: {
+    min: { x: number; y: number };
+    max: { x: number; y: number };
+    center: { x: number; y: number };
+  };
 };
 
 type Dropdown = {

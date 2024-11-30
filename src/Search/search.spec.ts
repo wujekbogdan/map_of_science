@@ -228,71 +228,7 @@ const map = {
 describe("mapModel", () => {
   it("should map and flatten the model", () => {
     const model = mapModel(map);
-    expect(model).toMatchSnapshot([
-      {
-        center: {
-          x: -431.8910662922816,
-          y: 22.71598460951293,
-        },
-        id: "path186",
-        label: "#Symbole-bity-sygnały",
-        normalizedLabel: "symbole-bity-sygnały",
-      },
-      {
-        center: {
-          x: -175.98698476092548,
-          y: 40.46505714629674,
-        },
-        id: "path187",
-        label: "#Społeczeństwo",
-        normalizedLabel: "społeczenstwo",
-      },
-      {
-        center: {
-          x: -390.95909444203926,
-          y: 132.81968177008088,
-        },
-        id: "path1",
-        label: "#Komputery i komunikacja",
-        normalizedLabel: "komputery i komunikacja",
-      },
-      {
-        center: {
-          x: 220.04397547889005,
-          y: 84.34425781473227,
-        },
-        id: "path2",
-        label: "#Bakterie i choroby zakaźne",
-        normalizedLabel: "bakterie i choroby zakazne",
-      },
-      {
-        center: {
-          x: -319.7775159,
-          y: -214.0745055,
-        },
-        id: "rect31",
-        label: "Urządzenia mechaniczne",
-        normalizedLabel: "urzadzenia mechaniczne",
-      },
-      {
-        center: {
-          x: -297.8461759,
-          y: -230.9224255,
-        },
-        id: "rect27",
-        label: "Robotyka",
-        normalizedLabel: "robotyka",
-      },
-      {
-        center: {
-          x: -141.0597459,
-          y: -293.0270355,
-        },
-        id: "rect32",
-        label: "Asfalt",
-        normalizedLabel: "asfalt",
-      },
-    ]);
+    expect(model).toMatchSnapshot();
   });
 
   it("should normalize diacritics", () => {
@@ -370,24 +306,44 @@ describe("search", () => {
   it("should return search results", () => {
     expect(search(map, "sygnały")).toEqual([
       {
-        center: {
-          x: -431.8910662922816,
-          y: 22.71598460951293,
+        boundingBox: {
+          center: {
+            x: -431.8910662922816,
+            y: 22.71598460951293,
+          },
+          max: {
+            x: -322.8051709687215,
+            y: 258.8283511316347,
+          },
+          min: {
+            x: -540.9769616158417,
+            y: -213.39638191260883,
+          },
         },
         id: "path186",
-        label: "#Symbole-bity-sygnały",
+        label: "Symbole-bity-sygnały",
         normalizedLabel: "symbole-bity-sygnaly",
       },
     ]);
 
     expect(search(map, "sygnaly")).toEqual([
       {
-        center: {
-          x: -431.8910662922816,
-          y: 22.71598460951293,
+        boundingBox: {
+          center: {
+            x: -431.8910662922816,
+            y: 22.71598460951293,
+          },
+          max: {
+            x: -322.8051709687215,
+            y: 258.8283511316347,
+          },
+          min: {
+            x: -540.9769616158417,
+            y: -213.39638191260883,
+          },
         },
         id: "path186",
-        label: "#Symbole-bity-sygnały",
+        label: "Symbole-bity-sygnały",
         normalizedLabel: "symbole-bity-sygnaly",
       },
     ]);

@@ -5,9 +5,10 @@ export type Model = {
   id: string;
   label: string;
   normalizedLabel: string;
-  center: {
-    x: number;
-    y: number;
+  boundingBox: {
+    min: { x: number; y: number };
+    max: { x: number; y: number };
+    center: { x: number; y: number };
   };
 }[];
 
@@ -28,7 +29,7 @@ const mapPath = (
   id: path.id,
   label: path.label.replace("#", ""),
   normalizedLabel: normalize(path.label),
-  center: path.boundingBox.center,
+  boundingBox: path.boundingBox,
 });
 
 export const mapModel = (map: MapSvgRepresentation) => [
@@ -39,7 +40,7 @@ export const mapModel = (map: MapSvgRepresentation) => [
       id: rect.id,
       label: rect.label.replace("#", ""),
       normalizedLabel: normalize(rect.label),
-      center: rect.boundingBox.center,
+      boundingBox: rect.boundingBox,
     })),
   ),
 ];

@@ -2,7 +2,7 @@
 
 type StyleObject = {
   [name: string]: string;
-}
+};
 
 // TODO: This is redundant. The following declaration should be enough:
 // declare module '*.svg?parse' {
@@ -11,6 +11,23 @@ type StyleObject = {
 //   export default content;
 // }
 // But for some reason, it doesn’t work, even if the ../vite-plugin/svg-map-parser.ts file is included in tsconfig.app.json.
+
+type Cords = {
+  x: number;
+  y: number;
+};
+
+type Path = {
+  id: string;
+  label: string;
+  style: StyleObject;
+  d: string;
+  boundingBox: {
+    min: Cords;
+    max: Cords;
+    center: Cords;
+  };
+};
 
 declare module "*.svg?parse" {
   const content: {
@@ -21,13 +38,8 @@ declare module "*.svg?parse" {
         style: StyleObject;
       };
       children: {
-        path: {
-          id: string;
-          label: string;
-          style: StyleObject;
-          d: string;
-        };
-      }[]
+        path: Path;
+      }[];
     };
     layer2: {
       attributes: {
@@ -36,13 +48,8 @@ declare module "*.svg?parse" {
         style: StyleObject;
       };
       children: {
-        path: {
-          id: string;
-          label: string;
-          style: StyleObject;
-          d: string;
-        };
-      }[]
+        path: Path;
+      }[];
     };
     layer3: {
       attributes: {
@@ -65,7 +72,7 @@ declare module "*.svg?parse" {
             x: number;
             y: number;
           };
-        }[]
+        }[];
       }[];
     };
   };

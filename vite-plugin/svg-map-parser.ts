@@ -121,6 +121,17 @@ export const parse = async (svgString: string) => {
           height: attributes.height,
           x: attributes.x,
           y: attributes.y,
+          boundingBox: {
+            min: { x: attributes.x, y: attributes.y },
+            max: {
+              x: attributes.x + attributes.width,
+              y: attributes.y + attributes.height,
+            },
+            center: {
+              x: attributes.x + attributes.width / 2,
+              y: attributes.y + attributes.height / 2,
+            },
+          },
         },
       })),
     })),

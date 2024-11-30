@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
+/// <reference types="vite-plugin-comlink/client" />
 
 type StyleObject = {
   [name: string]: string;
@@ -15,6 +16,12 @@ type StyleObject = {
 type Cords = {
   x: number;
   y: number;
+};
+
+type BoundingBox = {
+  min: Cords;
+  max: Cords;
+  center: Cords;
 };
 
 type Path = {
@@ -71,6 +78,7 @@ declare module "*.svg?parse" {
             height: number;
             x: number;
             y: number;
+            boundingBox: BoundingBox;
           };
         }[];
       }[];

@@ -69,8 +69,8 @@ export default function Map({ map, visibility, zoom }: Props) {
       //   top: `${scale.y(-y)} px}`,
       // },
       key: rect.id + rect.label,
-      x: rect.x,
-      y: rect.y,
+      x: rect.boundingBox.center.x,
+      y: rect.boundingBox.center.y,
       text: replaceHash(rect.label),
     };
   };

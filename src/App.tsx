@@ -8,6 +8,7 @@ import { DevTool } from "./DevTool.tsx";
 import styled from "styled-components";
 import { config } from "./config.ts";
 import { useStore } from "./store.ts";
+import { Search } from "./Search/Search.tsx";
 
 let isInitialized = false;
 
@@ -48,6 +49,10 @@ function App() {
 
   return (
     <>
+      <header>
+        <Search map={map} />
+      </header>
+
       <div id="article" className="content">
         <div id="article-content"></div>
       </div>

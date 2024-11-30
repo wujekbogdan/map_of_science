@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
+import { scaleLinear } from "d3";
+import styled from "styled-components";
 import Map from "./Map";
 import { init } from "./js/main";
 import map from "../asset/foreground.svg?parse";
 import { eventBus, Events } from "./event-bus.ts";
-import { scaleLinear } from "d3";
 import { DevTool } from "./DevTool.tsx";
-import styled from "styled-components";
 import { config } from "./config.ts";
 import { useStore } from "./store.ts";
 import { Search } from "./Search/Search.tsx";
@@ -83,16 +83,16 @@ function App() {
 }
 
 const Header = styled.div`
-  z-index: 1000;
+  z-index: 20;
   position: fixed;
   top: 0;
   right: 0;
   left: 0;
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: transparent;
 `;
 
 const DevToolsWrapper = styled.div`
-  z-index: 1000;
+  z-index: 20;
   position: fixed;
   bottom: 0;
   right: 0;

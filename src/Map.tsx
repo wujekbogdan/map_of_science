@@ -1,7 +1,7 @@
-import { MapSvgRepresentation } from "../vite-plugin/svg-map-parser.ts";
 import { ScaleLinear } from "d3";
-import { useStore } from "./store";
 import styled from "styled-components";
+import { MapSvgRepresentation } from "../vite-plugin/svg-map-parser.ts";
+import { useStore } from "./store";
 
 type Props = {
   map: MapSvgRepresentation;

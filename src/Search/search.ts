@@ -11,6 +11,9 @@ export type Model = {
   };
 }[];
 
+// FIXME: This isn't exactly right. The code assumes that the model never changes.
+// It's true in practice, but in theory one could change call the search function
+// with a different map parameter each time.
 export let cachedModel: Model | null = null;
 
 /**

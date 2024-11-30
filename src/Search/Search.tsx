@@ -1,37 +1,52 @@
-import { MapSvgRepresentation } from "../../vite-plugin/svg-map-parser.ts";
-import { useState, useEffect } from "react";
-import { Model as SearchResults } from "./search.ts";
+import { MapSvgRepresentation as Map } from "../../vite-plugin/svg-map-parser.ts";
+import { useState, useMemo } from "react";
+import useSWR from "swr";
 import { Dropdown } from "./Dropdown.tsx";
+import debounce from "lodash/debounce";
 
 const worker = new ComlinkSharedWorker<typeof import("./search.ts")>(
   new URL("./search.ts", import.meta.url),
 );
 
 type Props = {
-  map: MapSvgRepresentation;
+  map: Map;
 };
 
 export const Search = (props: Props) => {
   const { map } = props;
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [results, setResults] = useState<SearchResults>([]);
+
+  const { data: results = [] } = useSWR(
+    searchTerm ? [map, searchTerm] : null,
+    ([map, query]) => {
+      if (!query) return [];
+      return worker.search(map, query);
+    },
+  );
 
   const dropdownOptions = results.map(({ id, label }) => ({
     id,
     label,
   }));
 
-  useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    worker.search(map, searchTerm).then((results) => {
-      setResults(results);
-    });
-  }, [map, searchTerm]);
+  const onInput = useMemo(
+    () =>
+      debounce(
+        (query: string) => {
+          console.log("searching for", query);
+          if (query.length < 3) {
+            setSearchTerm("");
+            return;
+          }
 
-  const onInput = (query: string) => {
-    setSearchTerm(query);
-  };
+          setSearchTerm(query);
+        },
+        300,
+        { leading: true },
+      ),
+    [],
+  );
 
   return (
     <form

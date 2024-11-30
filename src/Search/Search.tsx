@@ -1,32 +1,40 @@
 import { MapSvgRepresentation } from "../../vite-plugin/svg-map-parser.ts";
-import { useState, FormEvent } from "react";
+import { useState, useEffect } from "react";
+import { Model as SearchResults } from "./search.ts";
+import { Dropdown } from "./Dropdown.tsx";
+
+const worker = new ComlinkSharedWorker<typeof import("./search.ts")>(
+  new URL("./search.ts", import.meta.url),
+);
 
 type Props = {
   map: MapSvgRepresentation;
 };
 
 export const Search = (props: Props) => {
-  const [searchTerm, setSearchTerm] = useState("");
-
   const { map } = props;
-  const instance = new ComlinkSharedWorker<typeof import("./search.ts")>(
-    new URL("./search.ts", import.meta.url),
-  );
 
-  const doWork = async (phrase: string) => {
-    console.log(await instance.search(map, phrase));
-  };
+  const [searchTerm, setSearchTerm] = useState("");
+  const [results, setResults] = useState<SearchResults>([]);
 
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    doWork(searchTerm).then((result) => {
-      console.log(result);
+  const dropdownOptions = results.map(({ id, label }) => ({
+    id,
+    label,
+  }));
+
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    worker.search(map, searchTerm).then((results) => {
+      setResults(results);
     });
+  }, [map, searchTerm]);
+
+  const onInput = (query: string) => {
+    setSearchTerm(query);
   };
 
   return (
     <form
-      onSubmit={onSubmit}
       style={{
         display: "flex",
         alignItems: "center",
@@ -34,20 +42,13 @@ export const Search = (props: Props) => {
         padding: "12px",
       }}
     >
-      <p>
-        <input
-          type="search"
-          id="search"
-          name="search"
-          value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-          }}
-        />
-      </p>
-      <p>
-        <button type="submit">Search</button>
-      </p>
+      <Dropdown
+        options={dropdownOptions}
+        onInput={onInput}
+        onSelect={(option) => {
+          console.log("selected", option);
+        }}
+      />
     </form>
   );
 };

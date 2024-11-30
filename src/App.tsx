@@ -49,9 +49,9 @@ function App() {
 
   return (
     <>
-      <header>
+      <Header>
         <Search map={map} />
-      </header>
+      </Header>
 
       <div id="article" className="content">
         <div id="article-content"></div>
@@ -81,6 +81,15 @@ function App() {
     </>
   );
 }
+
+const Header = styled.div`
+  z-index: 1000;
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+`;
 
 const DevToolsWrapper = styled.div`
   z-index: 1000;

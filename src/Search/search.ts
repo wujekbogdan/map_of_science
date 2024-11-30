@@ -1,7 +1,7 @@
 import { MapSvgRepresentation } from "../../vite-plugin/svg-map-parser.ts";
 import { normalizeSync } from "normalize-diacritics";
 
-type Model = {
+export type Model = {
   id: string;
   label: string;
   normalizedLabel: string;
@@ -23,7 +23,7 @@ const mapPath = (
   path: MapSvgRepresentation["layer1"]["children"][number]["path"],
 ) => ({
   id: path.id,
-  label: path.label,
+  label: path.label.replace("#", ""),
   normalizedLabel: normalize(path.label),
   center: path.boundingBox.center,
 });

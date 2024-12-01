@@ -1,6 +1,6 @@
 cluster_id	label
 3988	Osobowość i różnice międzyosobnicze zwierząt
-999999	FIZYKA-FOTONIKA--------------------------------------------
+999999	FIZYKA >>> FOTONIKA-----------------------------------------
 38	Spektroskopia LIBS
 31081	Generowanie wyższych harmonicznych
 2235	Plazma niskotemperaturowa
@@ -21,7 +21,7 @@ cluster_id	label
 10916	Obrazowanie w ośrodkach rozpraszających
 1945	Wyświetlacze holograficzne
 3172	Materia aktywna
-999999	MÓZG--------------------------------------------
+999999	MÓZG----------------------------------------------------
 30288	Anosmia i inne zaburzenia węchu
 9188	Substancje psychodeliczne
 3769	Ketamina i esketamina w leczeniu depresji
@@ -34,4 +34,13 @@ cluster_id	label
 388	Obrazowanie mózgu podczas wyobrażania ruchowego
 3370	Rozpoznawanie emocji na podstawie EEG
 7456	Poczucie ciała w wirtualnej rzeczywistości
-
+999999	CHEMIA >>> MATERIAŁY MIĘKKIE ------------------------------
+29061	Hydrożele przewodzące
+44254	Hydrożele w leczeniu ran
+2190	Druk 3D materiałów biologicznych i biokompatybilnych
+9423	Druk 4D i materiały aktywne
+3121	Dynamika polimerów, polimery samoleczące, witrymery
+5500	Inżynieria chemiczna ligniny w bioraniferiach
+414	Nanokryształy celulozy (CNC)
+27	Inżynieria chemiczna biomasy drzewnej
+6550	Materiały i związki pochodzenia naturalnego w produkcji opakowań

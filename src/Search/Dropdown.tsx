@@ -93,10 +93,10 @@ export const Dropdown = (props: Dropdown) => {
         <>
           <ComboboxInput
             autoFocus={true}
-            autocomplete="off"
+            autoComplete="off"
             $open={open}
             placeholder={i18n(
-              `Wyszukaj na Mapie Nauki. np.: "${randomPlaceholder}"`,
+              `Wyszukaj na Mapie Nauki, np. "${randomPlaceholder}"`,
             )}
             displayValue={(option: Option | null) => option?.label || query}
             onChange={onQueryChange}
@@ -129,11 +129,11 @@ export const Dropdown = (props: Dropdown) => {
 
 const ComboboxInput = styled(ComboboxInputHeadless).attrs<{
   placeholder?: string;
-  autocomplete?: string;
+  autoComplete?: string;
 }>((props) => ({
   type: "text",
   placeholder: props.placeholder ?? "",
-  autocomplete: props.autocomplete ?? "",
+  autoComplete: props.autoComplete ?? "",
 }))<{ $open: boolean }>`
   font-size: 16px;
   box-sizing: border-box;

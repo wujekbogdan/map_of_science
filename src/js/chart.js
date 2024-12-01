@@ -13,6 +13,7 @@ import {
   CITY_SIZE_THRESHOLD_4,
   CITY_SIZE_THRESHOLD_5,
 } from "./config";
+import { foregroundToScreenCoordinates } from "./foreground";
 
 let plotGroup = null;
 
@@ -21,19 +22,23 @@ function enableChartScreen() {
   document.getElementById("chart").style.display = "block";
 }
 
+export let zoomBehavior = null;
+export let selection = null;
+
 function buildChart(data) {
+  zoomBehavior = d3
+    .zoom()
+    .scaleExtent([zoom.zoomMin, zoom.zoomMax])
+    .on("zoom", (event) => zoom.handleZoom(event, data));
+
+  selection = d3.select("#chart-d3").append("svg");
+  const { clientWidth, clientHeight } = document.getElementById("chart-d3");
+
   return (
-    d3
-      .select("#chart-d3")
-      .append("svg")
-      .attr("width", document.getElementById("chart-d3").clientWidth)
-      .attr("height", document.getElementById("chart-d3").clientHeight)
-      .call(
-        d3
-          .zoom()
-          .scaleExtent([zoom.zoomMin, zoom.zoomMax])
-          .on("zoom", (event) => zoom.handleZoom(event, data)),
-      )
+    selection
+      .attr("width", clientWidth)
+      .attr("height", clientHeight)
+      .call(zoomBehavior)
       /**
        * Below line fixes error with:
        * (0 , d3_selection__WEBPACK_IMPORTED_MODULE_7__.default)(...).transition is not a function
@@ -42,6 +47,72 @@ function buildChart(data) {
       .on("dblclick.zoom", null)
       .append("g")
   );
+}
+
+export function zoomTo_(
+  boundingBox = {
+    min: { x: 0, y: 0 },
+    max: { x: 0, y: 0 },
+    center: { x: 0, y: 0 },
+  },
+) {
+  // Get the chart's viewport dimensions
+  const chartElement = document.getElementById("chart-d3");
+  const chartWidth = chartElement.clientWidth;
+  const chartHeight = chartElement.clientHeight;
+
+  // Convert the bounding box center to screen coordinates
+  const { x: screenX, y: screenY } = foregroundToScreenCoordinates(
+    boundingBox.center.x,
+    boundingBox.center.y,
+  );
+
+  // Calculate the translation to center the point
+  const translateX = chartWidth / 2 - screenX;
+  const translateY = chartHeight / 2 - screenY;
+
+  // Reset and apply the new transform
+  zoomBehavior.transform(
+    selection,
+    d3.zoomIdentity.translate(translateX, translateY).scale(1),
+  );
+}
+
+export function zoomTo(
+  boundingBox = {
+    min: { x: 0, y: 0 },
+    max: { x: 0, y: 0 },
+    center: { x: 0, y: 0 },
+  },
+) {
+  // Convert the bounding box center to screen coordinates
+  const { x: screenX, y: screenY } = foregroundToScreenCoordinates(
+    boundingBox.center.x,
+    boundingBox.center.y,
+  );
+
+  const chartElement = document.getElementById("chart-d3");
+  const { clientWidth: chartWidth, clientHeight: chartHeight } = chartElement;
+
+  const currentTransform = d3.zoomTransform(selection.node());
+
+  // Calculate the translation needed to center the bounding box
+  const translateX =
+    currentTransform.x + (chartWidth / 2 - screenX * currentTransform.k);
+  const translateY =
+    currentTransform.y + (chartHeight / 2 - screenY * currentTransform.k);
+
+  // Create a new transform that builds on the current one
+  const newTransform = currentTransform.translate(
+    translateX - currentTransform.x,
+    translateY - currentTransform.y,
+  );
+
+  selection
+    .transition()
+    .duration(300)
+    .ease(d3.easeQuadInOut)
+    .call(zoomBehavior.transform, newTransform);
 }
 
 export function initChart(dataPoints) {
@@ -65,12 +136,10 @@ export function initChart(dataPoints) {
   window.addEventListener("resize", () => zoom.handleResize(dataPoints));
 }
 
-// eslint-disable-next-line no-unused-vars
 function handleCityHover(event, city) {
   annotation.updateAnnotation(city);
 }
 
-// eslint-disable-next-line no-unused-vars
 function handleCityClick(event, city) {
   article.enableArticle(city);
 }

@@ -1,5 +1,7 @@
 /// <reference types="vite/client" />
 /// <reference types="vite-plugin-comlink/client" />
+/// <reference types="vite-plugin-svgr/client" />
+// TODO: Remove svgr before merge
 
 type StyleObject = {
   [name: string]: string;

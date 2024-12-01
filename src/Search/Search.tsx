@@ -3,6 +3,7 @@ import debounce from "lodash/debounce";
 import useSWR from "swr";
 import { MapSvgRepresentation as Map } from "../../vite-plugin/svg-map-parser.ts";
 import { Dropdown, Option } from "./Dropdown.tsx";
+import { zoomTo } from "../js/chart";
 
 const worker = new ComlinkSharedWorker<typeof import("./search.ts")>(
   new URL("./search.ts", import.meta.url),
@@ -49,7 +50,7 @@ export const Search = (props: Props) => {
   );
 
   const onSelectionChange = (option: Option) => {
-    console.log("Selected:", option);
+    zoomTo(option.boundingBox);
   };
 
   return (

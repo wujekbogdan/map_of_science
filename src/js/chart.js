@@ -49,35 +49,6 @@ function buildChart(data) {
   );
 }
 
-export function zoomTo_(
-  boundingBox = {
-    min: { x: 0, y: 0 },
-    max: { x: 0, y: 0 },
-    center: { x: 0, y: 0 },
-  },
-) {
-  // Get the chart's viewport dimensions
-  const chartElement = document.getElementById("chart-d3");
-  const chartWidth = chartElement.clientWidth;
-  const chartHeight = chartElement.clientHeight;
-
-  // Convert the bounding box center to screen coordinates
-  const { x: screenX, y: screenY } = foregroundToScreenCoordinates(
-    boundingBox.center.x,
-    boundingBox.center.y,
-  );
-
-  // Calculate the translation to center the point
-  const translateX = chartWidth / 2 - screenX;
-  const translateY = chartHeight / 2 - screenY;
-
-  // Reset and apply the new transform
-  zoomBehavior.transform(
-    selection,
-    d3.zoomIdentity.translate(translateX, translateY).scale(1),
-  );
-}
-
 export function zoomTo(
   boundingBox = {
     min: { x: 0, y: 0 },

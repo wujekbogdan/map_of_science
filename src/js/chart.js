@@ -55,30 +55,45 @@ export function zoomTo(
     max: { x: 0, y: 0 },
     center: { x: 0, y: 0 },
   },
+  desiredZoom = 2, // Default zoom level
 ) {
+  const chartElement = document.getElementById("chart-d3");
+  const { clientWidth: chartWidth, clientHeight: chartHeight } = chartElement;
+
   // Convert the bounding box center to screen coordinates
   const { x: screenX, y: screenY } = foregroundToScreenCoordinates(
     boundingBox.center.x,
     boundingBox.center.y,
   );
 
-  const chartElement = document.getElementById("chart-d3");
-  const { clientWidth: chartWidth, clientHeight: chartHeight } = chartElement;
-
   const currentTransform = d3.zoomTransform(selection.node());
 
-  // Calculate the translation needed to center the bounding box
-  const translateX =
-    currentTransform.x + (chartWidth / 2 - screenX * currentTransform.k);
-  const translateY =
-    currentTransform.y + (chartHeight / 2 - screenY * currentTransform.k);
+  console.log("Zoom Debug - Step 1: React Map to Screen Conversion");
+  console.log({ screenX, screenY });
 
-  // Create a new transform that builds on the current one
-  const newTransform = currentTransform.translate(
-    translateX - currentTransform.x,
-    translateY - currentTransform.y,
-  );
+  // Calculate the current data-space center
+  const dataCenterX = currentTransform.invertX(screenX);
+  const dataCenterY = currentTransform.invertY(screenY);
 
+  console.log("Zoom Debug - Step 2: Data-Space Center Calculation");
+  console.log({ dataCenterX, dataCenterY });
+
+  // Calculate absolute translation for the new zoom level
+  const translateX = chartWidth / 2 - dataCenterX * desiredZoom;
+  const translateY = chartHeight / 2 - dataCenterY * desiredZoom;
+
+  console.log("Zoom Debug - Step 3: Absolute Translation Calculation");
+  console.log({ translateX, translateY, desiredZoom });
+
+  // Create a new transform combining pan and zoom
+  const newTransform = d3.zoomIdentity
+    .translate(translateX, translateY)
+    .scale(desiredZoom);
+
+  console.log("Zoom Debug - Step 4: Final Combined Transform");
+  console.log({ newTransform });
+
+  // Apply the transform via zoomBehavior
   selection
     .transition()
     .duration(300)

@@ -1,5 +1,14 @@
 # map_of_science
 
+## 1.5.0
+
+### Minor Changes
+
+- 8ee6329: - Sync `assets/foreground.svg` with the original repo. https://github.com/dsonyy/map_of_science/commit/d05b22079ddb21a6b87008f999209e7cc0a5ac42
+  - Sync `asset/labels.tsv` with the original repo. https://github.com/dsonyy/map_of_science/commit/3c61c313d16cfd1db049acc94d8c1a946e2a89ee
+- 8ee6329: - Add a search feature. The typeahead search allows users to search through all the map labels. It zooms in and pans the map to the selected label's bounding box.
+  - Add plus/minus zoom controls.
+
 ## 1.4.0
 
 ### Minor Changes

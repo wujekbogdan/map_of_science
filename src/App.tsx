@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
+import { scaleLinear } from "d3";
+import styled from "styled-components";
 import Map from "./Map";
 import { init } from "./js/main";
 import map from "../asset/foreground.svg?parse";
 import { eventBus, Events } from "./event-bus.ts";
-import { scaleLinear } from "d3";
 import { DevTool } from "./DevTool.tsx";
-import styled from "styled-components";
 import { config } from "./config.ts";
 import { useStore } from "./store.ts";
+import { Header } from "./Header/Header.tsx";
 
 let isInitialized = false;
 
@@ -48,6 +49,8 @@ function App() {
 
   return (
     <>
+      <Header />
+
       <div id="article" className="content">
         <div id="article-content"></div>
       </div>
@@ -78,7 +81,7 @@ function App() {
 }
 
 const DevToolsWrapper = styled.div`
-  z-index: 1000;
+  z-index: 20;
   position: fixed;
   bottom: 0;
   right: 0;

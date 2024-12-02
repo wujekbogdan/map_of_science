@@ -5,6 +5,7 @@ import { readFileSync, existsSync } from "fs";
 import { resolve } from "path";
 import { z } from "zod";
 import styleToObject from "style-to-object";
+import { svgPathBbox } from "svg-path-bbox";
 
 const l1L2Schema = z.object({
   attributes: z.object({
@@ -70,6 +71,7 @@ export const parse = async (svgString: string) => {
   const parsedSvg = (await parser.parseStringPromise(svgString)) as ParsedSvg;
 
   const validated = schema.parse(parsedSvg);
+
   const style = (style: string) => styleToObject(style) ?? {};
 
   const map1st2ndLayer = (layer: z.infer<typeof l1L2Schema>) => ({
@@ -84,7 +86,18 @@ export const parse = async (svgString: string) => {
         label: attributes["inkscape:label"],
         style: style(attributes.style),
         d: attributes.d,
-      }
+        boundingBox: (() => {
+          const [minx, miny, maxX, maxY] = svgPathBbox(attributes.d);
+          return {
+            min: { x: minx, y: miny },
+            max: { x: maxX, y: maxY },
+            center: {
+              x: (minx + maxX) / 2,
+              y: (miny + maxY) / 2,
+            },
+          };
+        })(),
+      },
     })),
   });
 
@@ -108,8 +121,19 @@ export const parse = async (svgString: string) => {
           height: attributes.height,
           x: attributes.x,
           y: attributes.y,
-        }
-      }))
+          boundingBox: {
+            min: { x: attributes.x, y: attributes.y },
+            max: {
+              x: attributes.x + attributes.width,
+              y: attributes.y + attributes.height,
+            },
+            center: {
+              x: attributes.x + attributes.width / 2,
+              y: attributes.y + attributes.height / 2,
+            },
+          },
+        },
+      })),
     })),
   });
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { mapModel, search } from "./search";
+import { mapModel, search } from "./search.ts";
 
 const map = {
   layer1: {

@@ -8,8 +8,15 @@ export const DevTool = () => {
     "expanded",
   );
   const isExpanded = visibility === "expanded";
-  const { fontSize, scaleFactor, setFontSize, setScaleFactor, zoom } =
-    useStore();
+  const {
+    fontSize,
+    scaleFactor,
+    setFontSize,
+    setScaleFactor,
+    zoom,
+    zoomStepFactor,
+    setZoomStepFactor,
+  } = useStore();
   const layers = ["layer1", "layer2", "layer3"] as const;
   const scaleFactors = ["min", "max", "zoom"] as const;
 
@@ -68,6 +75,18 @@ export const DevTool = () => {
 
           <Panel>
             <Header>{i18n("Zoom")}</Header>
+            <P>
+              <FormControl>
+                <Label>{i18n("Zoom scale factor")}</Label>
+                <Input
+                  type="number"
+                  value={zoomStepFactor}
+                  onChange={(e) => {
+                    setZoomStepFactor(Number(e.target.value));
+                  }}
+                />
+              </FormControl>
+            </P>
             <P>
               <Label>{i18n("Current Zoom")}</Label>
               <span>{zoom}</span>

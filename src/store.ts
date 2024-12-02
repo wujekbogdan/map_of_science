@@ -3,6 +3,7 @@ import { combine } from "zustand/middleware";
 
 const defaults = {
   zoom: 1,
+  zoomStepFactor: 1.6,
   fontSize: {
     layer1: 16,
     layer2: 12.8,
@@ -19,6 +20,9 @@ export const useStore = create(
   combine(defaults, (set) => ({
     setZoom: (zoom: number) => {
       set({ zoom });
+    },
+    setZoomStepFactor: (zoomStepFactor: number) => {
+      set({ zoomStepFactor });
     },
     setFontSize: (
       layer: keyof typeof defaults.fontSize,

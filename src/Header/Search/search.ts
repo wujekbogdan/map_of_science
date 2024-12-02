@@ -1,5 +1,5 @@
 import { normalizeSync } from "normalize-diacritics";
-import { MapSvgRepresentation } from "../../vite-plugin/svg-map-parser.ts";
+import { MapSvgRepresentation } from "../../../vite-plugin/svg-map-parser.ts";
 
 export type Model = {
   id: string;

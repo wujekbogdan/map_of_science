@@ -8,7 +8,7 @@ import { eventBus, Events } from "./event-bus.ts";
 import { DevTool } from "./DevTool.tsx";
 import { config } from "./config.ts";
 import { useStore } from "./store.ts";
-import { Search } from "./Search/Search.tsx";
+import { Header } from "./Header/Header.tsx";
 
 let isInitialized = false;
 
@@ -49,9 +49,7 @@ function App() {
 
   return (
     <>
-      <Header>
-        <Search map={map} />
-      </Header>
+      <Header />
 
       <div id="article" className="content">
         <div id="article-content"></div>
@@ -81,15 +79,6 @@ function App() {
     </>
   );
 }
-
-const Header = styled.div`
-  z-index: 20;
-  position: fixed;
-  top: 0;
-  right: 0;
-  left: 0;
-  background-color: transparent;
-`;
 
 const DevToolsWrapper = styled.div`
   z-index: 20;

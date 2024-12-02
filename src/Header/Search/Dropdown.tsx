@@ -7,7 +7,7 @@ import {
 import styled from "styled-components";
 import { ChangeEvent, useMemo, useState } from "react";
 import { normalizeSync } from "normalize-diacritics";
-import { i18n } from "../i18n.ts";
+import { i18n } from "../../i18n.ts";
 
 export type Option = {
   label: string;
@@ -135,11 +135,12 @@ const ComboboxInput = styled(ComboboxInputHeadless).attrs<{
   placeholder: props.placeholder ?? "",
   autoComplete: props.autoComplete ?? "",
 }))<{ $open: boolean }>`
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+
   font-size: 16px;
   box-sizing: border-box;
   position: relative;
   width: 100%;
-  max-width: 450px;
   padding: 12px;
   border-width: ${({ $open }) => ($open ? "2px 2px 0 2px" : "2px")};
   border-style: solid;

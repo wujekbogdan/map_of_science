@@ -67,7 +67,6 @@ export function zoomTo(
     chartHeight / boundingBoxHeight,
   );
 
-  // Convert the bounding box center to screen coordinates
   const { x: screenX, y: screenY } = foregroundToScreenCoordinates(
     boundingBox.center.x,
     boundingBox.center.y,
@@ -80,8 +79,6 @@ export function zoomTo(
 
   const translateX = chartWidth / 2 - dataCenterX * desiredZoom;
   const translateY = chartHeight / 2 - dataCenterY * desiredZoom;
-
-  console.log({ translateX, translateY, desiredZoom });
 
   const newTransform = d3.zoomIdentity
     .translate(translateX, translateY)

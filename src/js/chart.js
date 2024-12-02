@@ -25,6 +25,8 @@ function enableChartScreen() {
 export let zoomBehavior = null;
 export let selection = null;
 
+const getChartElement = () => document.getElementById("chart-d3");
+
 function buildChart(data) {
   zoomBehavior = d3
     .zoom()
@@ -32,7 +34,7 @@ function buildChart(data) {
     .on("zoom", (event) => zoom.handleZoom(event, data));
 
   selection = d3.select("#chart-d3").append("svg");
-  const { clientWidth, clientHeight } = document.getElementById("chart-d3");
+  const { clientWidth, clientHeight } = getChartElement();
 
   return (
     selection
@@ -49,6 +51,13 @@ function buildChart(data) {
   );
 }
 
+/**
+ * Zooms to a specified bounding box.
+ *
+ * @param {{x: number, y: number}} boundingBox.min
+ * @param {{x: number, y: number}} boundingBox.max
+ * @param {{x: number, y: number}} boundingBox.center
+ */
 export function zoomTo(
   boundingBox = {
     min: { x: 0, y: 0 },
@@ -56,7 +65,7 @@ export function zoomTo(
     center: { x: 0, y: 0 },
   },
 ) {
-  const chartElement = document.getElementById("chart-d3");
+  const chartElement = getChartElement();
   const { clientWidth: chartWidth, clientHeight: chartHeight } = chartElement;
 
   const boundingBoxWidth = boundingBox.max.x - boundingBox.min.x;
@@ -73,10 +82,8 @@ export function zoomTo(
   );
 
   const currentTransform = d3.zoomTransform(selection.node());
-
   const dataCenterX = currentTransform.invertX(screenX);
   const dataCenterY = currentTransform.invertY(screenY);
-
   const translateX = chartWidth / 2 - dataCenterX * desiredZoom;
   const translateY = chartHeight / 2 - dataCenterY * desiredZoom;
 
@@ -86,16 +93,31 @@ export function zoomTo(
 
   selection
     .transition()
-    .duration(300)
+    .duration(600)
     .ease(d3.easeQuadInOut)
     .call(zoomBehavior.transform, newTransform);
 }
 
+export const zoomToScale = (desiredZoom = 1) => {
+  const selectionNode = selection.node();
+  const currentTransform = d3.zoomTransform(selectionNode);
+  const currentZoom = currentTransform.k;
+  const scaleFactor = desiredZoom / currentZoom;
+
+  selection
+    .transition()
+    .duration(300)
+    .ease(d3.easeQuadInOut)
+    .call(zoomBehavior.scaleBy, scaleFactor, [
+      selectionNode.clientWidth / 2,
+      selectionNode.clientHeight / 2,
+    ]);
+};
+
 export function initChart(dataPoints) {
   enableChartScreen();
 
-  const width = document.getElementById("chart-d3").clientWidth;
-  const height = document.getElementById("chart-d3").clientHeight;
+  const { clientWidth: width, clientHeight: height } = getChartElement();
   zoom.updateGlobalScaleDomains(width, height);
   zoom.transformLocalScaleDomains(d3.zoomIdentity);
   zoom.updateScaleRanges(width, height);

@@ -5,6 +5,7 @@ import { comlink } from "vite-plugin-comlink";
 
 export default defineConfig({
   plugins: [react(), svgMapParser(), comlink()],
+  base: process.env.VITE_BASE_URL,
   root: "src",
   envDir: "../",
   build: {

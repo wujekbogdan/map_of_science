@@ -4,16 +4,19 @@
 
 ### Minor Changes
 
-- 8ee6329: - Sync `assets/foreground.svg` with the original repo. https://github.com/dsonyy/map_of_science/commit/d05b22079ddb21a6b87008f999209e7cc0a5ac42
+- 8ee6329:
+  - Sync `assets/foreground.svg` with the original repo. https://github.com/dsonyy/map_of_science/commit/d05b22079ddb21a6b87008f999209e7cc0a5ac42
   - Sync `asset/labels.tsv` with the original repo. https://github.com/dsonyy/map_of_science/commit/3c61c313d16cfd1db049acc94d8c1a946e2a89ee
-- 8ee6329: - Add a search feature. The typeahead search allows users to search through all the map labels. It zooms in and pans the map to the selected label's bounding box.
+- 8ee6329:
+  - Add a search feature. The typeahead search allows users to search through all the map labels. It zooms in and pans the map to the selected label's bounding box.
   - Add plus/minus zoom controls.
 
 ## 1.4.0
 
 ### Minor Changes
 
-- bb5288f: - Drop the original labels implementation that rendered the labels outside the map SVG as absolutely positioned elements.
+- bb5288f:
+  - Drop the original labels implementation that rendered the labels outside the map SVG as absolutely positioned elements.
   - Re-implement the functionality with React, rendering labels within the SVG to simplify positioning and enable dynamic styling.
 - 0107cde: Add a Dev Tools widget for dynamic label size adjustment. The widget is disabled by default. To enable it, set the `VITE_DEV_TOOL_ENABLED` environment variable to `true`.
 
@@ -31,7 +34,8 @@
 
 ### Minor Changes
 
-- 21717bb: - Drop the `vite-plugin-svgr` Vite plugin.
+- 21717bb:
+  - Drop the `vite-plugin-svgr` Vite plugin.
   - Add a Vite plugin `vite-plugin/svg-map-parser` that:
     - Provides a custom loader for SVG files. Files loaded with the `?parse` query parameter are parsed by the plugin.
       Usage: `import map from './map.svg?parse'`.
@@ -60,7 +64,8 @@
 
 ### Minor Changes
 
-- 9aad3f6: - Add React + TypeScript + Vite
+- 9aad3f6:
+  - Add React + TypeScript + Vite
   - Merge the existing ESLint config with the default Vite config to ensure backward compatibility with the existing ESLint rules.
   - Wrap the existing JavaScript code in a React component to enable an incremental migration of the codebase to TypeScript.
   - Replace Webpack with SWC (used by Vite under the hood).
@@ -91,7 +96,8 @@
   - svg-injector
 
 - 19cf5a2: Turn the Release GitHub Workflow into a manually triggered one.
-- b9dad5d: - Add `Dockerfile`
+- b9dad5d:
+  - Add `Dockerfile`
   - Add `docker-compose.yml`
   - Add corresponding instructions to `README.md`
 
@@ -108,7 +114,8 @@
 
   - Add the `--fix` flag to the pre-commit hook.
 
-- 6b09a07: - Add [commitlint](https://commitlint.js.org/) together with [@commitlint/config-conventional](https://www.npmjs.com/package/@commitlint/config-conventional)
+- 6b09a07:
+  - Add [commitlint](https://commitlint.js.org/) together with [@commitlint/config-conventional](https://www.npmjs.com/package/@commitlint/config-conventional)
   - Add [Commitizen](https://www.npmjs.com/package/commitizen)
 - 753231f: Make the Node.js version explicit by:
 

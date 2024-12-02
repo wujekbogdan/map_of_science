@@ -92,7 +92,6 @@ export const Dropdown = (props: Dropdown) => {
       {({ open }) => (
         <>
           <ComboboxInput
-            autoFocus={true}
             autoComplete="off"
             $open={open}
             placeholder={i18n(

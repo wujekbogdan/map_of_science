@@ -5,7 +5,7 @@ import { useState } from "react";
 
 export const DevTool = () => {
   const [visibility, setVisibility] = useState<"collapsed" | "expanded">(
-    "expanded",
+    "collapsed",
   );
   const isExpanded = visibility === "expanded";
   const {

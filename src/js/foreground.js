@@ -123,3 +123,34 @@ function updateForegroundScaling(xScale, yScale) {
 
   selectForegroundSvg().attr("viewBox", `${x} ${y_prim} ${width} ${height}`);
 }
+
+const getViewBox = (svgElement) => {
+  const viewBox = svgElement.viewBox.baseVal;
+
+  return {
+    minX: viewBox.x,
+    minY: viewBox.y,
+    width: viewBox.width,
+    height: viewBox.height,
+  };
+};
+
+/**
+ * Converts foreground (map SVG) coordinates to their corresponding screen coordinates.
+ * This function assumes that both the map SVG and the chart (D3 SVG) occupy the entire screen.
+ * This is a temporary solution until data point rendering is re-implemented on the same SVG as the map.
+ *
+ * @param {number} x - The x-coordinate in the foreground's coordinate system.
+ * @param {number} y - The y-coordinate in the foreground's coordinate system.
+ * @return {{x: number, y: number}} - The corresponding screen coordinates.
+ */
+export function foregroundToScreenCoordinates(x, y) {
+  const foregroundSvg = selectForegroundSvg().node();
+  const { minX, minY, width, height } = getViewBox(foregroundSvg);
+  const { clientWidth: svgWidth, clientHeight: svgHeight } = foregroundSvg;
+
+  const screenX = ((x - minX) / width) * svgWidth;
+  const screenY = ((y - minY) / height) * svgHeight;
+
+  return { x: screenX, y: screenY };
+}

@@ -1,8 +1,7 @@
-import { MapSvgRepresentation } from "../vite-plugin/svg-map-parser.ts";
-import { svgPathBbox } from "svg-path-bbox";
 import { ScaleLinear } from "d3";
-import { useStore } from "./store";
 import styled from "styled-components";
+import { MapSvgRepresentation } from "../vite-plugin/svg-map-parser.ts";
+import { useStore } from "./store";
 
 type Props = {
   map: MapSvgRepresentation;
@@ -45,15 +44,6 @@ const Label = (props: Label) => {
 export default function Map({ map, visibility, zoom }: Props) {
   const { scaleFactor, fontSize } = useStore();
 
-  const getPathBoundingBoxCenter = (d: string) => {
-    const [minx, miny, maxX, maxY] = svgPathBbox(d);
-
-    return {
-      x: (minx + maxX) / 2,
-      y: (miny + maxY) / 2,
-    };
-  };
-
   // TODO: move to the model and display labels conditionally in the JSX rather than rendering an empty text element
   const replaceHash = (str: string) =>
     str.startsWith("#") ? str.replace("#", "") : "";
@@ -61,12 +51,10 @@ export default function Map({ map, visibility, zoom }: Props) {
   const getLabelPropsByPath = (
     path: (typeof map.layer1.children)[number]["path"],
   ) => {
-    const { x, y } = getPathBoundingBoxCenter(path.d);
-
     return {
       key: path.id + path.label,
-      x: x,
-      y: y,
+      x: path.boundingBox.center.x,
+      y: path.boundingBox.center.y,
       text: replaceHash(path.label),
     };
   };
@@ -81,8 +69,8 @@ export default function Map({ map, visibility, zoom }: Props) {
       //   top: `${scale.y(-y)} px}`,
       // },
       key: rect.id + rect.label,
-      x: rect.x,
-      y: rect.y,
+      x: rect.boundingBox.center.x,
+      y: rect.boundingBox.center.y,
       text: replaceHash(rect.label),
     };
   };

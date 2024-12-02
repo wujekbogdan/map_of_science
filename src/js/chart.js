@@ -55,10 +55,17 @@ export function zoomTo(
     max: { x: 0, y: 0 },
     center: { x: 0, y: 0 },
   },
-  desiredZoom = 2, // Default zoom level
 ) {
   const chartElement = document.getElementById("chart-d3");
   const { clientWidth: chartWidth, clientHeight: chartHeight } = chartElement;
+
+  const boundingBoxWidth = boundingBox.max.x - boundingBox.min.x;
+  const boundingBoxHeight = boundingBox.max.y - boundingBox.min.y;
+
+  const desiredZoom = Math.min(
+    chartWidth / boundingBoxWidth,
+    chartHeight / boundingBoxHeight,
+  );
 
   // Convert the bounding box center to screen coordinates
   const { x: screenX, y: screenY } = foregroundToScreenCoordinates(
@@ -68,32 +75,18 @@ export function zoomTo(
 
   const currentTransform = d3.zoomTransform(selection.node());
 
-  console.log("Zoom Debug - Step 1: React Map to Screen Conversion");
-  console.log({ screenX, screenY });
-
-  // Calculate the current data-space center
   const dataCenterX = currentTransform.invertX(screenX);
   const dataCenterY = currentTransform.invertY(screenY);
 
-  console.log("Zoom Debug - Step 2: Data-Space Center Calculation");
-  console.log({ dataCenterX, dataCenterY });
-
-  // Calculate absolute translation for the new zoom level
   const translateX = chartWidth / 2 - dataCenterX * desiredZoom;
   const translateY = chartHeight / 2 - dataCenterY * desiredZoom;
 
-  console.log("Zoom Debug - Step 3: Absolute Translation Calculation");
   console.log({ translateX, translateY, desiredZoom });
 
-  // Create a new transform combining pan and zoom
   const newTransform = d3.zoomIdentity
     .translate(translateX, translateY)
     .scale(desiredZoom);
 
-  console.log("Zoom Debug - Step 4: Final Combined Transform");
-  console.log({ newTransform });
-
-  // Apply the transform via zoomBehavior
   selection
     .transition()
     .duration(300)

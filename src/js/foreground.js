@@ -7,6 +7,8 @@ import {
   LAYER_ZOOM_RADIUS_0,
   LAYER_ZOOM_RADIUS_1,
   LAYER_ZOOM_RADIUS_2,
+  LAYER_ZOOM_THRESHOLD_3,
+  LAYER_ZOOM_RADIUS_3,
 } from "./config";
 
 function hideForegroundRects() {
@@ -69,11 +71,13 @@ export function getForegroundVisibilities(kZoom) {
     LAYER_ZOOM_THRESHOLD_0,
     LAYER_ZOOM_THRESHOLD_1,
     LAYER_ZOOM_THRESHOLD_2,
+    LAYER_ZOOM_THRESHOLD_3,
   ];
   const layerZoomRadiuses = [
     LAYER_ZOOM_RADIUS_0,
     LAYER_ZOOM_RADIUS_1,
     LAYER_ZOOM_RADIUS_2,
+    LAYER_ZOOM_RADIUS_3,
   ];
 
   const layers = getForegroundLayers();

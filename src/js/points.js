@@ -2,6 +2,8 @@ import * as chart from "./chart";
 
 export let data = [];
 let concepts = {};
+let cityLabels = [];
+export let cityLabelsByClusterId = {};
 
 function parseKeyConceptsRaw(keyConceptsRaw) {
   return keyConceptsRaw.split(",");
@@ -20,6 +22,7 @@ function parseDataPointItem(item) {
     growthRating: Number(item["growth_rating"]),
     clusterCategoryId: Number(item["cluster_category"]),
     keyConcepts: parseKeyConceptsRaw(item["key_concepts"]),
+    cityLabel: cityLabelsByClusterId[Number(item["cluster_id"])] || null,
   };
 }
 
@@ -43,7 +46,12 @@ function findClosestDataPoint(dataPoints, x, y, radius) {
 export function buildDataPointDetails(dataPoint) {
   let html = "";
 
-  html += "<strong>#" + dataPoint.clusterId + "</strong>" + "<br />";
+  if (dataPoint.cityLabel) {
+    html += "<strong>" + dataPoint.cityLabel + "</strong>";
+  } else {
+    html += "<strong>#" + dataPoint.clusterId + "</strong>";
+  }
+  html += "<br />";
 
   if (dataPoint.numRecentArticles <= 100) {
     html += "<span class='few-articles'>";
@@ -112,6 +120,19 @@ function loadData(url, parseItem, dataTarget, onLoaded) {
   runLoaderWorker(loaderWorker, url);
 }
 
+function parseCityLabelItem(item) {
+  cityLabelsByClusterId[Number(item["cluster_id"])] = item["label"];
+}
+
+function loadCityLabels() {
+  loadData(
+    new URL("../../asset/labels.tsv", import.meta.url),
+    parseCityLabelItem,
+    cityLabels, // Store city labels in the cityLabels array
+    () => {},
+  );
+}
+
 export function loadDataPoints() {
   loadData(
     new URL("../../asset/data.tsv", import.meta.url),
@@ -119,6 +140,7 @@ export function loadDataPoints() {
     data, // Separate array for data points
     handleDataPointsLoaded,
   );
+  loadCityLabels(); // Load city labels after loading data points
 }
 
 export function loadConcepts() {

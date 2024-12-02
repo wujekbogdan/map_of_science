@@ -9,6 +9,7 @@ import { DevTool } from "./DevTool.tsx";
 import { config } from "./config.ts";
 import { useStore } from "./store.ts";
 import { Header } from "./Header/Header.tsx";
+import { i18n } from "./i18n.ts";
 
 let isInitialized = false;
 
@@ -69,6 +70,7 @@ function App() {
 
       <div id="loading" className="loading-container">
         <div className="loading-spinner"></div>
+        <p>{i18n("Ładowanie danych...")}</p>
       </div>
 
       {config.devTool && (

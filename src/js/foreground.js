@@ -10,6 +10,7 @@ import {
   LAYER_ZOOM_THRESHOLD_3,
   LAYER_ZOOM_RADIUS_3,
 } from "./config";
+import { xScale, yScale } from "./zoom.js";
 
 function hideForegroundRects() {
   // set display none for all rects in the foreground
@@ -97,6 +98,7 @@ export function getForegroundVisibilities(kZoom) {
     visibilities[index] = visibility;
   });
 
+  // TODO: fix this
   return visibilities;
 }
 
@@ -113,6 +115,7 @@ export function getForegroundLayers() {
       return d3.select(this).style("display") !== "none";
     })
     .nodes();
+
   return sortForegroundLayers(layers);
 }
 
@@ -157,4 +160,24 @@ export function foregroundToScreenCoordinates(x, y) {
   const screenY = ((y - minY) / height) * svgHeight;
 
   return { x: screenX, y: screenY };
+}
+
+/**
+ * Converts screen coordinates to their corresponding foreground (map SVG) coordinates.
+ * This function assumes that both the map SVG and the chart (D3 SVG) occupy the entire screen.
+ * This is a temporary solution until data point rendering is re-implemented on the same SVG as the map.
+ *
+ * @param {number} x - The x-coordinate in the screen's coordinate system.
+ * @param {number} y - The y-coordinate in the screen's coordinate system.
+ * @return {{x: number, y: number}} - The corresponding foreground coordinates.
+ */
+export function screenToForegroundCoordinates(x, y) {
+  const foregroundSvg = selectForegroundSvg().node();
+  const { minX, minY, width, height } = getViewBox(foregroundSvg);
+  const { clientWidth: svgWidth, clientHeight: svgHeight } = foregroundSvg;
+
+  const foregroundX = (xScale(x) / svgWidth) * width + minX;
+  const foregroundY = (yScale(y) / svgHeight) * height + minY;
+
+  return { x: foregroundX, y: foregroundY };
 }

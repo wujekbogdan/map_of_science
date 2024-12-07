@@ -26,11 +26,12 @@ function App() {
   const [{ xScale, yScale, zoom, visibility }, setScale] = useState<
     Events["labelsUpdate"]
   >({
-    visibility: [0, 0, 0],
+    visibility: [0, 0, 0, 0],
     xScale: scaleLinear(),
     yScale: scaleLinear(),
     zoom: 1,
   });
+  const [cityLabels, setCityLabels] = useState<Events["cityLabelsLoaded"]>([]);
 
   useEffect(() => {
     eventBus.on("labelsUpdate", ({ xScale, yScale, zoom, visibility }) => {
@@ -42,24 +43,27 @@ function App() {
       });
       setZoom(zoom);
     });
+    eventBus.on("cityLabelsLoaded", (labels) => {
+      setCityLabels(labels);
+    });
 
     return () => {
       eventBus.off("labelsUpdate");
+      eventBus.off("cityLabelsLoaded");
     };
   }, [setScale, setZoom]);
 
   return (
     <>
       <Header />
-
       <div id="article" className="content">
         <div id="article-content"></div>
       </div>
-
       <div id="chart">
         <div id="chart-d3"></div>
         <div id="foreground">
           <Map
+            cityLabels={cityLabels}
             map={map}
             scale={{ x: xScale, y: yScale }}
             zoom={zoom}
@@ -67,12 +71,10 @@ function App() {
           />
         </div>
       </div>
-
       <div id="loading" className="loading-container">
         <div className="loading-spinner"></div>
         <p>{i18n("Ładowanie danych...")}</p>
       </div>
-
       {config.devTool && (
         <DevToolsWrapper>
           <DevTool />

@@ -17,13 +17,12 @@ To samo możesz zrobić ze światłem. Jeżeli po prostu włączasz latarkę i
 światłem na poziomie podstawowym. Pewnie wiesz, że światło składa się tak
 naprawdę z małych porcji zwanych fotonami, ale przecież nie musisz o tym
 myśleć, kiedy zbliżasz lupę do oka. To znak, że pozostajesz na skromnym
-poziomie _optyki_. Światłem można jednak bawić się znacznie bardziej
-precyzyjnie! Możesz przecież operować coraz mniejszymi porcjami światła, a
-wtedy prędzej czy później zaczną do ciebie "gadać" fotony. Możesz sobie
-zażyczyć, żeby twoje światło wędrowało po ściśle określonym kanale, który
-możesz na przykład nazwać _światłowód_. A może chciałbyś szybciutko
-włączać i wyłącząć swoje światło, żeby nim mrugać? A może chciałbyś, żeby
-twoje światło było o ściśle określonym kolorze, i będziesz montował rozmaite
-filtry, żeby do tego doprowadzić? To znak, że wkraczasz w świat
-_fotoniki_. I znowu, w grubym uproszczeniu: optyka zajmuje się
-_światłem_, a fotonika - _fotonami_.
+poziomie _optyki_.
+
+Światłem można jednak bawić się znacznie bardziej precyzyjnie! Możesz przecież operować coraz mniejszymi porcjami światła, a wtedy prędzej czy później zaczną do ciebie "gadać" fotony. Możesz sobie zażyczyć, żeby twoje światło wędrowało po ściśle określonym kanale, który możesz na przykład nazwać _światłowód_. A może chciałbyś szybciutko włączać i wyłącząć swoje światło, żeby nim mrugać? A może chciałbyś, żeby twoje światło było o ściśle określonym kolorze, i będziesz montował rozmaite filtry, żeby do tego doprowadzić? To wszystko znaki, że wkraczasz w świat _fotoniki_. A więc w pierwszym uproszczeniu: optyka zajmuje się _światłem_, a fotonika - _fotonami_, chociaż, oczywiście, tak naprawdę to są siostrzane dyscypliny, a czasem ciężko powiedzieć, czy uprawiamy akurat optykę, czy fotonikę.
+
+Na naszej mapie cała fotonika dzieli się na cztery dość wyraźne regiony:
+
+- Komunikacja optyczna
+- Metamateriały fotoniczne
+- Obrazowanie, hologramy, wyświetlacze

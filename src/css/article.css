@@ -11,7 +11,7 @@
   visibility: hidden;
   position: absolute;
   z-index: 30;
-  width: 800px; /* Responsive width */
+  width: min(800px, calc(100vw - 50px)); /* Responsive width */
   height: calc(100vh - 50px - 16px); /* Responsive height */
   right: 25px;
   top: 25px;

@@ -12,7 +12,7 @@ import "animate.css";
 
 export const init = () => {
   function enableLoadingScreen() {
-    document.getElementById("loading").style.display = "block";
+    document.getElementById("loading").style.display = "flex";
     document.getElementById("chart").style.display = "none";
   }
 

@@ -1,5 +1,6 @@
 import * as chart from "./chart";
 import { eventBus } from "../event-bus";
+import { parseFromUrl } from "../csv/parse";
 
 export let data = [];
 let concepts = {};
@@ -113,35 +114,11 @@ function handleDataPointsLoaded(dataPoints) {
   );
 }
 
-function buildLoaderWorker() {
-  return new Worker(new URL("./streaming-tsv-parser.js", import.meta.url).href);
-}
-
-function handleLoaderWorkerMessage(
-  // eslint-disable-next-line no-unused-vars
-  { data: { items, totalBytes, finished } },
-  parseItem,
-  dataTarget,
-  onLoaded,
-) {
-  const rows = items.map(parseItem);
-
-  dataTarget.push(...rows);
-
-  if (finished) {
-    onLoaded(dataTarget);
-  }
-}
-
-function runLoaderWorker(loaderWorker, url) {
-  loaderWorker.postMessage(url.href);
-}
-
 function loadData(url, parseItem, dataTarget, onLoaded) {
-  const loaderWorker = buildLoaderWorker();
-  loaderWorker.onmessage = (d) =>
-    handleLoaderWorkerMessage(d, parseItem, dataTarget, onLoaded);
-  runLoaderWorker(loaderWorker, url);
+  parseFromUrl(url, parseItem).then((parsedData) => {
+    dataTarget = Array.from(parsedData);
+    onLoaded(dataTarget);
+  });
 }
 
 function loadCityLabels() {

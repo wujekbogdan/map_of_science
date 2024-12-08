@@ -4,6 +4,51 @@ import styled from "styled-components";
 import { MapSvgRepresentation } from "../vite-plugin/svg-map-parser.ts";
 import { useStore } from "./store";
 import { screenToForegroundCoordinates } from "./js/foreground";
+import { isArticleAvailable } from "./js/article";
+
+type Label = {
+  key: string;
+  x: number;
+  y: number;
+  text: string;
+  fontSize: number;
+  opacity: number;
+  level: 1 | 2 | 3 | 4;
+  hasArticle: boolean;
+  onClick?: OnLabelClick;
+};
+
+type OnLabelClick = (label: Pick<Label, "text" | "x" | "y">) => void;
+
+const Label = (props: Label) => {
+  const onClick = props.onClick
+    ? () => {
+        console.log("click");
+        props.onClick?.({
+          text: props.text,
+          x: props.x,
+          y: props.y,
+        });
+      }
+    : undefined;
+
+  return (
+    <LabelText
+      display={props.opacity ? "block" : "none"}
+      key={props.key}
+      textAnchor="middle"
+      alignmentBaseline="middle"
+      x={props.x}
+      y={props.y}
+      $fontSize={props.fontSize}
+      $opacity={props.opacity}
+      $level={props.level}
+      onClick={onClick}
+    >
+      {props.text}
+    </LabelText>
+  );
+};
 
 type Props = {
   map: MapSvgRepresentation;
@@ -19,37 +64,13 @@ type Props = {
     x: number;
     y: number;
   }[];
+  on?: {
+    labelClick?: OnLabelClick;
+  };
 };
 
-type Label = {
-  key: string;
-  x: number;
-  y: number;
-  text: string;
-  fontSize: number;
-  opacity: number;
-  level: 1 | 2 | 3 | 4;
-};
-
-const Label = (props: Label) => {
-  return (
-    <LabelText
-      display={props.opacity ? "block" : "none"}
-      key={props.key}
-      textAnchor="middle"
-      alignmentBaseline="middle"
-      x={props.x}
-      y={props.y}
-      $fontSize={props.fontSize}
-      $opacity={props.opacity}
-      $level={props.level}
-    >
-      {props.text}
-    </LabelText>
-  );
-};
-
-export default function Map({ map, visibility, zoom, cityLabels = [] }: Props) {
+export default function Map(props: Props) {
+  const { map, zoom, visibility, cityLabels, on } = props;
   const { scaleFactor, fontSize } = useStore();
 
   // TODO: move to the model and display labels conditionally in the JSX rather than rendering an empty text element
@@ -59,10 +80,12 @@ export default function Map({ map, visibility, zoom, cityLabels = [] }: Props) {
   const getLabelPropsByPath = (
     path: (typeof map.layer1.children)[number]["path"],
   ) => {
+    const { x, y } = path.boundingBox.center;
+
     return {
       key: path.id + path.label,
-      x: path.boundingBox.center.x,
-      y: path.boundingBox.center.y,
+      x: x,
+      y: y,
       text: replaceHash(path.label),
     };
   };
@@ -103,9 +126,7 @@ export default function Map({ map, visibility, zoom, cityLabels = [] }: Props) {
 
   const cityLabelsScaled = useMemo(() => {
     return cityLabels.map((label) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       const { x, y } = screenToForegroundCoordinates(label.x, label.y);
-
       return {
         key: label.clusterId.toString(),
         x: x,
@@ -116,7 +137,7 @@ export default function Map({ map, visibility, zoom, cityLabels = [] }: Props) {
         level: 4,
       } as const;
     });
-  }, [cityLabels, visibility, scaledFontSize.layer4]);
+  }, [cityLabels, scaledFontSize.layer4, visibility]);
 
   const labels: Label[] = [
     ...map.layer1.children.map(
@@ -149,7 +170,19 @@ export default function Map({ map, visibility, zoom, cityLabels = [] }: Props) {
       ),
     ),
     ...cityLabelsScaled,
-  ];
+  ].map((label) => ({
+    ...label,
+    hasArticle: isArticleAvailable(label.text),
+    onClick: () => {
+      if (on?.labelClick) {
+        on.labelClick({
+          text: replaceHash(label.text),
+          x: label.x,
+          y: label.y,
+        });
+      }
+    },
+  }));
 
   return (
     <svg>
@@ -185,6 +218,7 @@ export default function Map({ map, visibility, zoom, cityLabels = [] }: Props) {
           <g key={group.attributes.id} id={group.attributes.id}>
             {group.children.map(({ rect }) => (
               <rect
+                key={rect.id}
                 id={rect.id}
                 width={rect.width}
                 height={rect.height}
@@ -207,7 +241,7 @@ export default function Map({ map, visibility, zoom, cityLabels = [] }: Props) {
 
       <g id="labels">
         {labels.map((label) => (
-          <Label {...label} key={label.key} level={label.level} />
+          <Label {...label} key={label.key} />
         ))}
       </g>
     </svg>
@@ -246,4 +280,7 @@ const LabelText = styled.text<{
         return "inherit";
     }
   }};
+  &:hover {
+    fill: red !important;
+  }
 `;

@@ -21,16 +21,16 @@ type Label = {
 type OnLabelClick = (label: Pick<Label, "text" | "x" | "y">) => void;
 
 const Label = (props: Label) => {
-  const onClick = props.onClick
-    ? () => {
-        console.log("click");
-        props.onClick?.({
-          text: props.text,
-          x: props.x,
-          y: props.y,
-        });
-      }
-    : undefined;
+  const onClick =
+    props.hasArticle && props.onClick
+      ? () => {
+          props.onClick?.({
+            text: props.text,
+            x: props.x,
+            y: props.y,
+          });
+        }
+      : undefined;
 
   return (
     <LabelText

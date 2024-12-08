@@ -17,7 +17,7 @@ export const DevTool = () => {
     zoomStepFactor,
     setZoomStepFactor,
   } = useStore();
-  const layers = ["layer1", "layer2", "layer3"] as const;
+  const layers = ["layer1", "layer2", "layer3", "layer4"] as const;
   const scaleFactors = ["min", "max", "zoom"] as const;
 
   const onMinimizeClick = () => {

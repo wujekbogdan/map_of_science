@@ -49,13 +49,7 @@ const Label = (props: Label) => {
   );
 };
 
-export default function Map({
-  map,
-  visibility,
-  zoom,
-  scale,
-  cityLabels = [],
-}: Props) {
+export default function Map({ map, visibility, zoom, cityLabels = [] }: Props) {
   const { scaleFactor, fontSize } = useStore();
 
   // TODO: move to the model and display labels conditionally in the JSX rather than rendering an empty text element
@@ -104,6 +98,7 @@ export default function Map({
     layer1: scaleFontSize(fontSize.layer1),
     layer2: scaleFontSize(fontSize.layer2),
     layer3: scaleFontSize(fontSize.layer3),
+    layer4: scaleFontSize(fontSize.layer4),
   };
 
   const cityLabelsScaled = useMemo(() => {
@@ -116,12 +111,12 @@ export default function Map({
         x: x,
         y: y,
         text: label.label,
-        fontSize: 11,
-        opacity: 1,
+        fontSize: scaledFontSize.layer4,
+        opacity: visibility[3],
         level: 4,
       } as const;
     });
-  }, [cityLabels]);
+  }, [cityLabels, visibility, scaledFontSize.layer4]);
 
   const labels: Label[] = [
     ...map.layer1.children.map(
@@ -203,6 +198,13 @@ export default function Map({
         ))}
       </g>
 
+      <g id="L4">
+        {
+          // A dummy element required by foreground.js that relies on DOM element to determine opacity values
+          // TODO: remove once foreground.js functionality is fully ported to React
+        }
+      </g>
+
       <g id="labels">
         {labels.map((label) => (
           <Label {...label} key={label.key} level={label.level} />
@@ -241,7 +243,7 @@ const LabelText = styled.text<{
       case 3:
         return "rgb(101, 91, 153)";
       case 4:
-        return "red";
+        return "inherit";
     }
   }};
 `;

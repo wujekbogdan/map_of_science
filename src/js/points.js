@@ -114,6 +114,7 @@ function handleDataPointsLoaded(dataPoints) {
   );
 }
 
+// TODO: Bring back WebWorker
 function loadData(url, parseItem, dataTarget, onLoaded) {
   parseFromUrl(url, parseItem).then((parsedData) => {
     dataTarget = Array.from(parsedData);
@@ -124,7 +125,7 @@ function loadData(url, parseItem, dataTarget, onLoaded) {
 function loadCityLabels() {
   return new Promise((resolve) => {
     loadData(
-      new URL("../../asset/labels.tsv", import.meta.url),
+      new URL("../../asset/labels.tsv", import.meta.url).href,
       (label) => {
         const clusterId = Number(label["cluster_id"]);
         const labelValue = label["label"];
@@ -144,7 +145,7 @@ function loadCityLabels() {
 export async function loadDataPoints() {
   await loadCityLabels();
   loadData(
-    new URL("../../asset/data.tsv", import.meta.url),
+    new URL("../../asset/data.tsv", import.meta.url).href,
     parseDataPointItem,
     data, // Separate array for data points
     handleDataPointsLoaded,
@@ -153,7 +154,7 @@ export async function loadDataPoints() {
 
 export function loadConcepts() {
   loadData(
-    new URL("../../asset/keys.tsv", import.meta.url),
+    new URL("../../asset/keys.tsv", import.meta.url).href,
     parseConceptItem,
     [], // We don't need to store the concepts in an array, they go to the `concepts` object
     () => {},

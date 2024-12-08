@@ -60,7 +60,6 @@ function App() {
         <div id="article-content"></div>
       </div>
       <div id="chart">
-        <div id="chart-d3"></div>
         <div id="foreground">
           <Map
             cityLabels={cityLabels}
@@ -70,6 +69,7 @@ function App() {
             visibility={visibility}
           />
         </div>
+        <div id="chart-d3"></div>
       </div>
       <div id="loading" className="loading-container">
         <div className="loading-spinner"></div>

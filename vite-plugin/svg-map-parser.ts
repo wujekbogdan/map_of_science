@@ -57,7 +57,7 @@ const l3Schema = z.object({
 
 const schema = z.object({
   svg: z.object({
-    g: z.tuple([l1L2Schema, l1L2Schema, l3Schema]),
+    g: z.tuple([l1L2Schema, l1L2Schema, l3Schema, z.unknown()]),
   }),
 });
 

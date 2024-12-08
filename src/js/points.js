@@ -1,7 +1,13 @@
 import * as chart from "./chart";
+import { eventBus } from "../event-bus";
 
 export let data = [];
 let concepts = {};
+
+/**
+ * @type {Record<number, { clusterId: number, label: string, x: number, y: number }>}
+ */
+const cityLabels = {};
 
 function parseKeyConceptsRaw(keyConceptsRaw) {
   return keyConceptsRaw.split(",");
@@ -12,14 +18,29 @@ function parseConceptItem(item) {
 }
 
 function parseDataPointItem(item) {
+  const clusterId = Number(item["cluster_id"]);
+  const hasCityLabel = !!cityLabels[clusterId];
+  const x = Number(item["x"]);
+  const y = Number(item["y"]);
+
+  // Populate cityLabels with missing x and y coordinates to make it possible to display them on the map
+  if (hasCityLabel) {
+    cityLabels[clusterId] = {
+      ...cityLabels[clusterId],
+      x,
+      y,
+    };
+  }
+
   return {
-    clusterId: Number(item["cluster_id"]),
-    x: Number(item["x"]),
-    y: Number(item["y"]),
+    clusterId: clusterId,
+    x,
+    y,
     numRecentArticles: Number(item["num_recent_articles"]),
     growthRating: Number(item["growth_rating"]),
     clusterCategoryId: Number(item["cluster_category"]),
     keyConcepts: parseKeyConceptsRaw(item["key_concepts"]),
+    cityLabel: hasCityLabel ? cityLabels[clusterId].label : null,
   };
 }
 
@@ -43,7 +64,12 @@ function findClosestDataPoint(dataPoints, x, y, radius) {
 export function buildDataPointDetails(dataPoint) {
   let html = "";
 
-  html += "<strong>#" + dataPoint.clusterId + "</strong>" + "<br />";
+  if (dataPoint.cityLabel) {
+    html += "<strong>" + dataPoint.cityLabel + "</strong>";
+  } else {
+    html += "<strong>#" + dataPoint.clusterId + "</strong>";
+  }
+  html += "<br />";
 
   if (dataPoint.numRecentArticles <= 100) {
     html += "<span class='few-articles'>";
@@ -77,8 +103,14 @@ export function buildDataPointDetails(dataPoint) {
 function handleDataPointsLoaded(dataPoints) {
   // Sort data by num_recent_articles
   dataPoints.sort((a, b) => b.numRecentArticles - a.numRecentArticles);
-
   chart.initChart(dataPoints);
+
+  // Feels confusing and actually is confusing, but only at this point labels are fully loaded since label x and y
+  // coordinates are only available after data points are loaded
+  eventBus.emit(
+    "cityLabelsLoaded",
+    Object.values(cityLabels).filter(({ x, y }) => !!(x && y)), // only include labels that belong to a data point
+  );
 }
 
 function buildLoaderWorker() {
@@ -112,7 +144,28 @@ function loadData(url, parseItem, dataTarget, onLoaded) {
   runLoaderWorker(loaderWorker, url);
 }
 
-export function loadDataPoints() {
+function loadCityLabels() {
+  return new Promise((resolve) => {
+    loadData(
+      new URL("../../asset/labels.tsv", import.meta.url),
+      (label) => {
+        const clusterId = Number(label["cluster_id"]);
+        const labelValue = label["label"];
+        cityLabels[clusterId] = {
+          clusterId,
+          label: labelValue,
+        };
+      },
+      [],
+      () => {
+        resolve();
+      },
+    );
+  });
+}
+
+export async function loadDataPoints() {
+  await loadCityLabels();
   loadData(
     new URL("../../asset/data.tsv", import.meta.url),
     parseDataPointItem,

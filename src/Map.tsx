@@ -1,7 +1,9 @@
+import { useMemo } from "react";
 import { ScaleLinear } from "d3";
 import styled from "styled-components";
 import { MapSvgRepresentation } from "../vite-plugin/svg-map-parser.ts";
 import { useStore } from "./store";
+import { screenToForegroundCoordinates } from "./js/foreground";
 
 type Props = {
   map: MapSvgRepresentation;
@@ -10,7 +12,13 @@ type Props = {
     y: ScaleLinear<number, number>;
   };
   zoom: number;
-  visibility: [number, number, number];
+  visibility: [number, number, number, number];
+  cityLabels: {
+    label: string;
+    clusterId: number;
+    x: number;
+    y: number;
+  }[];
 };
 
 type Label = {
@@ -20,7 +28,7 @@ type Label = {
   text: string;
   fontSize: number;
   opacity: number;
-  level: 1 | 2 | 3;
+  level: 1 | 2 | 3 | 4;
 };
 
 const Label = (props: Label) => {
@@ -41,7 +49,7 @@ const Label = (props: Label) => {
   );
 };
 
-export default function Map({ map, visibility, zoom }: Props) {
+export default function Map({ map, visibility, zoom, cityLabels = [] }: Props) {
   const { scaleFactor, fontSize } = useStore();
 
   // TODO: move to the model and display labels conditionally in the JSX rather than rendering an empty text element
@@ -90,7 +98,25 @@ export default function Map({ map, visibility, zoom }: Props) {
     layer1: scaleFontSize(fontSize.layer1),
     layer2: scaleFontSize(fontSize.layer2),
     layer3: scaleFontSize(fontSize.layer3),
+    layer4: scaleFontSize(fontSize.layer4),
   };
+
+  const cityLabelsScaled = useMemo(() => {
+    return cityLabels.map((label) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      const { x, y } = screenToForegroundCoordinates(label.x, label.y);
+
+      return {
+        key: label.clusterId.toString(),
+        x: x,
+        y: y,
+        text: label.label,
+        fontSize: scaledFontSize.layer4,
+        opacity: visibility[3],
+        level: 4,
+      } as const;
+    });
+  }, [cityLabels, visibility, scaledFontSize.layer4]);
 
   const labels: Label[] = [
     ...map.layer1.children.map(
@@ -122,6 +148,7 @@ export default function Map({ map, visibility, zoom }: Props) {
           }) as const,
       ),
     ),
+    ...cityLabelsScaled,
   ];
 
   return (
@@ -171,6 +198,13 @@ export default function Map({ map, visibility, zoom }: Props) {
         ))}
       </g>
 
+      <g id="L4">
+        {
+          // A dummy element required by foreground.js that relies on DOM element to determine opacity values
+          // TODO: remove once foreground.js functionality is fully ported to React
+        }
+      </g>
+
       <g id="labels">
         {labels.map((label) => (
           <Label {...label} key={label.key} level={label.level} />
@@ -183,7 +217,7 @@ export default function Map({ map, visibility, zoom }: Props) {
 const LabelText = styled.text<{
   $opacity: number;
   $fontSize: number;
-  $level: 1 | 2 | 3;
+  $level: 1 | 2 | 3 | 4;
 }>`
   font-size: ${(props) => props.$fontSize}px;
   opacity: ${(props) => props.$opacity};
@@ -208,6 +242,8 @@ const LabelText = styled.text<{
         return "rgb(57, 57, 57)";
       case 3:
         return "rgb(101, 91, 153)";
+      case 4:
+        return "inherit";
     }
   }};
 `;

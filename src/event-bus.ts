@@ -1,4 +1,4 @@
-import mitt from 'mitt';
+import mitt from "mitt";
 import { ScaleLinear } from "d3";
 
 export type Events = {
@@ -7,11 +7,17 @@ export type Events = {
   // For now, though, it's being emitted only from label.js, so the name is fine
   // for now.
   labelsUpdate: {
-    visibility: [number, number, number];
+    visibility: [number, number, number, number];
     xScale: ScaleLinear<number, number>;
     yScale: ScaleLinear<number, number>;
     zoom: number;
   };
+  cityLabelsLoaded: {
+    label: string;
+    clusterId: number;
+    x: number;
+    y: number;
+  }[];
 };
 
 export const eventBus = mitt<Events>();

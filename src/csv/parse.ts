@@ -1,4 +1,5 @@
 import { parse as csvParse } from "csv-parse/browser/esm";
+import { z as zod, ZodSchema } from "zod";
 
 type Fetcher = () => Promise<string> | string;
 type Transformer<T> = (data: Record<string, string>) => T;
@@ -8,8 +9,6 @@ export const parse = async <T>(
   transform: Transformer<T>,
 ): Promise<Set<T>> => {
   const csv = await fetch();
-
-  console.time("parse");
 
   return new Promise((resolve, reject) => {
     const result = new Set<T>();
@@ -37,7 +36,6 @@ export const parse = async <T>(
       })
       .on("readable", onReadable)
       .on("end", () => {
-        console.timeEnd("parse");
         resolve(result);
       });
 
@@ -58,4 +56,15 @@ export const parseFromUrl = <T>(url: string, transform: Transformer<T>) => {
   };
 
   return parse(fetcher, transform);
+};
+
+export const parseFromUrlWithSchema = <Input, Output>(
+  url: string,
+  // The usage of any is perfectly fine here. The linter is wrong.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  defineSchema: (z: typeof zod) => ZodSchema<Output, any, Input>,
+) => {
+  const schema = defineSchema(zod);
+
+  return parseFromUrl(url, (row) => schema.parse(row));
 };

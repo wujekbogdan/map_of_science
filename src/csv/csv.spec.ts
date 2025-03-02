@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
-import { parse, parseFromUrl } from "./parse";
+import { parse, parseFromUrl, parseFromUrlWithSchema } from "./parse";
 import { withRequestInterception } from "../test-utils/request-interception.ts";
+import { ZodError } from "zod";
 
 const CSV = "name\tage\nAlice\t30\nBob\t40";
 
@@ -113,6 +114,54 @@ describe("csv", () => {
             );
           }
           expect.hasAssertions();
+        },
+      ),
+    );
+  });
+
+  describe("parseFromUrlWithSchema", () => {
+    it(
+      "should parse CSV from URL with zod schema",
+      withRequestInterception(
+        ({ http, HttpResponse }) => [
+          http.get("https://example.com/csv", () => HttpResponse.text(CSV)),
+        ],
+        async () => {
+          const result = await parseFromUrlWithSchema(
+            "https://example.com/csv",
+            (z) => {
+              return z.object({
+                name: z.string(),
+                age: z.coerce.number(),
+              });
+            },
+          );
+
+          expect(result).toEqual(
+            new Set([
+              { name: "Alice", age: 30 },
+              { name: "Bob", age: 40 },
+            ]),
+          );
+        },
+      ),
+    );
+
+    it(
+      "should return zod schema validation error",
+      withRequestInterception(
+        ({ http, HttpResponse }) => [
+          http.get("https://example.com/csv", () => HttpResponse.text(CSV)),
+        ],
+        () => {
+          return expect(
+            parseFromUrlWithSchema("https://example.com/csv", (z) => {
+              return z.object({
+                id: z.string(),
+                age: z.coerce.number(),
+              });
+            }),
+          ).rejects.toThrow(ZodError);
         },
       ),
     );

@@ -53,13 +53,17 @@ export const setCollector = <T>() => {
   };
 };
 
-export const mapCollector = <Key extends string>(key: Key) => {
+export const mapCollector = <Key extends string>({
+  indexBy,
+}: {
+  indexBy: Key;
+}) => {
   return <Schema extends ZodObject<{ [K in Key]: zod.ZodTypeAny }>>() => {
     type Output = zod.infer<Schema>;
     const result = new Map<Output[Key], Output>();
 
     return {
-      collect: (item: zod.infer<Schema>) => result.set(item[key], item),
+      collect: (item: zod.infer<Schema>) => result.set(item[indexBy], item),
       getResult: () => result,
     };
   };

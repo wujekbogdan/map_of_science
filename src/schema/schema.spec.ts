@@ -3,22 +3,21 @@ import { dataSchema, conceptSchema, cityLabelSchema } from ".";
 import { fileURLToPath } from "node:url";
 import { readFile } from "node:fs/promises";
 import { ZodSchema } from "zod";
-import { parse as csvParse } from "../csv/parse.ts";
+import { parse as csvParse, setCollector } from "../csv/parse.ts";
 
-const parse = async <Input, Output>(
-  name: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  schema: ZodSchema<Output, any, Input>,
-): Promise<Set<Output>> => {
+const parse = async (name: string, schema: ZodSchema) => {
   const filePath = fileURLToPath(
     new URL(`./__test__/${name}`, import.meta.url),
   );
   const file = await readFile(filePath, "utf-8");
+  const collector = setCollector();
 
   return csvParse(
     () => file,
-    (data) => schema.parse(data), // Ensure transformation is correctly applied
-  );
+    (row) => {
+      collector.collect(schema.parse(row));
+    },
+  ).then(collector.getResult);
 };
 
 describe("schema", () => {

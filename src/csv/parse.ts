@@ -7,13 +7,13 @@ export const parse = async (
   /**
    * The function responsible for providing the CSV data.
    */
-  fetch: Provider,
+  provideSchema: Provider,
   /**
    * The callback function that will be called for each item in the CSV.
    */
   onItem: (item: Record<string, string>) => void,
 ): Promise<void> => {
-  const csv = await fetch();
+  const csv = await provideSchema();
 
   return new Promise((resolve, reject) => {
     const parser = csvParse({

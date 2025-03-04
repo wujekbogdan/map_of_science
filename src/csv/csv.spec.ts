@@ -87,7 +87,7 @@ describe("csv", () => {
                 age: z.coerce.number(),
               });
             },
-            Collector: (schema) => mapCollector(schema, (item) => item.name),
+            Collector: mapCollector("name"),
           });
 
           expect(result).toEqual(

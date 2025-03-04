@@ -1,5 +1,5 @@
 import { parse as csvParse } from "csv-parse/browser/esm";
-import { z as zod, ZodSchema, ZodTypeDef } from "zod";
+import { z as zod, ZodSchema, ZodTypeDef, ZodObject } from "zod";
 
 type Provider = () => Promise<string> | string;
 
@@ -53,18 +53,15 @@ export const setCollector = <T>() => {
   };
 };
 
-export const mapCollector = <Input, Output>(
-  // TODO: Find out if it's possible to infer the `item` type for the `getKey` function without passing the `schema` explicitly.
-  schema: ZodSchema<Output, ZodTypeDef, Input>,
-  getKey: (
-    item: Output,
-    schema: ZodSchema<Output, ZodTypeDef, Input>,
-  ) => string,
-) => {
-  const result = new Map<string, Output>();
-  return {
-    collect: (item: Output) => result.set(getKey(item, schema), item),
-    getResult: () => result,
+export const mapCollector = <Key extends string>(key: Key) => {
+  return <Schema extends ZodObject<{ [K in Key]: zod.ZodTypeAny }>>() => {
+    type Output = zod.infer<Schema>;
+    const result = new Map<Output[Key], Output>();
+
+    return {
+      collect: (item: zod.infer<Schema>) => result.set(item[key], item),
+      getResult: () => result,
+    };
   };
 };
 
@@ -79,7 +76,7 @@ const httpProvider = async (url: string) => {
 type Options<Input, Output, Collection> = {
   url: string;
   defineSchema: (z: typeof zod) => ZodSchema<Output, ZodTypeDef, Input>;
-  Collector: (schema: ZodSchema<Output, ZodTypeDef, Input>) => {
+  Collector: () => {
     collect: (item: Output) => void;
     getResult: () => Collection;
   };
@@ -90,7 +87,7 @@ export const parseFromUrlWithSchema = async <Input, Output, Collection>(
 ): Promise<Collection> => {
   const { url, Collector, defineSchema } = options;
   const schema = defineSchema(zod);
-  const collector = Collector(schema);
+  const collector = Collector();
 
   await parse(
     () => httpProvider(url),

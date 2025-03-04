@@ -53,10 +53,17 @@ export const setCollector = <T>() => {
   };
 };
 
-export const mapCollector = <T, K>(getKey: (item: T) => K) => {
-  const result = new Map<K, T>();
+export const mapCollector = <Input, Output>(
+  // TODO: Find out if it's possible to infer the `item` type for the `getKey` function without passing the `schema` explicitly.
+  schema: ZodSchema<Output, ZodTypeDef, Input>,
+  getKey: (
+    item: Output,
+    schema: ZodSchema<Output, ZodTypeDef, Input>,
+  ) => string,
+) => {
+  const result = new Map<string, Output>();
   return {
-    collect: (item: T) => result.set(getKey(item), item),
+    collect: (item: Output) => result.set(getKey(item, schema), item),
     getResult: () => result,
   };
 };
@@ -72,7 +79,7 @@ const httpProvider = async (url: string) => {
 type Options<Input, Output, Collection> = {
   url: string;
   defineSchema: (z: typeof zod) => ZodSchema<Output, ZodTypeDef, Input>;
-  Collector: () => {
+  Collector: (schema: ZodSchema<Output, ZodTypeDef, Input>) => {
     collect: (item: Output) => void;
     getResult: () => Collection;
   };
@@ -83,7 +90,7 @@ export const parseFromUrlWithSchema = async <Input, Output, Collection>(
 ): Promise<Collection> => {
   const { url, Collector, defineSchema } = options;
   const schema = defineSchema(zod);
-  const collector = Collector();
+  const collector = Collector(schema);
 
   await parse(
     () => httpProvider(url),

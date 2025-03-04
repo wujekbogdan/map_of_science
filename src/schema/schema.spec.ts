@@ -38,7 +38,7 @@ describe("schema", () => {
   });
 
   describe("keys.tsv", () => {
-    it("should parse keys TSV", async () => {
+    it("should parse keys keys.tsv", async () => {
       const [firstItem] = await parse("keys.tsv", conceptSchema);
       expect(firstItem).toEqual({
         index: 0,
@@ -48,7 +48,7 @@ describe("schema", () => {
   });
 
   describe("labels.tsv", () => {
-    it("should parse labels TSV", async () => {
+    it("should parse labels labels.tsv", async () => {
       const [firstItem] = await parse("labels.tsv", cityLabelSchema);
       expect(firstItem).toEqual({
         clusterId: 3988,

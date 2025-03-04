@@ -1,17 +1,21 @@
 import { parse as csvParse } from "csv-parse/browser/esm";
-import { z as zod, ZodSchema } from "zod";
+import { z as zod, ZodSchema, ZodTypeDef } from "zod";
 
-type Fetcher = () => Promise<string> | string;
-type Transformer<T> = (data: Record<string, string>) => T;
+type Provider = () => Promise<string> | string;
 
-export const parse = async <T>(
-  fetch: Fetcher,
-  transform: Transformer<T>,
-): Promise<Set<T>> => {
+export const parse = async (
+  /**
+   * The function responsible for providing the CSV data.
+   */
+  fetch: Provider,
+  /**
+   * The callback function that will be called for each item in the CSV.
+   */
+  onItem: (item: Record<string, string>) => void,
+): Promise<void> => {
   const csv = await fetch();
 
   return new Promise((resolve, reject) => {
-    const result = new Set<T>();
     const parser = csvParse({
       delimiter: "\t",
       columns: true,
@@ -25,8 +29,7 @@ export const parse = async <T>(
         return;
       }
 
-      const transformed = transform(record);
-      result.add(transformed);
+      onItem(record);
       onReadable();
     };
 
@@ -35,36 +38,59 @@ export const parse = async <T>(
         reject(error);
       })
       .on("readable", onReadable)
-      .on("end", () => {
-        resolve(result);
-      });
+      .on("end", resolve);
 
     stream.write(csv);
     stream.end();
   });
 };
 
-export const parseFromUrl = <T>(url: string, transform: Transformer<T>) => {
-  const fetcher = async () => {
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch csv from: ${url}`);
-    }
-
-    return response.text();
+export const setCollector = <T>() => {
+  const result = new Set<T>();
+  return {
+    collect: (item: T) => result.add(item),
+    getResult: () => result,
   };
-
-  return parse(fetcher, transform);
 };
 
-export const parseFromUrlWithSchema = <Input, Output>(
-  url: string,
-  // The usage of any is perfectly fine here. The linter is wrong.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  defineSchema: (z: typeof zod) => ZodSchema<Output, any, Input>,
-) => {
-  const schema = defineSchema(zod);
+export const mapCollector = <T, K>(getKey: (item: T) => K) => {
+  const result = new Map<K, T>();
+  return {
+    collect: (item: T) => result.set(getKey(item), item),
+    getResult: () => result,
+  };
+};
 
-  return parseFromUrl(url, (row) => schema.parse(row));
+const httpProvider = async (url: string) => {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch CSV from: ${url}`);
+  }
+  return response.text();
+};
+
+type Options<Input, Output, Collection> = {
+  url: string;
+  defineSchema: (z: typeof zod) => ZodSchema<Output, ZodTypeDef, Input>;
+  Collector: () => {
+    collect: (item: Output) => void;
+    getResult: () => Collection;
+  };
+};
+
+export const parseFromUrlWithSchema = async <Input, Output, Collection>(
+  options: Options<Input, Output, Collection>,
+): Promise<Collection> => {
+  const { url, Collector, defineSchema } = options;
+  const schema = defineSchema(zod);
+  const collector = Collector();
+
+  await parse(
+    () => httpProvider(url),
+    (row) => {
+      collector.collect(schema.parse(row));
+    },
+  );
+
+  return collector.getResult();
 };

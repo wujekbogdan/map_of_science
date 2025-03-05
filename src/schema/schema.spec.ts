@@ -1,5 +1,6 @@
+import { z } from "zod";
 import { describe, it, expect } from "vitest";
-import { dataSchema, conceptSchema, cityLabelSchema } from ".";
+import { DataSchema, ConceptSchema, CityLabelSchema } from ".";
 import { fileURLToPath } from "node:url";
 import { readFile } from "node:fs/promises";
 import { ZodSchema } from "zod";
@@ -23,7 +24,7 @@ const parse = async (name: string, schema: ZodSchema) => {
 describe("schema", () => {
   describe("data.tsv", () => {
     it("should parse data.tsv", async () => {
-      const [firstItem] = await parse("data.tsv", dataSchema);
+      const [firstItem] = await parse("data.tsv", DataSchema(z));
       expect(firstItem).toEqual({
         clusterCategory: 5,
         clusterId: 84872,
@@ -38,7 +39,7 @@ describe("schema", () => {
 
   describe("keys.tsv", () => {
     it("should parse keys keys.tsv", async () => {
-      const [firstItem] = await parse("keys.tsv", conceptSchema);
+      const [firstItem] = await parse("keys.tsv", ConceptSchema(z));
       expect(firstItem).toEqual({
         index: 0,
         key: "12-20210031",
@@ -48,7 +49,7 @@ describe("schema", () => {
 
   describe("labels.tsv", () => {
     it("should parse labels labels.tsv", async () => {
-      const [firstItem] = await parse("labels.tsv", cityLabelSchema);
+      const [firstItem] = await parse("labels.tsv", CityLabelSchema(z));
       expect(firstItem).toEqual({
         clusterId: 3988,
         label: "Osobowość i różnice międzyosobnicze zwierząt",

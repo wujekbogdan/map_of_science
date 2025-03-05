@@ -4,6 +4,7 @@ import {
   parse,
   parseFromUrlWithSchema,
   mapCollector,
+  arrayCollector,
 } from "./parse";
 import { withRequestInterception } from "../test-utils/request-interception.ts";
 
@@ -98,6 +99,32 @@ describe("csv", () => {
               ["Bob", { name: "Bob", age: 40 }],
             ]),
           );
+        },
+      ),
+    );
+
+    it(
+      "should parse CSV from URL with zod schema with arrayCollector",
+      withRequestInterception(
+        ({ http, HttpResponse }) => [
+          http.get("https://example.com/csv", () => HttpResponse.text(CSV)),
+        ],
+        async () => {
+          const result = await parseFromUrlWithSchema({
+            url: "https://example.com/csv",
+            defineSchema: (z) => {
+              return z.object({
+                name: z.string(),
+                age: z.coerce.number(),
+              });
+            },
+            Collector: arrayCollector,
+          });
+
+          expect(result).toEqual([
+            { name: "Alice", age: 30 },
+            { name: "Bob", age: 40 },
+          ]);
         },
       ),
     );

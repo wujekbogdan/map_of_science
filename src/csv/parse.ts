@@ -53,6 +53,14 @@ export const setCollector = <T>() => {
   };
 };
 
+export const arrayCollector = <T>() => {
+  const result: T[] = [];
+  return {
+    collect: (item: T) => result.push(item),
+    getResult: () => result,
+  };
+};
+
 export const mapCollector = <Key extends string>({
   indexBy,
 }: {

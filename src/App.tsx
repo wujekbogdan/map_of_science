@@ -10,6 +10,9 @@ import { config } from "./config.ts";
 import { useStore } from "./store.ts";
 import { Header } from "./Header/Header.tsx";
 import { i18n } from "./i18n.ts";
+import { loadData } from "./points.ts";
+
+loadData();
 
 let isInitialized = false;
 

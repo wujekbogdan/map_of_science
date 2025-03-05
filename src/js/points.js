@@ -1,6 +1,6 @@
 import * as chart from "./chart";
 import { eventBus } from "../event-bus";
-import { parseFromUrl } from "../csv/parse";
+// import { parseFromUrl } from "../csv/parse";
 
 export let data = [];
 let concepts = {};

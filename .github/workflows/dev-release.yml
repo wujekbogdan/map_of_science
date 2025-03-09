@@ -17,6 +17,8 @@ jobs:
 
       - name: Build the site
         run: npm run build
+        env:
+          VITE_BASE_URL: "/map/"
 
       - name: Deploy to FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4

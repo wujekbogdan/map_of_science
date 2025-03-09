@@ -1,19 +1,20 @@
 import { parse as csvParse } from "csv-parse/browser/esm";
-import { z as zod, ZodSchema, ZodTypeDef, ZodObject } from "zod";
+import { ZodTypeDef, ZodSchema } from "zod";
 
-type Provider = () => Promise<string> | string;
+type CsvSource = string | Buffer;
+type Provider = () => Promise<CsvSource> | CsvSource;
+type OnItem<T, R> = (item: T) => R;
+type CSVRecord = Record<string, string>;
+export type Collector<T, R> = {
+  add: (item: T) => R;
+  getResults: () => R;
+};
 
-export const parse = async (
-  /**
-   * The function responsible for providing the CSV data.
-   */
-  provideSchema: Provider,
-  /**
-   * The callback function that will be called for each item in the CSV.
-   */
-  onItem: (item: Record<string, string>) => void,
+export const parse = async <T extends CSVRecord, R>(
+  providerCsv: Provider,
+  onItem: OnItem<T, R>,
 ): Promise<void> => {
-  const csv = await provideSchema();
+  const csv = await providerCsv();
 
   return new Promise((resolve, reject) => {
     const parser = csvParse({
@@ -23,7 +24,7 @@ export const parse = async (
     });
 
     const onReadable = () => {
-      const record = parser.read() as Record<string, string> | null;
+      const record = parser.read() as T | null;
 
       if (record === null) {
         return;
@@ -45,38 +46,6 @@ export const parse = async (
   });
 };
 
-export const setCollector = <T>() => {
-  const result = new Set<T>();
-  return {
-    collect: (item: T) => result.add(item),
-    getResult: () => result,
-  };
-};
-
-export const arrayCollector = <T>() => {
-  const result: T[] = [];
-  return {
-    collect: (item: T) => result.push(item),
-    getResult: () => result,
-  };
-};
-
-export const mapCollector = <Key extends string>({
-  indexBy,
-}: {
-  indexBy: Key;
-}) => {
-  return <Schema extends ZodObject<{ [K in Key]: zod.ZodTypeAny }>>() => {
-    type Output = zod.infer<Schema>;
-    const result = new Map<Output[Key], Output>();
-
-    return {
-      collect: (item: zod.infer<Schema>) => result.set(item[indexBy], item),
-      getResult: () => result,
-    };
-  };
-};
-
 const httpProvider = async (url: string) => {
   const response = await fetch(url);
   if (!response.ok) {
@@ -85,28 +54,25 @@ const httpProvider = async (url: string) => {
   return response.text();
 };
 
-type Options<Input, Output, Collection> = {
-  url: string;
-  defineSchema: (z: typeof zod) => ZodSchema<Output, ZodTypeDef, Input>;
-  Collector: () => {
-    collect: (item: Output) => void;
-    getResult: () => Collection;
-  };
-};
+export const withHttpProvider = async <T extends CSVRecord, R>(
+  url: string,
+  onItem: OnItem<T, R>,
+) => parse(() => httpProvider(url), onItem);
 
-export const parseFromUrlWithSchema = async <Input, Output, Collection>(
-  options: Options<Input, Output, Collection>,
-): Promise<Collection> => {
-  const { url, Collector, defineSchema } = options;
-  const schema = defineSchema(zod);
-  const collector = Collector();
+export const validateWithSchema =
+  <T>(schema: ZodSchema<T, ZodTypeDef, unknown>) =>
+  (data: unknown): T =>
+    schema.parse(data);
 
-  await parse(
-    () => httpProvider(url),
-    (row) => {
-      collector.collect(schema.parse(row));
+export const createProcessor = <T, R>(
+  schema: ZodSchema<T, ZodTypeDef, unknown>,
+  collector: Collector<T, R>,
+) => {
+  return {
+    process: (data: unknown) => {
+      const parsed = validateWithSchema(schema)(data);
+      collector.add(parsed);
     },
-  );
-
-  return collector.getResult();
+    getResults: () => collector.getResults(),
+  };
 };

@@ -1,67 +1,12 @@
 import * as chart from "./chart";
 import { eventBus } from "../event-bus";
-// import { parseFromUrl } from "../csv/parse";
+import { loadData } from "../points.ts";
 
+// TODO: Avoid globals and mutability - use store instead
 export let data = [];
-let concepts = {};
+let conceptsData = [];
 
-/**
- * @type {Record<number, { clusterId: number, label: string, x: number, y: number }>}
- */
-const cityLabels = {};
-
-function parseKeyConceptsRaw(keyConceptsRaw) {
-  return keyConceptsRaw.split(",");
-}
-
-function parseConceptItem(item) {
-  concepts[item["index"]] = item["key"];
-}
-
-function parseDataPointItem(item) {
-  const clusterId = Number(item["cluster_id"]);
-  const hasCityLabel = !!cityLabels[clusterId];
-  const x = Number(item["x"]);
-  const y = Number(item["y"]);
-
-  // Populate cityLabels with missing x and y coordinates to make it possible to display them on the map
-  if (hasCityLabel) {
-    cityLabels[clusterId] = {
-      ...cityLabels[clusterId],
-      x,
-      y,
-    };
-  }
-
-  return {
-    clusterId: clusterId,
-    x,
-    y,
-    numRecentArticles: Number(item["num_recent_articles"]),
-    growthRating: Number(item["growth_rating"]),
-    clusterCategoryId: Number(item["cluster_category"]),
-    keyConcepts: parseKeyConceptsRaw(item["key_concepts"]),
-    cityLabel: hasCityLabel ? cityLabels[clusterId].label : null,
-  };
-}
-
-// eslint-disable-next-line no-unused-vars
-function findClosestDataPoint(dataPoints, x, y, radius) {
-  dataPoints.sort((a, b) => {
-    const distA = Math.pow(a.x - x, 2) + Math.pow(a.y - y, 2);
-    const distB = Math.pow(b.x - x, 2) + Math.pow(b.y - y, 2);
-    return distA - distB;
-  });
-  const closestDataPoint = dataPoints[0];
-  const dist =
-    Math.pow(closestDataPoint.x - x, 2) + Math.pow(closestDataPoint.y - y, 2);
-
-  if (dist > radius * radius) {
-    return null;
-  }
-  return closestDataPoint;
-}
-
+// TODO: move to React
 export function buildDataPointDetails(dataPoint) {
   let html = "";
 
@@ -94,69 +39,26 @@ export function buildDataPointDetails(dataPoint) {
   html += "<br /><strong>Słowa kluczowe:</strong><ul>";
 
   for (const concept_id of dataPoint.keyConcepts) {
-    html += "<li>" + concepts[Number(concept_id)] + "</li>";
+    html += "<li>" + conceptsData[Number(concept_id)] + "</li>";
   }
 
   html += "</ul>";
   return html;
 }
 
-function handleDataPointsLoaded(dataPoints) {
-  // Sort data by num_recent_articles
+// TODO: Bring back WebWorker
+export const load = async () => {
+  const { concepts, labels, dataPoints } = await loadData();
+
+  data = dataPoints;
+  conceptsData = concepts;
+
+  // TODO: Looping through dataPoints isn't efficient. We can likely avoid this by handling the sorting during the data loading process.
   dataPoints.sort((a, b) => b.numRecentArticles - a.numRecentArticles);
   chart.initChart(dataPoints);
 
-  // Feels confusing and actually is confusing, but only at this point labels are fully loaded since label x and y
-  // coordinates are only available after data points are loaded
   eventBus.emit(
     "cityLabelsLoaded",
-    Object.values(cityLabels).filter(({ x, y }) => !!(x && y)), // only include labels that belong to a data point
+    Object.values(labels).filter(({ x, y }) => !!(x && y)), // only include labels that belong to a data point
   );
-}
-
-// TODO: Bring back WebWorker
-function loadData(url, parseItem, dataTarget, onLoaded) {
-  parseFromUrl(url, parseItem).then((parsedData) => {
-    dataTarget = Array.from(parsedData);
-    onLoaded(dataTarget);
-  });
-}
-
-function loadCityLabels() {
-  return new Promise((resolve) => {
-    loadData(
-      new URL("../../asset/labels.tsv", import.meta.url).href,
-      (label) => {
-        const clusterId = Number(label["cluster_id"]);
-        const labelValue = label["label"];
-        cityLabels[clusterId] = {
-          clusterId,
-          label: labelValue,
-        };
-      },
-      [],
-      () => {
-        resolve();
-      },
-    );
-  });
-}
-
-export async function loadDataPoints() {
-  await loadCityLabels();
-  loadData(
-    new URL("../../asset/data.tsv", import.meta.url).href,
-    parseDataPointItem,
-    data, // Separate array for data points
-    handleDataPointsLoaded,
-  );
-}
-
-export function loadConcepts() {
-  loadData(
-    new URL("../../asset/keys.tsv", import.meta.url).href,
-    parseConceptItem,
-    [], // We don't need to store the concepts in an array, they go to the `concepts` object
-    () => {},
-  );
-}
+};

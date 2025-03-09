@@ -4,7 +4,8 @@ import { DataSchema, ConceptSchema, CityLabelSchema } from ".";
 import { fileURLToPath } from "node:url";
 import { readFile } from "node:fs/promises";
 import { ZodSchema } from "zod";
-import { parse as csvParse, setCollector } from "../csv/parse.ts";
+import { parse as csvParse } from "../csv/parse.ts";
+import { setCollector } from "../csv/collector.ts";
 
 const parse = async (name: string, schema: ZodSchema) => {
   const filePath = fileURLToPath(
@@ -13,27 +14,50 @@ const parse = async (name: string, schema: ZodSchema) => {
   const file = await readFile(filePath, "utf-8");
   const collector = setCollector();
 
-  return csvParse(
-    () => file,
+  await csvParse(
+    () => file, // Correctly pass provider function
     (row) => {
-      collector.collect(schema.parse(row));
+      collector.add(schema.parse(row));
     },
-  ).then(collector.getResult);
+  );
+
+  return collector.getResults();
 };
 
 describe("schema", () => {
   describe("data.tsv", () => {
-    it("should parse data.tsv", async () => {
-      const [firstItem] = await parse("data.tsv", DataSchema(z));
-      expect(firstItem).toEqual({
-        clusterCategory: 5,
-        clusterId: 84872,
-        growthRating: 15.43,
-        keyConcepts: [198432, 37537, 12177, 43800, 43431],
-        numRecentArticles: 228,
-        x: -90.2114,
-        y: -71.396,
-      });
+    it("should parse data.tsv with labels, including a null label case", async () => {
+      const labels = new Map<number, { clusterId: number; label: string }>([
+        [84872, { clusterId: 84872, label: "Tech Innovations" }],
+      ]);
+
+      const [withLabel, withoutLabel] = await parse(
+        "data.tsv",
+        DataSchema(z, labels),
+      );
+
+      expect([withLabel, withoutLabel]).toEqual([
+        {
+          clusterId: 84872,
+          x: -90.2114,
+          y: -71.396,
+          numRecentArticles: 228,
+          clusterCategory: 5,
+          growthRating: 15.43,
+          keyConcepts: [198432, 37537, 12177, 43800, 43431],
+          cityLabel: "Tech Innovations",
+        },
+        {
+          clusterId: 72062,
+          x: -76.1376,
+          y: -37.2588,
+          numRecentArticles: 239,
+          clusterCategory: 5,
+          growthRating: 3.22,
+          keyConcepts: [40293, 71377, 120209, 90737, 67314],
+          cityLabel: null,
+        },
+      ]);
     });
   });
 

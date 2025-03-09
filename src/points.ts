@@ -1,6 +1,34 @@
-import { arrayCollector, parseFromUrlWithSchema } from "./csv/parse";
+import { createProcessor, withHttpProvider } from "./csv/parse";
 import { DataSchema, ConceptSchema, CityLabelSchema } from "./schema";
-import { mapCollector } from "./csv/parse";
+import { z, ZodSchema, ZodTypeDef } from "zod";
+import { arrayCollector, mapCollector } from "./csv/collector.ts";
+
+type Options<T> = {
+  url: string;
+  schema: ZodSchema<T, ZodTypeDef, unknown>;
+};
+
+const loadAsArray = async <T>({ url, schema }: Options<T>) => {
+  const collector = arrayCollector<T>();
+  const processor = createProcessor(schema, collector);
+
+  await withHttpProvider(url, processor.process);
+
+  return processor.getResults();
+};
+
+const loadAsMap = async <T, K>({
+  url,
+  schema,
+  getKey,
+}: Options<T> & { getKey: (item: T) => K }) => {
+  const collector = mapCollector<K, T>(getKey);
+  const processor = createProcessor(schema, collector);
+
+  await withHttpProvider(url, processor.process);
+
+  return processor.getResults();
+};
 
 /**
  * - City labels loading doesn't depend on anything.
@@ -11,16 +39,16 @@ import { mapCollector } from "./csv/parse";
  * and then wait for city labels to finish before loading data points.
  */
 export const loadData = async () => {
-  const loadingConcepts = parseFromUrlWithSchema({
+  const loadingConcepts = loadAsMap({
     url: new URL("../asset/keys.tsv", import.meta.url).href,
-    defineSchema: ConceptSchema,
-    Collector: mapCollector({ indexBy: "key" }),
+    schema: ConceptSchema(z),
+    getKey: (item) => item.key,
   });
 
-  const loadingLabels = parseFromUrlWithSchema({
+  const loadingLabels = loadAsMap({
     url: new URL("../asset/labels.tsv", import.meta.url).href,
-    defineSchema: CityLabelSchema,
-    Collector: mapCollector({ indexBy: "clusterId" }),
+    schema: CityLabelSchema(z),
+    getKey: (item) => item.clusterId,
   });
 
   // We're awaiting the labels promise only because at this point we don't care about concepts yet
@@ -28,15 +56,9 @@ export const loadData = async () => {
 
   const [concepts, dataPoints] = await Promise.all([
     loadingConcepts,
-    parseFromUrlWithSchema({
+    loadAsArray({
       url: new URL("../asset/data.tsv", import.meta.url).href,
-      defineSchema: (z) =>
-        DataSchema(
-          z,
-          // TODO: Fix setCollector typing so that this type assertion is not needed
-          labels as Map<number, { clusterId: number; label: string }>,
-        ),
-      Collector: arrayCollector,
+      schema: DataSchema(z, labels),
     }),
   ]);
 

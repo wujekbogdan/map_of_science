@@ -1,11 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import {
-  setCollector,
-  parse,
-  parseFromUrlWithSchema,
-  mapCollector,
-  arrayCollector,
-} from "./parse";
+import { parse, withHttpProvider } from "./parse";
 import { withRequestInterception } from "../test-utils/request-interception.ts";
 
 const CSV = "name\tage\nAlice\t30\nBob\t40";
@@ -44,87 +38,23 @@ describe("csv", () => {
     });
   });
 
-  describe("parseFromUrlWithSchema", () => {
+  describe("withHttpProvider", () => {
     it(
-      "should parse CSV from URL with zod schema with setCollector",
+      "should fetch CSV from URL and process each row",
       withRequestInterception(
         ({ http, HttpResponse }) => [
           http.get("https://example.com/csv", () => HttpResponse.text(CSV)),
         ],
         async () => {
-          const result = await parseFromUrlWithSchema({
-            url: "https://example.com/csv",
-            defineSchema: (z) => {
-              return z.object({
-                name: z.string(),
-                age: z.coerce.number(),
-              });
-            },
-            Collector: setCollector,
+          const onItem = vi.fn();
+          await withHttpProvider("https://example.com/csv", onItem);
+
+          expect(onItem).toHaveBeenCalledTimes(2);
+          expect(onItem).toHaveBeenNthCalledWith(1, {
+            name: "Alice",
+            age: "30",
           });
-
-          expect(result).toEqual(
-            new Set([
-              { name: "Alice", age: 30 },
-              { name: "Bob", age: 40 },
-            ]),
-          );
-        },
-      ),
-    );
-
-    it(
-      "should parse CSV from URL with zod schema with mapCollector",
-      withRequestInterception(
-        ({ http, HttpResponse }) => [
-          http.get("https://example.com/csv", () => HttpResponse.text(CSV)),
-        ],
-        async () => {
-          const result = await parseFromUrlWithSchema({
-            url: "https://example.com/csv",
-            defineSchema: (z) => {
-              return z.object({
-                name: z.string(),
-                age: z.coerce.number(),
-              });
-            },
-            Collector: mapCollector({
-              indexBy: "name",
-            }),
-          });
-
-          expect(result).toEqual(
-            new Map([
-              ["Alice", { name: "Alice", age: 30 }],
-              ["Bob", { name: "Bob", age: 40 }],
-            ]),
-          );
-        },
-      ),
-    );
-
-    it(
-      "should parse CSV from URL with zod schema with arrayCollector",
-      withRequestInterception(
-        ({ http, HttpResponse }) => [
-          http.get("https://example.com/csv", () => HttpResponse.text(CSV)),
-        ],
-        async () => {
-          const result = await parseFromUrlWithSchema({
-            url: "https://example.com/csv",
-            defineSchema: (z) => {
-              return z.object({
-                name: z.string(),
-                age: z.coerce.number(),
-              });
-            },
-            Collector: arrayCollector,
-          });
-
-          expect(result).toEqual([
-            { name: "Alice", age: 30 },
-            { name: "Bob", age: 40 },
-          ]);
+          expect(onItem).toHaveBeenNthCalledWith(2, { name: "Bob", age: "40" });
         },
       ),
     );

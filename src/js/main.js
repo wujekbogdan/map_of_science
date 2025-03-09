@@ -17,6 +17,5 @@ export const init = () => {
   }
 
   enableLoadingScreen();
-  // points.loadConcepts();
-  // points.loadDataPoints();
+  points.load();
 };

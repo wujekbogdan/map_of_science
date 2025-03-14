@@ -4,7 +4,7 @@ import { loadData } from "../points.ts";
 
 // TODO: Avoid globals and mutability - use store instead
 export let data = [];
-let conceptsData = [];
+let conceptsData = new Map();
 
 // TODO: move to React
 export function buildDataPointDetails(dataPoint) {
@@ -39,7 +39,7 @@ export function buildDataPointDetails(dataPoint) {
   html += "<br /><strong>Słowa kluczowe:</strong><ul>";
 
   for (const concept_id of dataPoint.keyConcepts) {
-    html += "<li>" + conceptsData[Number(concept_id)] + "</li>";
+    html += "<li>" + conceptsData.get(Number(concept_id)).key + "</li>";
   }
 
   html += "</ul>";
@@ -50,6 +50,7 @@ export function buildDataPointDetails(dataPoint) {
 export const load = async () => {
   const { concepts, labels, dataPoints } = await loadData();
 
+  // TODO: Avoid globals and mutability - use store instead
   data = dataPoints;
   conceptsData = concepts;
 

@@ -42,7 +42,7 @@ export const loadData = async () => {
   const loadingConcepts = loadAsMap({
     url: new URL("../asset/keys.tsv", import.meta.url).href,
     schema: ConceptSchema(z),
-    getKey: (item) => item.key,
+    getKey: (item) => item.index,
   });
 
   const loadingLabels = loadAsMap({

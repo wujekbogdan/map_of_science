@@ -1,5 +1,5 @@
 export const loadData = () => {
-  const worker = new ComlinkSharedWorker<typeof import("./index.ts")>(
+  const worker = new ComlinkWorker<typeof import("./index.ts")>(
     new URL("./index.ts", import.meta.url),
   );
 

@@ -1,7 +1,7 @@
-import { createProcessor, withHttpProvider } from "./csv/parse";
-import { DataSchema, ConceptSchema, CityLabelSchema } from "./schema";
+import { createProcessor, withHttpProvider } from "../csv/parse.ts";
+import { DataSchema, ConceptSchema, CityLabelSchema } from "../schema";
 import { z, ZodSchema, ZodTypeDef } from "zod";
-import { arrayCollector, mapCollector } from "./csv/collector.ts";
+import { arrayCollector, mapCollector } from "../csv/collector.ts";
 
 type Options<T> = {
   url: string;
@@ -40,13 +40,13 @@ const loadAsMap = async <T, K>({
  */
 export const loadData = async () => {
   const loadingConcepts = loadAsMap({
-    url: new URL("../asset/keys.tsv", import.meta.url).href,
+    url: new URL("../../asset/keys.tsv", import.meta.url).href,
     schema: ConceptSchema(z),
     getKey: (item) => item.index,
   });
 
   const loadingLabels = loadAsMap({
-    url: new URL("../asset/labels.tsv", import.meta.url).href,
+    url: new URL("../../asset/labels.tsv", import.meta.url).href,
     schema: CityLabelSchema(z),
     getKey: (item) => item.clusterId,
   });
@@ -57,7 +57,7 @@ export const loadData = async () => {
   const [concepts, dataPoints] = await Promise.all([
     loadingConcepts,
     loadAsArray({
-      url: new URL("../asset/data.tsv", import.meta.url).href,
+      url: new URL("../../asset/data.tsv", import.meta.url).href,
       schema: DataSchema(z, labels),
     }),
   ]);

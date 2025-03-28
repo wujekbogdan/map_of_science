@@ -5,6 +5,7 @@ import { MapSvgRepresentation } from "../vite-plugin/svg-map-parser.ts";
 import { useStore } from "./store";
 import { screenToForegroundCoordinates } from "./js/foreground";
 import { isArticleAvailable } from "./js/article";
+import { Concept, DataPoint } from "./schema";
 
 type Label = {
   key: string;
@@ -50,11 +51,13 @@ const Label = (props: Label) => {
   );
 };
 
+type D3Scale = ScaleLinear<number, number>;
+
 type Props = {
   map: MapSvgRepresentation;
   scale: {
-    x: ScaleLinear<number, number>;
-    y: ScaleLinear<number, number>;
+    x: D3Scale;
+    y: D3Scale;
   };
   zoom: number;
   visibility: [number, number, number, number];
@@ -64,9 +67,109 @@ type Props = {
     x: number;
     y: number;
   }[];
+  dataPoints: DataPoint[];
+  concepts: Map<number, Concept>;
   on?: {
     labelClick?: OnLabelClick;
   };
+};
+
+const DATA_POINTS_LIMIT = 300;
+
+const isInViewport = (point: DataPoint, scale: { x: D3Scale; y: D3Scale }) => {
+  const { x, y } = point;
+  const [xMin, xMax] = scale.x.domain();
+  const [yMin, yMax] = scale.y.domain();
+
+  return x >= xMin && x <= xMax && y >= yMin && y <= yMax;
+};
+
+type DataPointProps = {
+  point: DataPoint;
+  concepts: Map<number, Concept>;
+};
+
+const DataPointShape = ({ point, concepts }: DataPointProps) => {
+  const configByThreshold = [
+    { min: 2001, shape: "square" },
+    { min: 1001, shape: "double-circle", radius: 7, innerRadius: 4 },
+    { min: 501, shape: "double-circle", radius: 6, innerRadius: 3 },
+    { min: 201, shape: "double-circle", radius: 5, innerRadius: 2 },
+    { min: 51, shape: "circle", radius: 4 },
+    { min: 0, shape: "circle", radius: 3 },
+  ] as const;
+  const { x, y } = point;
+  const config = configByThreshold.find(
+    ({ min }) => point.numRecentArticles >= min,
+  );
+
+  if (!config) {
+    console.error("Unable to find config for point:", point);
+    return null;
+  }
+
+  const label = concepts.get(point.clusterId)?.key;
+
+  if (config.shape === "square") {
+    const outer = 14;
+    const inner = 8;
+    return (
+      <g aria-label={label}>
+        <rect
+          x={x - outer / 2}
+          y={y - outer / 2}
+          width={outer}
+          height={outer}
+          fill="white"
+          stroke="black"
+          strokeWidth={1}
+        />
+        <rect
+          x={x - inner / 2}
+          y={y - inner / 2}
+          width={inner}
+          height={inner}
+          fill="black"
+        />
+      </g>
+    );
+  }
+
+  if (config.shape === "double-circle") {
+    return (
+      <g aria-label={label}>
+        <circle
+          cx={x}
+          cy={y}
+          r={config.radius}
+          fill="white"
+          stroke="black"
+          strokeWidth={1}
+        />
+        <circle
+          cx={x}
+          cy={y}
+          r={config.innerRadius}
+          fill={config.radius === 7 ? "black" : "white"}
+          stroke="black"
+          strokeWidth={1}
+        />
+      </g>
+    );
+  }
+
+  return (
+    <g aria-label={label}>
+      <circle
+        cx={x}
+        cy={y}
+        r={config.radius}
+        fill="white"
+        stroke="black"
+        strokeWidth={1}
+      />
+    </g>
+  );
 };
 
 export default function Map(props: Props) {
@@ -184,6 +287,18 @@ export default function Map(props: Props) {
     },
   }));
 
+  const dataPointsInViewport = useMemo(() => {
+    return props.dataPoints
+      .filter((point) => isInViewport(point, props.scale))
+      .slice(0, DATA_POINTS_LIMIT)
+      .map((point) => ({
+        // TODO: Any scaling needed here? If not, drop x, y together with the map loop
+        ...point,
+        x: point.x,
+        y: point.y,
+      }));
+  }, [props.dataPoints, props.scale]);
+
   return (
     <svg>
       {/* Layer 1 */}
@@ -229,6 +344,16 @@ export default function Map(props: Props) {
               />
             ))}
           </g>
+        ))}
+      </g>
+
+      <g id="data-points">
+        {dataPointsInViewport.map((point) => (
+          <DataPointShape
+            point={point}
+            concepts={props.concepts}
+            key={point.clusterId}
+          />
         ))}
       </g>
 

@@ -46,7 +46,6 @@ export function buildDataPointDetails(dataPoint) {
   return html;
 }
 
-// TODO: Bring back WebWorker
 export const load = async () => {
   const { concepts, labels, dataPoints } = await loadData();
 
@@ -58,6 +57,8 @@ export const load = async () => {
   dataPoints.sort((a, b) => b.numRecentArticles - a.numRecentArticles);
   chart.initChart(dataPoints);
 
+  eventBus.emit("conceptsLoaded", concepts);
+  eventBus.emit("dataPointsLoaded", dataPoints);
   eventBus.emit(
     "cityLabelsLoaded",
     Object.values(labels).filter(({ x, y }) => !!(x && y)), // only include labels that belong to a data point

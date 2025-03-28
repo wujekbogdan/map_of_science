@@ -1,5 +1,6 @@
 import mitt from "mitt";
 import { ScaleLinear } from "d3";
+import { Concept, DataPoint } from "./schema";
 
 export type Events = {
   // TODO: This name isn't great. In the future it will get renamed to
@@ -18,6 +19,8 @@ export type Events = {
     x: number;
     y: number;
   }[];
+  dataPointsLoaded: DataPoint[];
+  conceptsLoaded: Map<number, Concept>;
 };
 
 export const eventBus = mitt<Events>();

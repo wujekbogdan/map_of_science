@@ -109,7 +109,7 @@ function sortForegroundLayers(layers) {
 
 export function getForegroundLayers() {
   const layers = selectForegroundSvg()
-    .selectAll(":scope > g:not(#labels)")
+    .selectAll(":scope > g:not(#labels):not(#data-points)")
     .filter(function () {
       // Filter out <g> elements where the display property is set to 'none'
       return d3.select(this).style("display") !== "none";

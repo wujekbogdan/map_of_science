@@ -1,7 +1,9 @@
 import { create } from "zustand";
 import { combine } from "zustand/middleware";
+import { DataPoint } from "./schema";
 
 const defaults = {
+  dataPoints: [] as DataPoint[],
   zoom: 1,
   zoomStepFactor: 1.6,
   fontSize: {
@@ -48,6 +50,9 @@ export const useStore = create(
           [factor]: parsedValue || defaults.scaleFactor[factor],
         },
       }));
+    },
+    setDataPoints: (dataPoints: DataPoint[]) => {
+      set({ dataPoints });
     },
   })),
 );

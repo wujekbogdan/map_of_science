@@ -1,9 +1,25 @@
 import { z as zod } from "zod";
 
-export const DataSchema = (
-  z: typeof zod,
-  labels: Map<number, { clusterId: number; label: string }>,
-) =>
+export const ConceptSchema = (z: typeof zod) =>
+  z.object({
+    index: z.coerce.number(),
+    key: z.string(),
+  });
+export type Concept = zod.infer<ReturnType<typeof ConceptSchema>>;
+
+export const CityLabelSchema = (z: typeof zod) =>
+  z
+    .object({
+      cluster_id: z.coerce.number(),
+      label: z.string(),
+    })
+    .transform((data) => ({
+      clusterId: data.cluster_id,
+      label: data.label,
+    }));
+export type CityLabel = zod.infer<ReturnType<typeof CityLabelSchema>>;
+
+export const DataSchema = (z: typeof zod, labels: Map<number, CityLabel>) =>
   z
     .object({
       cluster_id: z.coerce.number(),
@@ -24,20 +40,4 @@ export const DataSchema = (
       keyConcepts: data.key_concepts.split(",").map((id) => Number(id)),
       cityLabel: labels.get(data.cluster_id)?.label || null,
     }));
-
-export const ConceptSchema = (z: typeof zod) =>
-  z.object({
-    index: z.coerce.number(),
-    key: z.string(),
-  });
-
-export const CityLabelSchema = (z: typeof zod) =>
-  z
-    .object({
-      cluster_id: z.coerce.number(),
-      label: z.string(),
-    })
-    .transform((data) => ({
-      clusterId: data.cluster_id,
-      label: data.label,
-    }));
+export type DataPoint = zod.infer<ReturnType<typeof DataSchema>>;

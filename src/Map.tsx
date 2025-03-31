@@ -24,12 +24,12 @@ const Label = (props: Label) => {
   const onClick =
     props.hasArticle && props.onClick
       ? () => {
-          props.onClick?.({
-            text: props.text,
-            x: props.x,
-            y: props.y,
-          });
-        }
+        props.onClick?.({
+          text: props.text,
+          x: props.x,
+          y: props.y,
+        });
+      }
       : undefined;
 
   return (

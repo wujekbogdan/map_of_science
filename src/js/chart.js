@@ -33,13 +33,12 @@ function buildChart(data) {
     .scaleExtent([zoom.zoomMin, zoom.zoomMax])
     .on("zoom", (event) => zoom.handleZoom(event, data));
 
-  selection = d3.select("#chart-d3").append("svg");
-  const { clientWidth, clientHeight } = getChartElement();
-
   return (
-    selection
-      .attr("width", clientWidth)
-      .attr("height", clientHeight)
+    d3
+      .select("#chart-d3")
+      .append("svg")
+      .attr("width", "100%")
+      .attr("height", "100%")
       .call(zoomBehavior)
       /**
        * Below line fixes error with:

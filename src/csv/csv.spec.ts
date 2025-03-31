@@ -1,118 +1,60 @@
 import { describe, it, expect, vi } from "vitest";
-import { parse, parseFromUrl } from "./parse";
+import { parse, withHttpProvider } from "./parse";
 import { withRequestInterception } from "../test-utils/request-interception.ts";
 
 const CSV = "name\tage\nAlice\t30\nBob\t40";
 
 describe("csv", () => {
   describe("parse", () => {
-    it("should parse CSV", async () => {
-      const fetcher = vi.fn(() => CSV);
-      const asyncFetcher = vi.fn(() => Promise.resolve(CSV));
-      const transformer = (row: unknown) => row;
+    it("should parse CSV with non-async provider", async () => {
+      const provider = vi.fn(() => CSV);
+      const onItem = vi.fn();
 
-      const resultNonAsync = await parse(fetcher, transformer);
-      const resultAsync = await parse(asyncFetcher, transformer);
-      const expected = new Set([
-        { name: "Alice", age: "30" },
-        { name: "Bob", age: "40" },
-      ]);
+      await parse(provider, onItem);
 
-      expect(fetcher).toHaveBeenCalledOnce();
-      expect(asyncFetcher).toHaveBeenCalledOnce();
-      expect(resultNonAsync).toEqual(expected);
-      expect(resultAsync).toEqual(expected);
+      expect(onItem).toHaveBeenCalledTimes(2);
+      expect(onItem).toHaveBeenNthCalledWith(1, { name: "Alice", age: "30" });
+      expect(onItem).toHaveBeenNthCalledWith(2, { name: "Bob", age: "40" });
     });
 
-    it("should transform rows", async () => {
-      const fetcher = () => CSV;
+    it("should parse CSV with async provider", async () => {
+      const provider = vi.fn(() => Promise.resolve(CSV));
+      const onItem = vi.fn();
 
-      const result = await parse(fetcher, (row) => ({
-        name: `transformed ${row.name}`,
-        age: parseInt(row.age),
-      }));
-      const expected = new Set([
-        { name: "transformed Alice", age: 30 },
-        { name: "transformed Bob", age: 40 },
-      ]);
+      await parse(provider, onItem);
 
-      expect(result).toEqual(expected);
+      expect(onItem).toHaveBeenCalledTimes(2);
+      expect(onItem).toHaveBeenNthCalledWith(1, { name: "Alice", age: "30" });
+      expect(onItem).toHaveBeenNthCalledWith(2, { name: "Bob", age: "40" });
     });
 
-    it("should fail to parse CSV if transformer fails", async () => {
-      const transformer = () => {
-        throw new Error("Failed to transform");
+    it("should fail to parse CSV if onItem fails", async () => {
+      const provider = vi.fn(() => Promise.resolve(CSV));
+      const onItem = () => {
+        throw new Error("onItem failed");
       };
 
-      return expect(parse(() => CSV, transformer)).rejects.toThrow(
-        "Failed to transform",
-      );
+      return expect(parse(provider, onItem)).rejects.toThrow("onItem failed");
     });
   });
 
-  describe("parseFromUrl", () => {
+  describe("withHttpProvider", () => {
     it(
-      "should parse CSV from URL",
+      "should fetch CSV from URL and process each row",
       withRequestInterception(
         ({ http, HttpResponse }) => [
-          http.get("https://example.com/csv", () => {
-            return HttpResponse.text(CSV);
-          }),
+          http.get("https://example.com/csv", () => HttpResponse.text(CSV)),
         ],
         async () => {
-          const result = await parseFromUrl(
-            "https://example.com/csv",
-            (row: unknown) => row,
-          );
+          const onItem = vi.fn();
+          await withHttpProvider("https://example.com/csv", onItem);
 
-          expect(result).toEqual(
-            new Set([
-              { name: "Alice", age: "30" },
-              { name: "Bob", age: "40" },
-            ]),
-          );
-        },
-      ),
-    );
-
-    it(
-      "should fail if request fails",
-      withRequestInterception(
-        ({ http, HttpResponse }) => [
-          http.get("https://example.com/csv", () => {
-            return HttpResponse.error();
-          }),
-        ],
-        async () => {
-          try {
-            await parseFromUrl("https://example.com/csv", (row) => row);
-          } catch (error) {
-            expect(error).toEqual(new Error("Failed to fetch"));
-          }
-          expect.hasAssertions();
-        },
-      ),
-    );
-
-    it(
-      "should fail if request doesn't fail, but response is not 200",
-      withRequestInterception(
-        ({ http, HttpResponse }) => [
-          http.get("https://example.com/csv", () => {
-            return new HttpResponse(null, {
-              status: 404,
-            });
-          }),
-        ],
-        async () => {
-          try {
-            await parseFromUrl("https://example.com/csv", (row) => row);
-          } catch (error) {
-            expect(error).toEqual(
-              new Error("Failed to fetch csv from: https://example.com/csv"),
-            );
-          }
-          expect.hasAssertions();
+          expect(onItem).toHaveBeenCalledTimes(2);
+          expect(onItem).toHaveBeenNthCalledWith(1, {
+            name: "Alice",
+            age: "30",
+          });
+          expect(onItem).toHaveBeenNthCalledWith(2, { name: "Bob", age: "40" });
         },
       ),
     );

@@ -1,18 +1,22 @@
 import { parse as csvParse } from "csv-parse/browser/esm";
+import { ZodTypeDef, ZodSchema } from "zod";
 
-type Fetcher = () => Promise<string> | string;
-type Transformer<T> = (data: Record<string, string>) => T;
+type CsvSource = string | Buffer;
+type Provider = () => Promise<CsvSource> | CsvSource;
+type OnItem<T, R> = (item: T) => R;
+type CSVRecord = Record<string, string>;
+export type Collector<T, R> = {
+  add: (item: T) => R;
+  getResults: () => R;
+};
 
-export const parse = async <T>(
-  fetch: Fetcher,
-  transform: Transformer<T>,
-): Promise<Set<T>> => {
-  const csv = await fetch();
-
-  console.time("parse");
+export const parse = async <T extends CSVRecord, R>(
+  providerCsv: Provider,
+  onItem: OnItem<T, R>,
+): Promise<void> => {
+  const csv = await providerCsv();
 
   return new Promise((resolve, reject) => {
-    const result = new Set<T>();
     const parser = csvParse({
       delimiter: "\t",
       columns: true,
@@ -20,14 +24,13 @@ export const parse = async <T>(
     });
 
     const onReadable = () => {
-      const record = parser.read() as Record<string, string> | null;
+      const record = parser.read() as T | null;
 
       if (record === null) {
         return;
       }
 
-      const transformed = transform(record);
-      result.add(transformed);
+      onItem(record);
       onReadable();
     };
 
@@ -36,26 +39,40 @@ export const parse = async <T>(
         reject(error);
       })
       .on("readable", onReadable)
-      .on("end", () => {
-        console.timeEnd("parse");
-        resolve(result);
-      });
+      .on("end", resolve);
 
     stream.write(csv);
     stream.end();
   });
 };
 
-export const parseFromUrl = <T>(url: string, transform: Transformer<T>) => {
-  const fetcher = async () => {
-    const response = await fetch(url);
+const httpProvider = async (url: string) => {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch CSV from: ${url}`);
+  }
+  return response.text();
+};
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch csv from: ${url}`);
-    }
+export const withHttpProvider = async <T extends CSVRecord, R>(
+  url: string,
+  onItem: OnItem<T, R>,
+) => parse(() => httpProvider(url), onItem);
 
-    return response.text();
+export const validateWithSchema =
+  <T>(schema: ZodSchema<T, ZodTypeDef, unknown>) =>
+  (data: unknown): T =>
+    schema.parse(data);
+
+export const createProcessor = <T, R>(
+  schema: ZodSchema<T, ZodTypeDef, unknown>,
+  collector: Collector<T, R>,
+) => {
+  return {
+    process: (data: unknown) => {
+      const parsed = validateWithSchema(schema)(data);
+      collector.add(parsed);
+    },
+    getResults: () => collector.getResults(),
   };
-
-  return parse(fetcher, transform);
 };

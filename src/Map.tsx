@@ -87,9 +87,10 @@ const isInViewport = (point: DataPoint, scale: { x: D3Scale; y: D3Scale }) => {
 type DataPointProps = {
   point: DataPoint;
   concepts: Map<number, Concept>;
+  zoom: number;
 };
 
-const DataPointShape = ({ point, concepts }: DataPointProps) => {
+const DataPointShape = ({ point, concepts, zoom }: DataPointProps) => {
   const configByThreshold = [
     { min: 2001, shape: "square" },
     { min: 1001, shape: "double-circle", radius: 7, innerRadius: 4 },
@@ -109,10 +110,11 @@ const DataPointShape = ({ point, concepts }: DataPointProps) => {
   }
 
   const label = concepts.get(point.clusterId)?.key;
+  const scale = 1 / zoom;
 
   if (config.shape === "square") {
-    const outer = 14;
-    const inner = 8;
+    const outer = 14 * scale;
+    const inner = 8 * scale;
     return (
       <g aria-label={label}>
         <rect
@@ -141,7 +143,7 @@ const DataPointShape = ({ point, concepts }: DataPointProps) => {
         <circle
           cx={x}
           cy={y}
-          r={config.radius}
+          r={config.radius * scale}
           fill="white"
           stroke="black"
           strokeWidth={1}
@@ -149,7 +151,7 @@ const DataPointShape = ({ point, concepts }: DataPointProps) => {
         <circle
           cx={x}
           cy={y}
-          r={config.innerRadius}
+          r={config.innerRadius * scale}
           fill={config.radius === 7 ? "black" : "white"}
           stroke="black"
           strokeWidth={1}
@@ -163,7 +165,7 @@ const DataPointShape = ({ point, concepts }: DataPointProps) => {
       <circle
         cx={x}
         cy={y}
-        r={config.radius}
+        r={config.radius * scale}
         fill="white"
         stroke="black"
         strokeWidth={1}
@@ -350,6 +352,7 @@ export default function Map(props: Props) {
       <g id="data-points">
         {dataPointsInViewport.map((point) => (
           <DataPointShape
+            zoom={zoom}
             point={point}
             concepts={props.concepts}
             key={point.clusterId}

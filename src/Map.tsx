@@ -1,11 +1,12 @@
-import { useMemo } from "react";
-import { ScaleLinear } from "d3";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { D3ZoomEvent, select, zoom as d3Zoom, zoomIdentity } from "d3";
 import styled from "styled-components";
 import { MapSvgRepresentation } from "../vite-plugin/svg-map-parser.ts";
 import { useStore } from "./store";
-import { screenToForegroundCoordinates } from "./js/foreground";
 import { isArticleAvailable } from "./js/article";
 import { Concept, DataPoint } from "./schema";
+import { ZoomTransform } from "d3-zoom";
+import { useLayersOpacity } from "./useLayersOpacity.ts";
 
 type Label = {
   key: string;
@@ -51,16 +52,12 @@ const Label = (props: Label) => {
   );
 };
 
-type D3Scale = ScaleLinear<number, number>;
-
 type Props = {
   map: MapSvgRepresentation;
-  scale: {
-    x: D3Scale;
-    y: D3Scale;
+  size: {
+    width: number;
+    height: number;
   };
-  zoom: number;
-  visibility: [number, number, number, number];
   cityLabels: {
     label: string;
     clusterId: number;
@@ -75,14 +72,6 @@ type Props = {
 };
 
 const DATA_POINTS_LIMIT = 300;
-
-const isInViewport = (point: DataPoint, scale: { x: D3Scale; y: D3Scale }) => {
-  const { x, y } = point;
-  const [xMin, xMax] = scale.x.domain();
-  const [yMin, yMax] = scale.y.domain();
-
-  return x >= xMin && x <= xMax && y >= yMin && y <= yMax;
-};
 
 type DataPointProps = {
   point: DataPoint;
@@ -99,6 +88,7 @@ const DataPointShape = ({ point, concepts, zoom }: DataPointProps) => {
     { min: 51, shape: "circle", radius: 4 },
     { min: 0, shape: "circle", radius: 3 },
   ] as const;
+
   const { x, y } = point;
   const config = configByThreshold.find(
     ({ min }) => point.numRecentArticles >= min,
@@ -110,16 +100,19 @@ const DataPointShape = ({ point, concepts, zoom }: DataPointProps) => {
   }
 
   const label = concepts.get(point.clusterId)?.key;
-  const scale = 1 / zoom;
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+  const transform = `translate(${x}, ${y}) scale(${1 / zoom})`;
 
   if (config.shape === "square") {
-    const outer = 14 * scale;
-    const inner = 8 * scale;
+    // TODO: adjust size
+    const outer = 14;
+    const inner = 8;
+
     return (
-      <g aria-label={label}>
+      <g aria-label={label} transform={transform}>
         <rect
-          x={x - outer / 2}
-          y={y - outer / 2}
+          x={-outer / 2}
+          y={-outer / 2}
           width={outer}
           height={outer}
           fill="white"
@@ -127,8 +120,8 @@ const DataPointShape = ({ point, concepts, zoom }: DataPointProps) => {
           strokeWidth={1}
         />
         <rect
-          x={x - inner / 2}
-          y={y - inner / 2}
+          x={-inner / 2}
+          y={-inner / 2}
           width={inner}
           height={inner}
           fill="black"
@@ -139,19 +132,19 @@ const DataPointShape = ({ point, concepts, zoom }: DataPointProps) => {
 
   if (config.shape === "double-circle") {
     return (
-      <g aria-label={label}>
+      <g aria-label={label} transform={transform}>
         <circle
-          cx={x}
-          cy={y}
-          r={config.radius * scale}
+          x={0}
+          y={0}
+          r={config.radius}
           fill="white"
           stroke="black"
           strokeWidth={1}
         />
         <circle
-          cx={x}
-          cy={y}
-          r={config.innerRadius * scale}
+          cx={0}
+          cy={0}
+          r={config.innerRadius}
           fill={config.radius === 7 ? "black" : "white"}
           stroke="black"
           strokeWidth={1}
@@ -161,11 +154,11 @@ const DataPointShape = ({ point, concepts, zoom }: DataPointProps) => {
   }
 
   return (
-    <g aria-label={label}>
+    <g aria-label={label} transform={transform}>
       <circle
-        cx={x}
-        cy={y}
-        r={config.radius * scale}
+        x={0}
+        y={0}
+        r={config.radius}
         fill="white"
         stroke="black"
         strokeWidth={1}
@@ -175,8 +168,71 @@ const DataPointShape = ({ point, concepts, zoom }: DataPointProps) => {
 };
 
 export default function Map(props: Props) {
-  const { map, zoom, visibility, cityLabels, on } = props;
+  const { map, cityLabels, on } = props;
   const { scaleFactor, fontSize } = useStore();
+  const svgRoot = useRef<SVGSVGElement>(null);
+  const zoomBehavior = useRef<ReturnType<
+    typeof d3Zoom<SVGSVGElement, unknown>
+  > | null>(null);
+  const hasZoomed = useRef(false);
+  const [transform, setTransform] = useState<ZoomTransform>();
+  const [mapVisibility, setMapVisibility] = useState<"visible" | "hidden">(
+    "hidden",
+  );
+  const zoom = transform ? transform.k : 1;
+  const transformValue = transform ? transform.toString() : "";
+  const opacity = useLayersOpacity(zoom);
+
+  useEffect(() => {
+    if (!svgRoot.current) return;
+
+    zoomBehavior.current = d3Zoom<SVGSVGElement, unknown>()
+      .scaleExtent([0.5, 50])
+      .on("zoom", (event: D3ZoomEvent<SVGSVGElement, unknown>) => {
+        setTransform(event.transform);
+      });
+
+    select<SVGSVGElement, unknown>(svgRoot.current).call(zoomBehavior.current);
+  }, []);
+
+  useEffect(() => {
+    if (hasZoomed.current) return;
+    if (!svgRoot.current || !zoomBehavior.current) return;
+
+    const center = {
+      x: props.size.width / 2,
+      y: props.size.height / 2,
+    };
+    zoomTo(center.x, center.y, 1, false, () => {
+      setMapVisibility("visible");
+    });
+    hasZoomed.current = true;
+  });
+
+  const zoomTo = (
+    x: number,
+    y: number,
+    scale: number,
+    animate = true,
+    onEnd?: () => void,
+  ) => {
+    if (!svgRoot.current || !zoomBehavior.current) return;
+
+    const selection = select(svgRoot.current);
+    const transform = zoomIdentity.translate(x, y).scale(scale);
+    const duration = animate ? 300 : 0;
+
+    selection
+      .transition()
+      .duration(duration)
+      .call((sel) => {
+        if (!zoomBehavior.current) return; // Isn't really required because we check it above, but it makes TS happy.
+        zoomBehavior.current.transform(sel, transform);
+      })
+      .on("end", () => {
+        onEnd?.();
+      });
+  };
 
   // TODO: move to the model and display labels conditionally in the JSX rather than rendering an empty text element
   const replaceHash = (str: string) =>
@@ -231,18 +287,17 @@ export default function Map(props: Props) {
 
   const cityLabelsScaled = useMemo(() => {
     return cityLabels.map((label) => {
-      const { x, y } = screenToForegroundCoordinates(label.x, label.y);
       return {
         key: label.clusterId.toString(),
-        x: x,
-        y: y,
+        x: label.x,
+        y: label.y,
         text: label.label,
         fontSize: scaledFontSize.layer4,
-        opacity: visibility[3],
+        opacity: opacity.layer4,
         level: 4,
       } as const;
     });
-  }, [cityLabels, scaledFontSize.layer4, visibility]);
+  }, [cityLabels, scaledFontSize.layer4, opacity]);
 
   const labels: Label[] = [
     ...map.layer1.children.map(
@@ -250,7 +305,7 @@ export default function Map(props: Props) {
         ({
           ...getLabelPropsByPath(path),
           fontSize: scaledFontSize.layer1,
-          opacity: visibility[0],
+          opacity: opacity.layer1,
           level: 1,
         }) as const,
     ),
@@ -259,7 +314,7 @@ export default function Map(props: Props) {
         ({
           ...getLabelPropsByPath(path),
           fontSize: scaledFontSize.layer2,
-          opacity: visibility[1],
+          opacity: opacity.layer2,
           level: 2,
         }) as const,
     ),
@@ -269,7 +324,7 @@ export default function Map(props: Props) {
           ({
             ...getLabelPropsByRect(rect),
             fontSize: scaledFontSize.layer3,
-            opacity: visibility[2],
+            opacity: opacity.layer3,
             level: 3,
           }) as const,
       ),
@@ -289,88 +344,88 @@ export default function Map(props: Props) {
     },
   }));
 
-  const dataPointsInViewport = useMemo(() => {
-    return props.dataPoints
-      .filter((point) => isInViewport(point, props.scale))
-      .slice(0, DATA_POINTS_LIMIT)
-      .map((point) => ({
-        // TODO: Any scaling needed here? If not, drop x, y together with the map loop
-        ...point,
-        x: point.x,
-        y: point.y,
-      }));
-  }, [props.dataPoints, props.scale]);
+  // TODO: dataPoints seem to use the same coordinate system as the SVG.
+  // The (0, 0) point is not the top-left corner — it's the center of the SVG map and the data space.
+  // Not sure where this alignment comes from — it's just an observed behavior.
+  // It's fine for now, but we might want to introduce d3-based scaling to decouple the map from data coordinates.
+  const data = useMemo(() => {
+    return props.dataPoints.map((point) => ({
+      ...point,
+      y: -point.y,
+    }));
+  }, [props.dataPoints]);
+
+  // TODO: This isn't efficient. Use quadtree or a similar method to determine which points are in the viewport.
+  const dataInViewport = data
+    .filter((point) => {
+      if (!transform) return false;
+
+      const screenX = transform.applyX(point.x);
+      const screenY = transform.applyY(point.y);
+
+      return (
+        screenX >= 0 &&
+        screenX <= props.size.width &&
+        screenY >= 0 &&
+        screenY <= props.size.height
+      );
+    })
+    .slice(0, DATA_POINTS_LIMIT);
 
   return (
-    <svg>
-      {/* Layer 1 */}
-      <g id={map.layer1.attributes.id} style={map.layer1.attributes.style}>
-        {map.layer1.children.map(({ path }) => (
-          <path
-            key={path.id}
-            id={path.id}
-            d={path.d}
-            style={path.style}
-            data-label={path.label}
-          />
-        ))}
-      </g>
+    <svg
+      ref={svgRoot}
+      width={props.size.width}
+      height={props.size.height}
+      style={{ visibility: mapVisibility }}
+    >
+      <g transform={transformValue} opacity={opacity.layer1}>
+        {/* Layer 1 */}
+        <g id={map.layer1.attributes.id} style={map.layer1.attributes.style}>
+          {map.layer1.children.map(({ path }) => (
+            <path
+              key={path.id}
+              id={path.id}
+              d={path.d}
+              style={path.style}
+              data-label={path.label}
+            />
+          ))}
+        </g>
 
-      {/* Layer 2 */}
-      <g id={map.layer2.attributes.id} style={map.layer2.attributes.style}>
-        {map.layer2.children.map(({ path }) => (
-          <path
-            key={path.id}
-            id={path.id}
-            d={path.d}
-            style={path.style}
-            data-label={path.label}
-          />
-        ))}
-      </g>
+        {/* Layer 2 */}
+        <g
+          id={map.layer2.attributes.id}
+          style={map.layer2.attributes.style}
+          opacity={opacity.layer2}
+        >
+          {map.layer2.children.map(({ path }) => (
+            <path
+              key={path.id}
+              id={path.id}
+              d={path.d}
+              style={path.style}
+              data-label={path.label}
+            />
+          ))}
+        </g>
 
-      {/* Layer 3 */}
-      <g id={map.layer3.attributes.id} style={map.layer3.attributes.style}>
-        {map.layer3.groups.map((group) => (
-          <g key={group.attributes.id} id={group.attributes.id}>
-            {group.children.map(({ rect }) => (
-              <rect
-                key={rect.id}
-                id={rect.id}
-                width={rect.width}
-                height={rect.height}
-                x={rect.x}
-                y={rect.y}
-                style={rect.style}
-                data-label={rect.label}
-              />
-            ))}
-          </g>
-        ))}
-      </g>
+        <g id="data-points">
+          {dataInViewport.map((point) => (
+            <DataPointShape
+              zoom={zoom}
+              point={point}
+              concepts={props.concepts}
+              key={point.clusterId}
+            />
+          ))}
+        </g>
 
-      <g id="data-points">
-        {dataPointsInViewport.map((point) => (
-          <DataPointShape
-            zoom={zoom}
-            point={point}
-            concepts={props.concepts}
-            key={point.clusterId}
-          />
-        ))}
-      </g>
-
-      <g id="L4">
-        {
-          // A dummy element required by foreground.js that relies on DOM element to determine opacity values
-          // TODO: remove once foreground.js functionality is fully ported to React
-        }
-      </g>
-
-      <g id="labels">
-        {labels.map((label) => (
-          <Label {...label} key={label.key} />
-        ))}
+        <g id="labels">
+          {labels.map((label) => (
+            <Label {...label} key={label.key} />
+          ))}
+        </g>
       </g>
     </svg>
   );

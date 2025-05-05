@@ -1,6 +1,9 @@
 import styled from "styled-components";
-import { zoomToScale } from "../../js/chart";
 import { useStore } from "../../store.ts";
+
+const zoomToScale = (scale: number) => {
+  // TODO: Implement
+};
 
 export const ZoomControls = () => {
   const { zoomStepFactor, zoom: currentZoom } = useStore();

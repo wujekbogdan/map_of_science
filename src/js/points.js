@@ -1,4 +1,3 @@
-import * as chart from "./chart";
 import { eventBus } from "../event-bus";
 import { loadData } from "../api/worker.ts";
 
@@ -55,7 +54,6 @@ export const load = async () => {
 
   // TODO: Looping through dataPoints isn't efficient. We can likely avoid this by handling the sorting during the data loading process.
   dataPoints.sort((a, b) => b.numRecentArticles - a.numRecentArticles);
-  chart.initChart(dataPoints);
 
   eventBus.emit("conceptsLoaded", concepts);
   eventBus.emit("dataPointsLoaded", dataPoints);

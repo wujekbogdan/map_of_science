@@ -2,9 +2,15 @@ import { create } from "zustand";
 import { combine } from "zustand/middleware";
 import { DataPoint } from "./schema";
 
-const defaults = {
+type Zoom = { x: number; y: number; scale: number };
+type PartialDefaults = typeof partialDefaults;
+type State = PartialDefaults & {
+  currentZoom: Zoom | null;
+  desiredZoom: Zoom | null;
+};
+
+const partialDefaults = {
   dataPoints: [] as DataPoint[],
-  zoom: 1,
   zoomStepFactor: 1.6,
   fontSize: {
     layer1: 16,
@@ -19,10 +25,19 @@ const defaults = {
   },
 };
 
+const defaults: State = {
+  ...partialDefaults,
+  desiredZoom: null,
+  currentZoom: null,
+};
+
 export const useStore = create(
   combine(defaults, (set) => ({
-    setZoom: (zoom: number) => {
-      set({ zoom });
+    setDesiredZoom: (zoom: Zoom | null) => {
+      set({ desiredZoom: zoom });
+    },
+    setCurrentZoom: (zoom: Zoom | null) => {
+      set({ currentZoom: zoom });
     },
     setZoomStepFactor: (zoomStepFactor: number) => {
       set({ zoomStepFactor });

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, RefObject } from "react";
+import { useEffect, useRef, useState, RefObject, useCallback } from "react";
 import {
   D3ZoomEvent,
   select,
@@ -6,6 +6,8 @@ import {
   zoomIdentity,
   ZoomTransform,
 } from "d3";
+import { useStore } from "./store.ts";
+import { useShallow } from "zustand/react/shallow";
 
 type Zoom = {
   x: number;
@@ -13,18 +15,52 @@ type Zoom = {
   scale: number;
 };
 
-export const useD3Zoom = (
-  svg: RefObject<SVGSVGElement>,
-  initialZoom: Zoom,
-  initialized?: () => void,
-) => {
+type Options = {
+  svg: RefObject<SVGSVGElement>;
+  initialZoom: Zoom;
+  initialized?: () => void;
+  desiredZoom: Zoom | null;
+};
+
+export const useD3Zoom = (options: Options) => {
+  const { svg, initialZoom, initialized, desiredZoom } = options;
+
   const zoomBehavior = useRef<ReturnType<
     typeof d3Zoom<SVGSVGElement, unknown>
   > | null>(null);
   const hasInitialized = useRef(false);
   const hasZoomed = useRef(false);
   const [transform, setTransform] = useState<ZoomTransform>();
+  const [setCurrentZoom] = useStore(useShallow((s) => [s.setCurrentZoom]));
   const zoom = transform ? transform.k : 1;
+
+  const zoomTo = useCallback(
+    (
+      x: number,
+      y: number,
+      scale: number,
+      animate = true,
+      onEnd?: () => void,
+    ) => {
+      if (!svg.current || !zoomBehavior.current) return;
+
+      const selection = select(svg.current);
+      const transform = zoomIdentity.translate(x, y).scale(scale);
+      const duration = animate ? 300 : 0;
+
+      selection
+        .transition()
+        .duration(duration)
+        .call((sel) => {
+          if (!zoomBehavior.current) return; // Isn't really required because we check it above, but it makes TS happy.
+          zoomBehavior.current.transform(sel, transform);
+        })
+        .on("end", () => {
+          onEnd?.();
+        });
+    },
+    [svg, zoomBehavior],
+  );
 
   useEffect(() => {
     if (hasInitialized.current) return;
@@ -33,7 +69,13 @@ export const useD3Zoom = (
     zoomBehavior.current = d3Zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.5, 50])
       .on("zoom", (event: D3ZoomEvent<SVGSVGElement, unknown>) => {
+        // TODO: consider moving transform to Zustand
         setTransform(event.transform);
+        setCurrentZoom({
+          x: event.transform.x,
+          y: event.transform.y,
+          scale: event.transform.k,
+        });
       });
 
     select<SVGSVGElement, unknown>(svg.current).call(zoomBehavior.current);
@@ -54,30 +96,11 @@ export const useD3Zoom = (
     hasZoomed.current = true;
   });
 
-  const zoomTo = (
-    x: number,
-    y: number,
-    scale: number,
-    animate = true,
-    onEnd?: () => void,
-  ) => {
-    if (!svg.current || !zoomBehavior.current) return;
+  useEffect(() => {
+    if (!desiredZoom) return;
 
-    const selection = select(svg.current);
-    const transform = zoomIdentity.translate(x, y).scale(scale);
-    const duration = animate ? 300 : 0;
-
-    selection
-      .transition()
-      .duration(duration)
-      .call((sel) => {
-        if (!zoomBehavior.current) return; // Isn't really required because we check it above, but it makes TS happy.
-        zoomBehavior.current.transform(sel, transform);
-      })
-      .on("end", () => {
-        onEnd?.();
-      });
-  };
+    zoomTo(desiredZoom.x, desiredZoom.y, desiredZoom.scale, true);
+  }, [desiredZoom, desiredZoom?.x, desiredZoom?.y, desiredZoom?.scale, zoomTo]);
 
   return {
     zoom,

@@ -6,6 +6,7 @@ import { isArticleAvailable } from "./js/article";
 import { Concept, DataPoint } from "./schema";
 import { useLayersOpacity } from "./useLayersOpacity.ts";
 import { useD3Zoom } from "./useD3Zoom.ts";
+import { useShallow } from "zustand/react/shallow";
 
 type Label = {
   key: string;
@@ -168,22 +169,26 @@ const DataPointShape = ({ point, concepts, zoom }: DataPointProps) => {
 
 export default function Map(props: Props) {
   const { map, cityLabels, on } = props;
-  const { scaleFactor, fontSize } = useStore();
+  const [scaleFactor, fontSize, desiredZoom] = useStore(
+    useShallow((s) => [s.scaleFactor, s.fontSize, s.desiredZoom]),
+  );
+
   const svgRoot = useRef<SVGSVGElement>(null);
   const [mapVisibility, setMapVisibility] = useState<"visible" | "hidden">(
     "hidden",
   );
-  const { transform, zoom } = useD3Zoom(
-    svgRoot,
-    {
+  const { transform, zoom } = useD3Zoom({
+    svg: svgRoot,
+    initialZoom: {
       x: props.size.width / 2,
       y: props.size.height / 2,
       scale: 1,
     },
-    () => {
+    desiredZoom,
+    initialized: () => {
       setMapVisibility("visible");
     },
-  );
+  });
   const transformValue = transform ? transform.toString() : "";
   const opacity = useLayersOpacity(zoom);
 

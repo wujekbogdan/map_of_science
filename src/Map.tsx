@@ -1,12 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { D3ZoomEvent, select, zoom as d3Zoom, zoomIdentity } from "d3";
+import { useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { MapSvgRepresentation } from "../vite-plugin/svg-map-parser.ts";
 import { useStore } from "./store";
 import { isArticleAvailable } from "./js/article";
 import { Concept, DataPoint } from "./schema";
-import { ZoomTransform } from "d3-zoom";
 import { useLayersOpacity } from "./useLayersOpacity.ts";
+import { useD3Zoom } from "./useD3Zoom.ts";
 
 type Label = {
   key: string;
@@ -171,68 +170,22 @@ export default function Map(props: Props) {
   const { map, cityLabels, on } = props;
   const { scaleFactor, fontSize } = useStore();
   const svgRoot = useRef<SVGSVGElement>(null);
-  const zoomBehavior = useRef<ReturnType<
-    typeof d3Zoom<SVGSVGElement, unknown>
-  > | null>(null);
-  const hasZoomed = useRef(false);
-  const [transform, setTransform] = useState<ZoomTransform>();
   const [mapVisibility, setMapVisibility] = useState<"visible" | "hidden">(
     "hidden",
   );
-  const zoom = transform ? transform.k : 1;
-  const transformValue = transform ? transform.toString() : "";
-  const opacity = useLayersOpacity(zoom);
-
-  useEffect(() => {
-    if (!svgRoot.current) return;
-
-    zoomBehavior.current = d3Zoom<SVGSVGElement, unknown>()
-      .scaleExtent([0.5, 50])
-      .on("zoom", (event: D3ZoomEvent<SVGSVGElement, unknown>) => {
-        setTransform(event.transform);
-      });
-
-    select<SVGSVGElement, unknown>(svgRoot.current).call(zoomBehavior.current);
-  }, []);
-
-  useEffect(() => {
-    if (hasZoomed.current) return;
-    if (!svgRoot.current || !zoomBehavior.current) return;
-
-    const center = {
+  const { transform, zoom } = useD3Zoom(
+    svgRoot,
+    {
       x: props.size.width / 2,
       y: props.size.height / 2,
-    };
-    zoomTo(center.x, center.y, 1, false, () => {
+      scale: 1,
+    },
+    () => {
       setMapVisibility("visible");
-    });
-    hasZoomed.current = true;
-  });
-
-  const zoomTo = (
-    x: number,
-    y: number,
-    scale: number,
-    animate = true,
-    onEnd?: () => void,
-  ) => {
-    if (!svgRoot.current || !zoomBehavior.current) return;
-
-    const selection = select(svgRoot.current);
-    const transform = zoomIdentity.translate(x, y).scale(scale);
-    const duration = animate ? 300 : 0;
-
-    selection
-      .transition()
-      .duration(duration)
-      .call((sel) => {
-        if (!zoomBehavior.current) return; // Isn't really required because we check it above, but it makes TS happy.
-        zoomBehavior.current.transform(sel, transform);
-      })
-      .on("end", () => {
-        onEnd?.();
-      });
-  };
+    },
+  );
+  const transformValue = transform ? transform.toString() : "";
+  const opacity = useLayersOpacity(zoom);
 
   // TODO: move to the model and display labels conditionally in the JSX rather than rendering an empty text element
   const replaceHash = (str: string) =>

@@ -1,7 +1,6 @@
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import MapComponent from "./Map";
-import { withSize } from "./withSize.tsx";
 import { init } from "./js/main";
 import map from "../asset/foreground.svg?parse";
 import { eventBus, Events } from "./event-bus.ts";
@@ -10,10 +9,10 @@ import { config } from "./config.ts";
 import { Header } from "./Header/Header.tsx";
 import { i18n } from "./i18n.ts";
 import { Concept } from "./schema";
+import { useStore } from "./store.ts";
+import { useWindowSize } from "./useWindowSize.ts";
 
 let isInitialized = false;
-
-const SizedMap = withSize(MapComponent);
 
 const Loader = () => {
   return <LoadingWrapper>{i18n("Ładowanie danych...")}</LoadingWrapper>;
@@ -33,6 +32,10 @@ function App() {
     new Map<number, Concept>(),
   );
   const isLoaded = dataPoints.length > 0 && concepts.size > 0;
+  const setMapSize = useStore((s) => s.setMapSize);
+  const size = useWindowSize((windowSize) => {
+    setMapSize(windowSize);
+  });
 
   // TODO: Get rid of event-based communication and rely solely on Zustand once data points rendering is fully migrated to React
   useEffect(() => {
@@ -64,7 +67,8 @@ function App() {
         {!isLoaded ? (
           <Loader />
         ) : (
-          <SizedMap
+          <MapComponent
+            size={size}
             cityLabels={cityLabels}
             dataPoints={dataPoints}
             concepts={concepts}

@@ -4,10 +4,8 @@ import debounce from "lodash/debounce";
 import useSWR from "swr";
 import { MapSvgRepresentation as Map } from "../../../vite-plugin/svg-map-parser.ts";
 import { Dropdown, Option } from "./Dropdown.tsx";
-
-const zoomTo = () => {
-  // TODO: Implement
-};
+import { useShallow } from "zustand/react/shallow";
+import { useStore } from "../../store.ts";
 
 const worker = new ComlinkSharedWorker<typeof import("./search.ts")>(
   new URL("./search.ts", import.meta.url),
@@ -19,7 +17,9 @@ type Props = {
 
 export const Search = (props: Props) => {
   const { map } = props;
-
+  const [setDesiredZoom, mapSize] = useStore(
+    useShallow((s) => [s.setDesiredZoom, s.mapSize]),
+  );
   const [searchTerm, setSearchTerm] = useState("");
 
   const { data: results = [] } = useSWR(
@@ -53,7 +53,27 @@ export const Search = (props: Props) => {
     [],
   );
 
+  const zoomTo = (bbox: Option["boundingBox"]) => {
+    const boxWidth = bbox.max.x - bbox.min.x;
+    const boxHeight = bbox.max.y - bbox.min.y;
+
+    const zoomX = mapSize.width / boxWidth;
+    const zoomY = mapSize.height / boxHeight;
+
+    const zoom = Math.min(zoomX, zoomY); // fit entire box
+
+    const x = -bbox.center.x * zoom + mapSize.width / 2;
+    const y = -bbox.center.y * zoom + mapSize.height / 2;
+
+    setDesiredZoom({
+      x,
+      y,
+      scale: zoom,
+    });
+  };
+
   const onSelectionChange = (option: Option) => {
+    console.log(option.label);
     zoomTo(option.boundingBox);
   };
 

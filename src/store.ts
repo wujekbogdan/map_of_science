@@ -8,10 +8,18 @@ type State = PartialDefaults & {
   currentZoom: Zoom | null;
   desiredZoom: Zoom | null;
 };
+type Size = {
+  width: number;
+  height: number;
+};
 
 const partialDefaults = {
   dataPoints: [] as DataPoint[],
   zoomStepFactor: 1.6,
+  mapSize: {
+    width: 0,
+    height: 0,
+  },
   fontSize: {
     layer1: 16,
     layer2: 12.8,
@@ -38,6 +46,9 @@ export const useStore = create(
     },
     setCurrentZoom: (zoom: Zoom | null) => {
       set({ currentZoom: zoom });
+    },
+    setMapSize: (size: Size) => {
+      set({ mapSize: size });
     },
     setZoomStepFactor: (zoomStepFactor: number) => {
       set({ zoomStepFactor });

@@ -71,8 +71,6 @@ type Props = {
   };
 };
 
-const DATA_POINTS_LIMIT = 300;
-
 type DataPointProps = {
   point: DataPoint;
   concepts: Map<number, Concept>;
@@ -169,9 +167,15 @@ const DataPointShape = ({ point, concepts, zoom }: DataPointProps) => {
 
 export default function Map(props: Props) {
   const { map, cityLabels, on } = props;
-  const [scaleFactor, fontSize, desiredZoom] = useStore(
-    useShallow((s) => [s.scaleFactor, s.fontSize, s.desiredZoom]),
-  );
+  const [scaleFactor, fontSize, desiredZoom, maxDataPointsInViewport] =
+    useStore(
+      useShallow((s) => [
+        s.scaleFactor,
+        s.fontSize,
+        s.desiredZoom,
+        s.maxDataPointsInViewport,
+      ]),
+    );
 
   const svgRoot = useRef<SVGSVGElement>(null);
   const [mapVisibility, setMapVisibility] = useState<"visible" | "hidden">(
@@ -213,11 +217,6 @@ export default function Map(props: Props) {
     rect: (typeof map.layer3.groups)[number]["children"][number]["rect"],
   ) => {
     return {
-      // The original label.js code uses some kind of scaling here, but it's not clear why.
-      // style: {
-      //   left: `${scale.x(x)} px}`,
-      //   top: `${scale.y(-y)} px}`,
-      // },
       key: rect.id + rect.label,
       x: rect.boundingBox.center.x,
       y: rect.boundingBox.center.y,
@@ -328,10 +327,10 @@ export default function Map(props: Props) {
         screenY <= props.size.height
       );
     })
-    .slice(0, DATA_POINTS_LIMIT);
+    .slice(0, maxDataPointsInViewport);
 
   return (
-    <svg
+    <MapSvg
       ref={svgRoot}
       width={props.size.width}
       height={props.size.height}
@@ -385,9 +384,17 @@ export default function Map(props: Props) {
           ))}
         </g>
       </g>
-    </svg>
+    </MapSvg>
   );
 }
+
+const MapSvg = styled.svg`
+  background: radial-gradient(
+    circle,
+    rgba(173, 216, 230, 0.7) 0,
+    rgba(173, 216, 230, 1) 100%
+  );
+`;
 
 const LabelText = styled.text<{
   $opacity: number;

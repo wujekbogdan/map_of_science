@@ -15,6 +15,8 @@ export const useWindowSize = (onResize: (windowSize: WindowSize) => void) => {
   const [size, setSize] = useState(measure());
 
   useEffect(() => {
+    onResize(measure());
+
     const onResizeHandler = debounce(() => {
       const windowSize = measure();
       setSize(windowSize);

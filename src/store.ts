@@ -31,6 +31,7 @@ const partialDefaults = {
     max: 16,
     zoom: 0.5,
   },
+  maxDataPointsInViewport: 300,
 };
 
 const defaults: State = {
@@ -76,6 +77,9 @@ export const useStore = create(
           [factor]: parsedValue || defaults.scaleFactor[factor],
         },
       }));
+    },
+    setMaxDataPointsInViewport: (maxDataPointsInViewport: number) => {
+      set({ maxDataPointsInViewport });
     },
     setDataPoints: (dataPoints: DataPoint[]) => {
       set({ dataPoints });

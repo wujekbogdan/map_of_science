@@ -17,6 +17,8 @@ export const DevTool = () => {
     setScaleFactor,
     zoomStepFactor,
     setZoomStepFactor,
+    maxDataPointsInViewport,
+    setMaxDataPointsInViewport,
   ] = useStore(
     useShallow((state) => [
       state.currentZoom?.scale.toFixed(2) ?? 1,
@@ -26,6 +28,8 @@ export const DevTool = () => {
       state.setScaleFactor,
       state.zoomStepFactor,
       state.setZoomStepFactor,
+      state.maxDataPointsInViewport,
+      state.setMaxDataPointsInViewport,
     ]),
   );
   const layers = ["layer1", "layer2", "layer3", "layer4"] as const;
@@ -46,6 +50,26 @@ export const DevTool = () => {
       </TitleBar>
       {isExpanded && (
         <Panels>
+          <Panel>
+            <Header>{i18n("Data")}</Header>
+            <P>
+              <FormControl>
+                <Label>{i18n("Visible data points limit")}</Label>
+                <Input
+                  type="number"
+                  value={maxDataPointsInViewport}
+                  onChange={(e) => {
+                    setMaxDataPointsInViewport(Number(e.target.value));
+                  }}
+                />
+              </FormControl>
+            </P>
+            <P>
+              <Label>{i18n("Current Zoom")}</Label>
+              <span>{zoom}</span>
+            </P>
+          </Panel>
+
           <Panel>
             <Header>{i18n("Font Sizes")}</Header>
             {layers.map((layer, index) => (

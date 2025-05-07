@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import styled from "styled-components";
 import MapComponent from "./Map";
 import { init } from "./js/main";
@@ -33,9 +33,14 @@ function App() {
   );
   const isLoaded = dataPoints.length > 0 && concepts.size > 0;
   const setMapSize = useStore((s) => s.setMapSize);
-  const size = useWindowSize((windowSize) => {
-    setMapSize(windowSize);
-  });
+  const size = useWindowSize(
+    useCallback(
+      (size: { width: number; height: number }) => {
+        setMapSize(size);
+      },
+      [setMapSize],
+    ),
+  );
 
   // TODO: Get rid of event-based communication and rely solely on Zustand once data points rendering is fully migrated to React
   useEffect(() => {

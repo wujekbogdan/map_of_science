@@ -2,21 +2,32 @@ import { useStore } from "./store";
 import { i18n } from "./i18n";
 import styled from "styled-components";
 import { useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 
 export const DevTool = () => {
   const [visibility, setVisibility] = useState<"collapsed" | "expanded">(
     "collapsed",
   );
   const isExpanded = visibility === "expanded";
-  const {
+  const [
+    zoom,
     fontSize,
     scaleFactor,
     setFontSize,
     setScaleFactor,
-    zoom,
     zoomStepFactor,
     setZoomStepFactor,
-  } = useStore();
+  ] = useStore(
+    useShallow((state) => [
+      state.currentZoom?.scale.toFixed(2) ?? 1,
+      state.fontSize,
+      state.scaleFactor,
+      state.setFontSize,
+      state.setScaleFactor,
+      state.zoomStepFactor,
+      state.setZoomStepFactor,
+    ]),
+  );
   const layers = ["layer1", "layer2", "layer3", "layer4"] as const;
   const scaleFactors = ["min", "max", "zoom"] as const;
 

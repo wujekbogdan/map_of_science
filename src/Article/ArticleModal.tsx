@@ -49,6 +49,8 @@ const Overlay = styled.div`
 `;
 
 const ArticleWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
   position: fixed;
   top: 40px;
   right: 40px;
@@ -65,7 +67,9 @@ const Header = styled.header`
   display: flex;
 `;
 
-const Content = styled.section``;
+const Content = styled.section`
+  flex-grow: 1;
+`;
 
 const Button = styled.button`
   border-radius: 4px;

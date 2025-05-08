@@ -84,7 +84,10 @@ export default function Map(props: Props) {
         s.maxDataPointsInViewport,
       ]),
     );
-  const fetchArticle = useArticleStore(({ fetch }) => fetch);
+  const fetchLocalArticle = useArticleStore(
+    ({ fetchLocalArticle }) => fetchLocalArticle,
+  );
+
   const svgRoot = useRef<SVGSVGElement>(null);
   const [mapVisibility, setMapVisibility] = useState<"visible" | "hidden">(
     "hidden",
@@ -292,7 +295,7 @@ export default function Map(props: Props) {
               {...label}
               key={label.key}
               onClick={({ text }) => {
-                void fetchArticle(text);
+                void fetchLocalArticle(text);
               }}
             />
           ))}

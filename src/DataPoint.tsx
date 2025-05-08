@@ -9,6 +9,7 @@ import {
 } from "@floating-ui/react";
 import { DataPointDetails } from "./DataPointDetails.tsx";
 import { Concept, DataPoint as Point } from "./schema";
+import { useArticleStore } from "./store.ts";
 
 type Props = {
   point: Point;
@@ -17,6 +18,9 @@ type Props = {
 };
 
 export const DataPoint = ({ point, concepts, zoom }: Props) => {
+  const setRemoteArticleId = useArticleStore(
+    ({ setRemoteArticleId }) => setRemoteArticleId,
+  );
   const [isOpen, setIsOpen] = useState(false);
   const { refs, floatingStyles, context } = useFloating({
     middleware: [offset(10)],
@@ -125,10 +129,14 @@ export const DataPoint = ({ point, concepts, zoom }: Props) => {
   return (
     <>
       <g
+        style={{ cursor: "pointer" }}
         aria-label={label}
         transform={transform}
         ref={refs.setReference}
         {...getReferenceProps()}
+        onClick={() => {
+          setRemoteArticleId(point.clusterId);
+        }}
       >
         {shape()}
       </g>

@@ -9,10 +9,9 @@ import { config } from "./config.ts";
 import { Header } from "./Header/Header.tsx";
 import { i18n } from "./i18n.ts";
 import { Concept } from "./schema";
-import { useArticleStore, useStore } from "./store.ts";
+import { useStore } from "./store.ts";
 import { useWindowSize } from "./useWindowSize.ts";
-import { ArticleModal } from "./Article/ArticleModal.tsx";
-import { LocalArticle } from "./Article/LocalArticle.tsx";
+import { Article } from "./Article/Article.tsx";
 
 let isInitialized = false;
 
@@ -28,8 +27,6 @@ function App() {
     isInitialized = true;
   }, []);
 
-  const article = useArticleStore(({ article }) => article);
-  const resetArticle = useArticleStore(({ reset }) => reset);
   const [cityLabels, setCityLabels] = useState<Events["cityLabelsLoaded"]>([]);
   const [dataPoints, setDataPoints] = useState<Events["dataPointsLoaded"]>([]);
   const [concepts, setConcepts] = useState<Map<number, Concept>>(
@@ -81,14 +78,7 @@ function App() {
         />
       )}
 
-      {article && (
-        <ArticleModal
-          children={<LocalArticle html={article} />}
-          onClose={() => {
-            resetArticle();
-          }}
-        />
-      )}
+      <Article />
 
       {config.devTool && (
         <DevToolsWrapper>

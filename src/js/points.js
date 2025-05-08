@@ -1,3 +1,4 @@
+// TODO: There's no need for eventBus anymore since all the legacy code was ported to TS. Let's move it to a store.
 import { eventBus } from "../event-bus";
 import { loadData } from "../api/worker.ts";
 

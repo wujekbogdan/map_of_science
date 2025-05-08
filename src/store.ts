@@ -89,21 +89,35 @@ export const useStore = create(
   })),
 );
 
-const articleStoreDefaults: {
-  article: string | null;
-} = {
-  article: null,
+type ArticleState =
+  | { id: null; type: null; article: null }
+  | { id: null; type: "local"; article: string }
+  | { id: number; type: "iframe"; article: null };
+
+type ArticleActions = {
+  reset: () => void;
+  setRemoteArticleId: (id: number) => void;
+  fetchLocalArticle: (label: string) => Promise<void>;
 };
 
-export const useArticleStore = create(
-  combine(articleStoreDefaults, (set) => ({
-    reset: () => {
-      set({ article: null });
-    },
-    fetch: async (label: string) => {
-      // TODO: Drop the legacy article.js dependency. Consider using SWR for fetching
-      const articleHTML = await fetchArticle(label);
-      set({ article: articleHTML });
-    },
-  })),
-);
+export const useArticleStore = create<ArticleState & ArticleActions>((set) => ({
+  id: null,
+  type: null,
+  article: null,
+  reset: () => {
+    set({ id: null, type: null, article: null });
+  },
+  setRemoteArticleId: (id: number) => {
+    set({ id, type: "iframe", article: null });
+  },
+  fetchLocalArticle: async (label: string) => {
+    const articleHTML = await fetchArticle(label);
+
+    if (!articleHTML) {
+      set({ id: null, type: null, article: null });
+      return;
+    }
+
+    set({ id: null, type: "local", article: articleHTML });
+  },
+}));

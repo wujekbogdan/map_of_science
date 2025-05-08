@@ -1,5 +1,13 @@
 # map_of_science
 
+## 1.8.0
+
+### Minor Changes
+
+- e7497a2: Port articles rendering to React
+- e7497a2: Add ability to control the number of data points rendered with DevTools
+- e7497a2: Port data points rendering to React
+
 ## 1.7.0
 
 ### Minor Changes

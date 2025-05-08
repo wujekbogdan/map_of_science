@@ -9,8 +9,10 @@ import { config } from "./config.ts";
 import { Header } from "./Header/Header.tsx";
 import { i18n } from "./i18n.ts";
 import { Concept } from "./schema";
-import { useStore } from "./store.ts";
+import { useArticleStore, useStore } from "./store.ts";
 import { useWindowSize } from "./useWindowSize.ts";
+import { ArticleModal } from "./Article/ArticleModal.tsx";
+import { LocalArticle } from "./Article/LocalArticle.tsx";
 
 let isInitialized = false;
 
@@ -26,6 +28,8 @@ function App() {
     isInitialized = true;
   }, []);
 
+  const article = useArticleStore(({ article }) => article);
+  const resetArticle = useArticleStore(({ reset }) => reset);
   const [cityLabels, setCityLabels] = useState<Events["cityLabelsLoaded"]>([]);
   const [dataPoints, setDataPoints] = useState<Events["dataPointsLoaded"]>([]);
   const [concepts, setConcepts] = useState<Map<number, Concept>>(
@@ -64,23 +68,27 @@ function App() {
   return (
     <>
       <Header />
-      <div id="article" className="content">
-        <div id="article-content"></div>
-      </div>
 
-      <div className="map">
-        {!isLoaded ? (
-          <Loader />
-        ) : (
-          <MapComponent
-            size={size}
-            cityLabels={cityLabels}
-            dataPoints={dataPoints}
-            concepts={concepts}
-            map={map}
-          />
-        )}
-      </div>
+      {!isLoaded ? (
+        <Loader />
+      ) : (
+        <MapComponent
+          size={size}
+          cityLabels={cityLabels}
+          dataPoints={dataPoints}
+          concepts={concepts}
+          map={map}
+        />
+      )}
+
+      {article && (
+        <ArticleModal
+          children={<LocalArticle html={article} />}
+          onClose={() => {
+            resetArticle();
+          }}
+        />
+      )}
 
       {config.devTool && (
         <DevToolsWrapper>

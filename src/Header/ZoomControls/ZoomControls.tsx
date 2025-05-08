@@ -37,7 +37,6 @@ export const ZoomControls = () => {
 };
 
 const ZoomControlsStyled = styled.div`
-  box-sizing: border-box;
   background: rgba(255, 255, 255, 0.9);
   display: flex;
   flex-direction: column;

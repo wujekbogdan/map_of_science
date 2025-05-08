@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { combine } from "zustand/middleware";
 import { DataPoint } from "./schema";
+import { fetchArticle } from "./js/article";
 
 type Zoom = { x: number; y: number; scale: number };
 type PartialDefaults = typeof partialDefaults;
@@ -40,6 +41,7 @@ const defaults: State = {
   currentZoom: null,
 };
 
+// TODO: break the main store into per-feature stores
 export const useStore = create(
   combine(defaults, (set) => ({
     setDesiredZoom: (zoom: Zoom | null) => {
@@ -83,6 +85,25 @@ export const useStore = create(
     },
     setDataPoints: (dataPoints: DataPoint[]) => {
       set({ dataPoints });
+    },
+  })),
+);
+
+const articleStoreDefaults: {
+  article: string | null;
+} = {
+  article: null,
+};
+
+export const useArticleStore = create(
+  combine(articleStoreDefaults, (set) => ({
+    reset: () => {
+      set({ article: null });
+    },
+    fetch: async (label: string) => {
+      // TODO: Drop the legacy article.js dependency. Consider using SWR for fetching
+      const articleHTML = await fetchArticle(label);
+      set({ article: articleHTML });
     },
   })),
 );

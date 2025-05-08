@@ -102,7 +102,7 @@ const markdownToHtml = async (markdown) => {
   return marked.parse(markdown);
 };
 
-async function fetchArticle(labelText) {
+export async function fetchArticle(labelText) {
   const labelId = labelTextToLabelId(labelText);
 
   try {

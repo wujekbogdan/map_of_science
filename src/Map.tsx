@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { MapSvgRepresentation } from "../vite-plugin/svg-map-parser.ts";
-import { useStore } from "./store";
+import { useArticleStore, useStore } from "./store";
 import { isArticleAvailable } from "./js/article";
 import { Concept, DataPoint as Point } from "./schema";
 import { useLayersOpacity } from "./useLayersOpacity.ts";
@@ -43,6 +43,7 @@ const Label = (props: Label) => {
       alignmentBaseline="middle"
       x={props.x}
       y={props.y}
+      $hasArticle={props.hasArticle}
       $fontSize={props.fontSize}
       $opacity={props.opacity}
       $level={props.level}
@@ -83,6 +84,7 @@ export default function Map(props: Props) {
         s.maxDataPointsInViewport,
       ]),
     );
+  const fetchArticle = useArticleStore(({ fetch }) => fetch);
   const svgRoot = useRef<SVGSVGElement>(null);
   const [mapVisibility, setMapVisibility] = useState<"visible" | "hidden">(
     "hidden",
@@ -237,10 +239,10 @@ export default function Map(props: Props) {
 
   return (
     <MapSvg
+      $visibility={mapVisibility}
       ref={svgRoot}
       width={props.size.width}
       height={props.size.height}
-      style={{ visibility: mapVisibility }}
     >
       <g transform={transformValue} opacity={opacity.layer1}>
         {/* Layer 1 */}
@@ -286,7 +288,13 @@ export default function Map(props: Props) {
 
         <g id="labels">
           {labels.map((label) => (
-            <Label {...label} key={label.key} />
+            <Label
+              {...label}
+              key={label.key}
+              onClick={({ text }) => {
+                void fetchArticle(text);
+              }}
+            />
           ))}
         </g>
       </g>
@@ -294,7 +302,10 @@ export default function Map(props: Props) {
   );
 }
 
-const MapSvg = styled.svg`
+const MapSvg = styled.svg<{
+  $visibility: "visible" | "hidden";
+}>`
+  visibility: ${(props) => props.$visibility};
   display: block;
   background: radial-gradient(
     circle,
@@ -303,11 +314,26 @@ const MapSvg = styled.svg`
   );
 `;
 
+const labelFillColor = ($level: 1 | 2 | 3 | 4) => {
+  switch ($level) {
+    case 1:
+      return "rgb(153, 91, 153)";
+    case 2:
+      return "rgb(57, 57, 57)";
+    case 3:
+      return "rgb(101, 91, 153)";
+    default:
+      return "inherit";
+  }
+};
+
 const LabelText = styled.text<{
   $opacity: number;
   $fontSize: number;
   $level: 1 | 2 | 3 | 4;
+  $hasArticle: boolean;
 }>`
+  cursor: ${(props) => (props.$hasArticle ? "pointer" : "default")};
   font-size: ${(props) => props.$fontSize}px;
   opacity: ${(props) => props.$opacity};
   font-weight: bold;
@@ -323,19 +349,9 @@ const LabelText = styled.text<{
     0 0 5px #f2efe9,
     0 0 5px #f2efe9,
     0 0 5px #f2efe9;
-  fill: ${(props) => {
-    switch (props.$level) {
-      case 1:
-        return "rgb(153, 91, 153)";
-      case 2:
-        return "rgb(57, 57, 57)";
-      case 3:
-        return "rgb(101, 91, 153)";
-      case 4:
-        return "inherit";
-    }
-  }};
+  fill: ${(props) => labelFillColor(props.$level)};
   &:hover {
-    fill: red !important;
+    fill: ${(props) =>
+      props.$hasArticle ? "#4A90E2" : labelFillColor(props.$level)};
   }
 `;

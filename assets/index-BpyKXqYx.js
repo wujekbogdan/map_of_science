@@ -193,9 +193,12 @@ Error generating stack: `+o.message+`
   padding: 4px;
   margin: 0;
   border-radius: 0;
-  border-bottom: 1px solid #eee;
+  border-width: 0 0 1px 0;
+  border-bottom: solid #eee;
   font-size: 24px;
   transition: background-color 0.1s ease-in-out;
+  cursor: pointer;
+
   &:hover {
     background-color: #f0f0f0;
   }
@@ -215,14 +218,16 @@ Error generating stack: `+o.message+`
   display: flex;
   justify-content: space-between;
   padding: 12px;
-`,Lk=e=>{const t=()=>({width:window.innerWidth,height:window.innerHeight}),[n,r]=m.useState(t());return m.useEffect(()=>{e(t());const i=Y9(()=>{const o=t();r(o),e(o)},100);return window.addEventListener("resize",i),()=>{i.cancel(),window.removeEventListener("resize",i)}},[e]),n},Nk=({html:e})=>I.jsx("div",{dangerouslySetInnerHTML:{__html:e}});function jk(e){for(var t=[],n=1;n<arguments.length;n++)t[n-1]=arguments[n];e&&e.addEventListener&&e.addEventListener.apply(e,t)}function Hk(e){for(var t=[],n=1;n<arguments.length;n++)t[n-1]=arguments[n];e&&e.removeEventListener&&e.removeEventListener.apply(e,t)}var Vk=["mousedown","touchstart"],Wk=function(e,t,n){n===void 0&&(n=Vk);var r=m.useRef(t);m.useEffect(function(){r.current=t},[t]),m.useEffect(function(){for(var i=function(a){var u=e.current;u&&!u.contains(a.target)&&r.current(a)},o=0,l=n;o<l.length;o++){var s=l[o];jk(document,s,i)}return function(){for(var a=0,u=n;a<u.length;a++){var c=u[a];Hk(document,c,i)}}},[n,e])};const Uk=({children:e,onClose:t})=>{const n=m.useRef(null);return Wk(n,()=>{console.log("click away"),t==null||t()}),I.jsx(Qk,{children:I.jsxs(Yk,{ref:n,children:[I.jsx(Kk,{children:I.jsx(Zk,{onClick:()=>{t==null||t()},children:sn("Zamknij")})}),I.jsx(Gk,{children:e})]})})},Qk=te.div`
+`,Lk=e=>{const t=()=>({width:window.innerWidth,height:window.innerHeight}),[n,r]=m.useState(t());return m.useEffect(()=>{e(t());const i=Y9(()=>{const o=t();r(o),e(o)},100);return window.addEventListener("resize",i),()=>{i.cancel(),window.removeEventListener("resize",i)}},[e]),n},Nk=({html:e})=>I.jsx(jk,{dangerouslySetInnerHTML:{__html:e}}),jk=te.div`
+  line-height: 1.42;
+`;function Hk(e){for(var t=[],n=1;n<arguments.length;n++)t[n-1]=arguments[n];e&&e.addEventListener&&e.addEventListener.apply(e,t)}function Vk(e){for(var t=[],n=1;n<arguments.length;n++)t[n-1]=arguments[n];e&&e.removeEventListener&&e.removeEventListener.apply(e,t)}var Wk=["mousedown","touchstart"],Uk=function(e,t,n){n===void 0&&(n=Wk);var r=m.useRef(t);m.useEffect(function(){r.current=t},[t]),m.useEffect(function(){for(var i=function(a){var u=e.current;u&&!u.contains(a.target)&&r.current(a)},o=0,l=n;o<l.length;o++){var s=l[o];Hk(document,s,i)}return function(){for(var a=0,u=n;a<u.length;a++){var c=u[a];Vk(document,c,i)}}},[n,e])};const Qk=({children:e,onClose:t})=>{const n=m.useRef(null);return Uk(n,()=>{console.log("click away"),t==null||t()}),I.jsx(Yk,{children:I.jsxs(Kk,{ref:n,children:[I.jsx(Gk,{children:I.jsxs(qk,{onClick:()=>{t==null||t()},children:[sn("Zamknij")," ✕"]})}),I.jsx(Xk,{children:e})]})})},Yk=te.div`
   z-index: 30;
   position: fixed;
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
-`,Yk=te.div`
+`,Kk=te.div`
   display: flex;
   flex-direction: column;
   position: fixed;
@@ -235,13 +240,15 @@ Error generating stack: `+o.message+`
   border-radius: 4px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
-`,Kk=te.header`
+`,Gk=te.header`
   display: flex;
-`,Gk=te.section`
+`,Xk=te.section`
   flex-grow: 1;
-`,Xk=te.button`
+`,Zk=te.button`
   border-radius: 4px;
   border: 1px solid #ddd;
+  padding: 8px 12px;
+  cursor: pointer;
 
   &:hover {
     border-color: #ccc;
@@ -251,22 +258,22 @@ Error generating stack: `+o.message+`
     border-color: #999;
     outline: none;
   }
-`,Zk=te(Xk)``,qk=({id:e})=>{const t=`https://sciencemap.eto.tech/cluster/?version=2&cluster_id=${e.toString()}`;return I.jsxs(Jk,{children:[I.jsxs("p",{children:[sn("Więcej informacji na temat klastra "),I.jsxs("strong",{children:["#",e]})," ",sn("ze strony projektu ETO Map of Science"),":"]}),I.jsx(eS,{src:t}),I.jsx("p",{children:I.jsx("a",{href:t,target:"_blank",rel:"noopener noreferrer",children:sn("Otórz w nowej karcie »")})})]})},Jk=te.div`
+`,qk=te(Zk)``,Jk=({id:e})=>{const t=`https://sciencemap.eto.tech/cluster/?version=2&cluster_id=${e.toString()}`;return I.jsxs(eS,{children:[I.jsxs("p",{children:[sn("Więcej informacji na temat klastra "),I.jsxs("strong",{children:["#",e]})," ",sn("ze strony projektu ETO Map of Science"),":"]}),I.jsx(tS,{src:t}),I.jsx("p",{children:I.jsx("a",{href:t,target:"_blank",rel:"noopener noreferrer",children:sn("Otórz w nowej karcie »")})})]})},eS=te.div`
   display: flex;
   flex-direction: column;
   height: 100%;
-`,eS=te.iframe`
+`,tS=te.iframe`
   width: 100%;
   flex-grow: 1;
   border: none;
-`,tS=()=>{const{type:e,id:t,article:n,reset:r}=Nc();if(!e)return null;const i=e==="iframe"?I.jsx(qk,{id:t}):I.jsx(Nk,{html:n});return I.jsx(Uk,{children:i,onClose:()=>{r()}})};let ef=!1;const nS=()=>I.jsx(iS,{children:sn("Ładowanie danych...")});function rS(){m.useEffect(()=>{ef||(Ix(),ef=!0)},[]);const[e,t]=m.useState([]),[n,r]=m.useState([]),[i,o]=m.useState(new Map),l=n.length>0&&i.size>0,s=Ao(u=>u.setMapSize),a=Lk(m.useCallback(u=>{s(u)},[s]));return m.useEffect(()=>(en.on("cityLabelsLoaded",u=>{t(u)}),en.on("dataPointsLoaded",u=>{r(u)}),en.on("conceptsLoaded",u=>{o(u)}),()=>{en.off("cityLabelsLoaded"),en.off("dataPointsLoaded"),en.off("conceptsLoaded")}),[]),I.jsxs(I.Fragment,{children:[I.jsx(Mk,{}),l?I.jsx(vx,{size:a,cityLabels:e,dataPoints:n,concepts:i,map:H9}):I.jsx(nS,{}),I.jsx(tS,{}),Lx.devTool]})}te.div`
+`,nS=()=>{const{type:e,id:t,article:n,reset:r}=Nc();if(!e)return null;const i=e==="iframe"?I.jsx(Jk,{id:t}):I.jsx(Nk,{html:n});return I.jsx(Qk,{children:i,onClose:()=>{r()}})};let ef=!1;const rS=()=>I.jsx(oS,{children:sn("Ładowanie danych...")});function iS(){m.useEffect(()=>{ef||(Ix(),ef=!0)},[]);const[e,t]=m.useState([]),[n,r]=m.useState([]),[i,o]=m.useState(new Map),l=n.length>0&&i.size>0,s=Ao(u=>u.setMapSize),a=Lk(m.useCallback(u=>{s(u)},[s]));return m.useEffect(()=>(en.on("cityLabelsLoaded",u=>{t(u)}),en.on("dataPointsLoaded",u=>{r(u)}),en.on("conceptsLoaded",u=>{o(u)}),()=>{en.off("cityLabelsLoaded"),en.off("dataPointsLoaded"),en.off("conceptsLoaded")}),[]),I.jsxs(I.Fragment,{children:[I.jsx(Mk,{}),l?I.jsx(vx,{size:a,cityLabels:e,dataPoints:n,concepts:i,map:H9}):I.jsx(rS,{}),I.jsx(nS,{}),Lx.devTool]})}te.div`
   z-index: 20;
   position: fixed;
   bottom: 0;
   right: 0;
-`;const iS=te.div`
+`;const oS=te.div`
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-`,L5=document.getElementById("root");if(!L5)throw new Error("No #root element found in the document");y3(L5).render(I.jsx(m.StrictMode,{children:I.jsx(rS,{})}));
+`,L5=document.getElementById("root");if(!L5)throw new Error("No #root element found in the document");y3(L5).render(I.jsx(m.StrictMode,{children:I.jsx(iS,{})}));

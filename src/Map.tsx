@@ -295,6 +295,7 @@ export default function Map(props: Props) {
 }
 
 const MapSvg = styled.svg`
+  display: block;
   background: radial-gradient(
     circle,
     rgba(173, 216, 230, 0.7) 0,

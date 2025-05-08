@@ -159,8 +159,8 @@ const TitleBar = styled.div`
 `;
 
 const Toggle = styled.div`
-  width: 24px;
-  height: 24px;
+  width: 45px;
+  height: 45px;
   display: flex;
   padding: 12px;
   background-color: #e4e4e4;

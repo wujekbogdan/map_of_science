@@ -25,7 +25,7 @@ export const ArticleModal = ({ children, onClose }: Props) => {
               onClose?.();
             }}
           >
-            {i18n("Zamknij")}
+            {i18n("Zamknij")} ✕
           </CloseButton>
         </Header>
         <Content>{children}</Content>
@@ -74,6 +74,8 @@ const Content = styled.section`
 const Button = styled.button`
   border-radius: 4px;
   border: 1px solid #ddd;
+  padding: 8px 12px;
+  cursor: pointer;
 
   &:hover {
     border-color: #ccc;

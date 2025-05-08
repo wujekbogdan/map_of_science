@@ -51,9 +51,12 @@ const Button = styled.button`
   padding: 4px;
   margin: 0;
   border-radius: 0;
-  border-bottom: 1px solid #eee;
+  border-width: 0 0 1px 0;
+  border-bottom: solid #eee;
   font-size: 24px;
   transition: background-color 0.1s ease-in-out;
+  cursor: pointer;
+
   &:hover {
     background-color: #f0f0f0;
   }

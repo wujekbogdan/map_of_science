@@ -88,8 +88,6 @@ export function handleResize(data) {
   transformLocalScaleDomains(zoomTransform);
   updateScaleRanges(width, height);
 
-  d3.select("svg").attr("width", width).attr("height", height);
-
   const _data = getDataPointsToRender(data, xScale, yScale);
   chart.renderChart(_data);
 

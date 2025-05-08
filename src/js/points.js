@@ -2,6 +2,7 @@ import * as chart from "./chart";
 import { eventBus } from "../event-bus";
 import { loadData } from "../api/worker.ts";
 
+
 // TODO: Avoid globals and mutability - use store instead
 export let data = [];
 let conceptsData = new Map();

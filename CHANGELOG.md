@@ -1,5 +1,27 @@
 # map_of_science
 
+## 1.7.0
+
+### Minor Changes
+
+- 2a74b69: - Introduce strongly-typed `keys.tsv`, `data.tsv`, and `labels.tsv"` files parsing.
+  - Refactor `points.js` to use th newly introduced parser
+- b60bc77: Bring back CSV parsing with Web Workers.
+- 91bb5f0: Add an `onClick` handler to map labels. The handler triggers only if the label has a corresponding article.
+  This feature _DOES NOT_ bring back articles.
+- 3e54b12: Drop the `streaming-tsv-parser.js` CSV parser:
+
+  - Add a generic `csv` parser based on [`csv-parse`](https://www.npmjs.com/package/csv-parse).
+  - Use the new parser in `points.js`.
+
+  _Notice_: The new implementation doesn't use Web Workers. This is temporary and will be implemented using Comlink.
+
+### Patch Changes
+
+- b60bc77: Fixed the cities svg behaviour to resize when the window is resized.
+- 91bb5f0: Fix a bug causing `VITE_BASE_URL` to be resolved as `undefined` in `vite.config.ts` if the variable was set via an `.env*` file.
+  The Vite config now instantiates `dotenv` and parses `.env*` files.
+
 ## 1.6.0
 
 ### Minor Changes

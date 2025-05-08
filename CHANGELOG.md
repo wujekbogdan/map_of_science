@@ -1,5 +1,12 @@
 # map_of_science
 
+## 1.8.1
+
+### Patch Changes
+
+- 820bd2b: Fix the styling of the article close button and the zoom controls button.
+- 6054aac: restore the `isArticleAvailable()` function
+
 ## 1.8.0
 
 ### Minor Changes

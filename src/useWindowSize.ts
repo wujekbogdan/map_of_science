@@ -15,6 +15,7 @@ export const useWindowSize = (onResize: (windowSize: WindowSize) => void) => {
   const [size, setSize] = useState(measure());
 
   useEffect(() => {
+    // So that it triggers at least once on mount.
     onResize(measure());
 
     const onResizeHandler = debounce(() => {

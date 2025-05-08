@@ -3,10 +3,11 @@ import styled from "styled-components";
 import { MapSvgRepresentation } from "../vite-plugin/svg-map-parser.ts";
 import { useStore } from "./store";
 import { isArticleAvailable } from "./js/article";
-import { Concept, DataPoint } from "./schema";
+import { Concept, DataPoint as Point } from "./schema";
 import { useLayersOpacity } from "./useLayersOpacity.ts";
 import { useD3Zoom } from "./useD3Zoom.ts";
 import { useShallow } from "zustand/react/shallow";
+import { DataPoint } from "./DataPoint.tsx";
 
 type Label = {
   key: string;
@@ -64,105 +65,11 @@ type Props = {
     x: number;
     y: number;
   }[];
-  dataPoints: DataPoint[];
+  dataPoints: Point[];
   concepts: Map<number, Concept>;
   on?: {
     labelClick?: OnLabelClick;
   };
-};
-
-type DataPointProps = {
-  point: DataPoint;
-  concepts: Map<number, Concept>;
-  zoom: number;
-};
-
-const DataPointShape = ({ point, concepts, zoom }: DataPointProps) => {
-  const configByThreshold = [
-    { min: 2001, shape: "square" },
-    { min: 1001, shape: "double-circle", radius: 7, innerRadius: 4 },
-    { min: 501, shape: "double-circle", radius: 6, innerRadius: 3 },
-    { min: 201, shape: "double-circle", radius: 5, innerRadius: 2 },
-    { min: 51, shape: "circle", radius: 4 },
-    { min: 0, shape: "circle", radius: 3 },
-  ] as const;
-
-  const { x, y } = point;
-  const config = configByThreshold.find(
-    ({ min }) => point.numRecentArticles >= min,
-  );
-
-  if (!config) {
-    console.error("Unable to find config for point:", point);
-    return null;
-  }
-
-  const label = concepts.get(point.clusterId)?.key;
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-  const transform = `translate(${x}, ${y}) scale(${1 / zoom})`;
-
-  if (config.shape === "square") {
-    // TODO: adjust size
-    const outer = 14;
-    const inner = 8;
-
-    return (
-      <g aria-label={label} transform={transform}>
-        <rect
-          x={-outer / 2}
-          y={-outer / 2}
-          width={outer}
-          height={outer}
-          fill="white"
-          stroke="black"
-          strokeWidth={1}
-        />
-        <rect
-          x={-inner / 2}
-          y={-inner / 2}
-          width={inner}
-          height={inner}
-          fill="black"
-        />
-      </g>
-    );
-  }
-
-  if (config.shape === "double-circle") {
-    return (
-      <g aria-label={label} transform={transform}>
-        <circle
-          x={0}
-          y={0}
-          r={config.radius}
-          fill="white"
-          stroke="black"
-          strokeWidth={1}
-        />
-        <circle
-          cx={0}
-          cy={0}
-          r={config.innerRadius}
-          fill={config.radius === 7 ? "black" : "white"}
-          stroke="black"
-          strokeWidth={1}
-        />
-      </g>
-    );
-  }
-
-  return (
-    <g aria-label={label} transform={transform}>
-      <circle
-        x={0}
-        y={0}
-        r={config.radius}
-        fill="white"
-        stroke="black"
-        strokeWidth={1}
-      />
-    </g>
-  );
 };
 
 export default function Map(props: Props) {
@@ -176,7 +83,6 @@ export default function Map(props: Props) {
         s.maxDataPointsInViewport,
       ]),
     );
-
   const svgRoot = useRef<SVGSVGElement>(null);
   const [mapVisibility, setMapVisibility] = useState<"visible" | "hidden">(
     "hidden",
@@ -369,7 +275,7 @@ export default function Map(props: Props) {
 
         <g id="data-points">
           {dataInViewport.map((point) => (
-            <DataPointShape
+            <DataPoint
               zoom={zoom}
               point={point}
               concepts={props.concepts}

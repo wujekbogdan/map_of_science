@@ -1,24 +1,33 @@
 import styled from "styled-components";
-import { zoomToScale } from "../../js/chart";
 import { useStore } from "../../store.ts";
+import { useShallow } from "zustand/react/shallow";
 
 export const ZoomControls = () => {
-  const { zoomStepFactor, zoom: currentZoom } = useStore();
+  const [setDesiredZoom, currentZoom, zoomStepFactor] = useStore(
+    useShallow((s) => [s.setDesiredZoom, s.currentZoom, s.zoomStepFactor]),
+  );
+  const scale = currentZoom ? currentZoom.scale : 1;
+
+  const zoomToScale = (scale: number) => {
+    setDesiredZoom({
+      x: currentZoom?.x ?? 0,
+      y: currentZoom?.y ?? 0,
+      scale,
+    });
+  };
 
   return (
     <ZoomControlsStyled>
       <Button
         onClick={() => {
-          const desiredZoom = currentZoom * zoomStepFactor;
-          zoomToScale(desiredZoom);
+          zoomToScale(scale * zoomStepFactor);
         }}
       >
         +
       </Button>
       <Button
         onClick={() => {
-          const desiredZoom = currentZoom / zoomStepFactor;
-          zoomToScale(desiredZoom);
+          zoomToScale(scale / zoomStepFactor);
         }}
       >
         &minus;
@@ -28,7 +37,6 @@ export const ZoomControls = () => {
 };
 
 const ZoomControlsStyled = styled.div`
-  box-sizing: border-box;
   background: rgba(255, 255, 255, 0.9);
   display: flex;
   flex-direction: column;

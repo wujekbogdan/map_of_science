@@ -47,3 +47,8 @@ export async function fetchArticle(labelText) {
     return null;
   }
 }
+
+export function isArticleAvailable(articleName) {
+  const labelId = labelTextToLabelId(articleName);
+  return labelId in articles;
+}

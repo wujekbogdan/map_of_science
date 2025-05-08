@@ -1,3 +1,5 @@
+import styled from "styled-components";
+
 type Props = {
   html: string;
 };
@@ -5,5 +7,10 @@ type Props = {
 export const LocalArticle = ({ html }: Props) => {
   // It says dangerouslySetInnerHTML, but it's safe because the content comes
   // from local markdown files we control.
-  return <div dangerouslySetInnerHTML={{ __html: html }} />;
+  return <Article dangerouslySetInnerHTML={{ __html: html }} />;
 };
+
+// TODO: Implement proper styling for Markdown content.
+const Article = styled.div`
+  line-height: 1.42;
+`;

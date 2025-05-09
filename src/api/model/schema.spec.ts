@@ -26,15 +26,8 @@ const parse = async (name: string, schema: ZodSchema) => {
 
 describe("schema", () => {
   describe("data.tsv", () => {
-    it("should parse data.tsv with labels, including a null label case", async () => {
-      const labels = new Map<number, { clusterId: number; label: string }>([
-        [84872, { clusterId: 84872, label: "Tech Innovations" }],
-      ]);
-
-      const [withLabel, withoutLabel] = await parse(
-        "data.tsv",
-        DataSchema(z, labels),
-      );
+    it("should parse data.tsv", async () => {
+      const [withLabel, withoutLabel] = await parse("data.tsv", DataSchema(z));
 
       expect([withLabel, withoutLabel]).toEqual([
         {
@@ -45,7 +38,6 @@ describe("schema", () => {
           clusterCategory: 5,
           growthRating: 15.43,
           keyConcepts: [198432, 37537, 12177, 43800, 43431],
-          cityLabel: "Tech Innovations",
         },
         {
           clusterId: 72062,
@@ -55,7 +47,6 @@ describe("schema", () => {
           clusterCategory: 5,
           growthRating: 3.22,
           keyConcepts: [40293, 71377, 120209, 90737, 67314],
-          cityLabel: null,
         },
       ]);
     });

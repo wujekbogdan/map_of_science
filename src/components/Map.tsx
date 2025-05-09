@@ -167,7 +167,7 @@ export default function Map(props: Props) {
     });
   }, [cityLabels, scaledFontSize.layer4, opacity]);
 
-  const labels: Label[] = [
+  const labels = [
     ...map.layer1.children.map(
       ({ path }) =>
         ({

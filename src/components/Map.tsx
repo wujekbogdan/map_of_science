@@ -1,13 +1,13 @@
 import { useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { useShallow } from "zustand/react/shallow";
-import { MapSvgRepresentation } from "../vite-plugin/svg-map-parser.ts";
+import { MapSvgRepresentation } from "../../vite-plugin/svg-map-parser.ts";
+import { isArticleAvailable } from "../api/article";
+import { Concept, DataPoint as Point } from "../api/model";
+import { useArticleStore, useStore } from "../store";
+import { useD3Zoom } from "../useD3Zoom.ts";
+import { useLayersOpacity } from "../useLayersOpacity.ts";
 import { DataPoint } from "./DataPoint.tsx";
-import { isArticleAvailable } from "./js/article";
-import { Concept, DataPoint as Point } from "./schema";
-import { useArticleStore, useStore } from "./store";
-import { useD3Zoom } from "./useD3Zoom.ts";
-import { useLayersOpacity } from "./useLayersOpacity.ts";
 
 type Label = {
   key: string;

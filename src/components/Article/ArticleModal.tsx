@@ -1,7 +1,7 @@
 import { ReactElement, useRef } from "react";
 import { useClickAway } from "react-use";
 import styled from "styled-components";
-import { i18n } from "../i18n.ts";
+import { i18n } from "../../i18n.ts";
 
 type Props = {
   children: ReactElement;

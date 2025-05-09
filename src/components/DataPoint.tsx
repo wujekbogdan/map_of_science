@@ -10,9 +10,9 @@ import {
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import styled, { keyframes } from "styled-components";
+import { Concept, DataPoint as Point } from "../api/model";
+import { useArticleStore } from "../store.ts";
 import { DataPointDetails } from "./DataPointDetails.tsx";
-import { Concept, DataPoint as Point } from "./schema";
-import { useArticleStore } from "./store.ts";
 
 type Props = {
   point: Point;

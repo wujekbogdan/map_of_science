@@ -1,7 +1,7 @@
-import { createProcessor, withHttpProvider } from "../csv/parse.ts";
-import { DataSchema, ConceptSchema, CityLabelSchema } from "../schema";
 import { z, ZodSchema, ZodTypeDef } from "zod";
 import { arrayCollector, mapCollector } from "../csv/collector.ts";
+import { createProcessor, withHttpProvider } from "../csv/parse.ts";
+import { DataSchema, ConceptSchema, CityLabelSchema } from "../schema";
 
 type Options<T> = {
   url: string;

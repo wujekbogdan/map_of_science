@@ -1,13 +1,13 @@
 import { useMemo, useRef, useState } from "react";
 import styled from "styled-components";
+import { useShallow } from "zustand/react/shallow";
 import { MapSvgRepresentation } from "../vite-plugin/svg-map-parser.ts";
-import { useArticleStore, useStore } from "./store";
+import { DataPoint } from "./DataPoint.tsx";
 import { isArticleAvailable } from "./js/article";
 import { Concept, DataPoint as Point } from "./schema";
-import { useLayersOpacity } from "./useLayersOpacity.ts";
+import { useArticleStore, useStore } from "./store";
 import { useD3Zoom } from "./useD3Zoom.ts";
-import { useShallow } from "zustand/react/shallow";
-import { DataPoint } from "./DataPoint.tsx";
+import { useLayersOpacity } from "./useLayersOpacity.ts";
 
 type Label = {
   key: string;
@@ -27,12 +27,12 @@ const Label = (props: Label) => {
   const onClick =
     props.hasArticle && props.onClick
       ? () => {
-        props.onClick?.({
-          text: props.text,
-          x: props.x,
-          y: props.y,
-        });
-      }
+          props.onClick?.({
+            text: props.text,
+            x: props.x,
+            y: props.y,
+          });
+        }
       : undefined;
 
   return (

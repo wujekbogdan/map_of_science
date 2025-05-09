@@ -4,9 +4,9 @@ import {
   ComboboxOptions as ComboboxOptionsHeadless,
   ComboboxOption as ComboboxOptionHeadless,
 } from "@headlessui/react";
-import styled from "styled-components";
-import { ChangeEvent, useMemo, useState } from "react";
 import { normalizeSync } from "normalize-diacritics";
+import { ChangeEvent, useMemo, useState } from "react";
+import styled from "styled-components";
 import { i18n } from "../../i18n.ts";
 
 export type Option = {

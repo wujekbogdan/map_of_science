@@ -1,34 +1,6 @@
-import { z, ZodSchema, ZodTypeDef } from "zod";
-import { arrayCollector, mapCollector } from "../csv/collector.ts";
-import { createProcessor, withHttpProvider } from "../csv/parse.ts";
+import { z } from "zod";
 import { DataSchema, ConceptSchema, CityLabelSchema } from "./model";
-
-type Options<T> = {
-  url: string;
-  schema: ZodSchema<T, ZodTypeDef, unknown>;
-};
-
-const loadAsArray = async <T>({ url, schema }: Options<T>) => {
-  const collector = arrayCollector<T>();
-  const processor = createProcessor(schema, collector);
-
-  await withHttpProvider(url, processor.process);
-
-  return processor.getResults();
-};
-
-const loadAsMap = async <T, K>({
-  url,
-  schema,
-  getKey,
-}: Options<T> & { getKey: (item: T) => K }) => {
-  const collector = mapCollector<K, T>(getKey);
-  const processor = createProcessor(schema, collector);
-
-  await withHttpProvider(url, processor.process);
-
-  return processor.getResults();
-};
+import { loadAsMap } from "./utils.ts";
 
 /**
  * - City labels loading doesn't depend on anything.
@@ -52,15 +24,37 @@ export const loadData = async () => {
   });
 
   // We're awaiting the labels promise only because at this point we don't care about concepts yet
-  const labels = await loadingLabels;
+  const rawLabels = await loadingLabels;
 
   const [concepts, dataPoints] = await Promise.all([
     loadingConcepts,
-    loadAsArray({
+    loadAsMap({
       url: new URL("../../asset/data.tsv", import.meta.url).href,
-      schema: DataSchema(z, labels),
+      schema: DataSchema(z, rawLabels),
+      getKey: (item) => item.clusterId,
     }),
   ]);
 
-  return { concepts, labels, dataPoints };
+  // Populate labels with x,y coordinates
+  const labels = [...rawLabels.values()]
+    .map(({ clusterId, label }) => {
+      const point = dataPoints.get(clusterId);
+      return {
+        x: point?.x ?? NaN,
+        y: point?.y ?? NaN,
+        clusterId,
+        label,
+      };
+    })
+    .filter(({ x, y }) => !Number.isNaN(x) && !Number.isNaN(y));
+
+  const dataPointsOrdered = [...dataPoints.values()].sort(
+    (a, b) => b.numRecentArticles - a.numRecentArticles,
+  );
+
+  return {
+    concepts,
+    labels,
+    dataPoints: dataPointsOrdered,
+  };
 };

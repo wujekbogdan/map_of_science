@@ -1,11 +1,10 @@
-import { useEffect, useState, useCallback } from "react";
+import { useCallback } from "react";
 import styled from "styled-components";
+import useSWR from "swr";
 import map from "../../asset/foreground.svg?parse";
-import { Concept } from "../api/model";
+import { loadData } from "../api/worker.ts";
 import { config } from "../config.ts";
-import { eventBus, Events } from "../event-bus.ts";
 import { i18n } from "../i18n.ts";
-import { init } from "../js/main";
 import { useStore } from "../store.ts";
 import { useWindowSize } from "../useWindowSize.ts";
 import { Article } from "./Article/Article.tsx";
@@ -13,26 +12,12 @@ import { DevTool } from "./DevTool.tsx";
 import { Header } from "./Header/Header.tsx";
 import MapComponent from "./Map";
 
-let isInitialized = false;
-
 const Loader = () => {
   return <LoadingWrapper>{i18n("Ładowanie danych...")}</LoadingWrapper>;
 };
 
 function App() {
-  // Ensure the init function is called only once, even in React strict mode
-  useEffect(() => {
-    if (isInitialized) return;
-    init();
-    isInitialized = true;
-  }, []);
-
-  const [cityLabels, setCityLabels] = useState<Events["cityLabelsLoaded"]>([]);
-  const [dataPoints, setDataPoints] = useState<Events["dataPointsLoaded"]>([]);
-  const [concepts, setConcepts] = useState<Map<number, Concept>>(
-    new Map<number, Concept>(),
-  );
-  const isLoaded = dataPoints.length > 0 && concepts.size > 0;
+  const { data, isLoading } = useSWR("data", loadData);
   const setMapSize = useStore((s) => s.setMapSize);
   const size = useWindowSize(
     useCallback(
@@ -43,37 +28,21 @@ function App() {
     ),
   );
 
-  // TODO: Get rid of event-based communication and rely solely on Zustand once data points rendering is fully migrated to React
-  useEffect(() => {
-    eventBus.on("cityLabelsLoaded", (labels) => {
-      setCityLabels(labels);
-    });
-    eventBus.on("dataPointsLoaded", (dataPoints) => {
-      setDataPoints(dataPoints);
-    });
-    eventBus.on("conceptsLoaded", (dataPoints) => {
-      setConcepts(dataPoints);
-    });
-
-    return () => {
-      eventBus.off("cityLabelsLoaded");
-      eventBus.off("dataPointsLoaded");
-      eventBus.off("conceptsLoaded");
-    };
-  }, []);
-
   return (
     <Container>
       <Header />
 
-      {!isLoaded ? (
+      {isLoading ? (
         <Loader />
       ) : (
         <MapComponent
           size={size}
-          cityLabels={cityLabels}
-          dataPoints={dataPoints}
-          concepts={concepts}
+          /* TODO: This condition isn't really required. values are never
+           *  undefined. It's just an issue with typing.
+           * */
+          cityLabels={data?.labels ?? []}
+          dataPoints={data?.dataPoints ?? []}
+          concepts={data?.concepts ?? new Map()}
           map={map}
         />
       )}

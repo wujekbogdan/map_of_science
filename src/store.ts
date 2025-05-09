@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { combine } from "zustand/middleware";
-import { DataPoint } from "./schema";
 import { fetchArticle } from "./js/article";
+import { DataPoint } from "./schema";
 
 type Zoom = { x: number; y: number; scale: number };
 type PartialDefaults = typeof partialDefaults;

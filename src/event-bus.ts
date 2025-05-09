@@ -1,5 +1,5 @@
-import mitt from "mitt";
 import { ScaleLinear } from "d3";
+import mitt from "mitt";
 import { Concept, DataPoint } from "./schema";
 
 export type Events = {

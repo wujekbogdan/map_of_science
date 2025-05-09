@@ -1,6 +1,6 @@
 import styled from "styled-components";
-import { useStore } from "../../store.ts";
 import { useShallow } from "zustand/react/shallow";
+import { useStore } from "../../store.ts";
 
 export const ZoomControls = () => {
   const [setDesiredZoom, currentZoom, zoomStepFactor] = useStore(

@@ -1,5 +1,5 @@
-import { i18n } from "../i18n.ts";
 import styled from "styled-components";
+import { i18n } from "../i18n.ts";
 
 export const IframeArticle = ({ id }: { id: number }) => {
   const url = `https://sciencemap.eto.tech/cluster/?version=2&cluster_id=${id.toString()}`;

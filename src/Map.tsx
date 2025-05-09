@@ -310,11 +310,6 @@ const MapSvg = styled.svg<{
 }>`
   visibility: ${(props) => props.$visibility};
   display: block;
-  background: radial-gradient(
-    circle,
-    rgba(173, 216, 230, 0.7) 0,
-    rgba(173, 216, 230, 1) 100%
-  );
 `;
 
 const labelFillColor = ($level: 1 | 2 | 3 | 4) => {

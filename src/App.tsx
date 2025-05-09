@@ -63,7 +63,7 @@ function App() {
   }, []);
 
   return (
-    <>
+    <Container>
       <Header />
 
       {!isLoaded ? (
@@ -85,9 +85,18 @@ function App() {
           <DevTool />
         </DevToolsWrapper>
       )}
-    </>
+    </Container>
   );
 }
+
+const Container = styled.div`
+  min-height: 100vh;
+  background: radial-gradient(
+    circle,
+    rgba(173, 216, 230, 0.7) 0,
+    rgba(173, 216, 230, 1) 100%
+  );
+`;
 
 const DevToolsWrapper = styled.div`
   z-index: 20;

@@ -4,6 +4,8 @@ import {
   useHover,
   useInteractions,
   useTransitionStyles,
+  flip,
+  shift,
 } from "@floating-ui/react";
 import { useState } from "react";
 import { createPortal } from "react-dom";
@@ -24,7 +26,7 @@ export const DataPoint = ({ point, concepts, zoom }: Props) => {
   );
   const [isOpen, setIsOpen] = useState(false);
   const { refs, floatingStyles, context } = useFloating({
-    middleware: [offset(10)],
+    middleware: [offset(10), flip(), shift({ padding: 10 })],
     open: isOpen,
     onOpenChange: setIsOpen,
   });

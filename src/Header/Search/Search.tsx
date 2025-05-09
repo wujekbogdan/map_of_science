@@ -99,6 +99,5 @@ export const Search = (props: Props) => {
 };
 
 const Form = styled.form`
-  width: 100%;
-  max-width: 450px;
+  width: 450px;
 `;

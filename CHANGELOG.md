@@ -1,5 +1,20 @@
 # map_of_science
 
+## 1.9.0
+
+### Minor Changes
+
+- 0f9ec6c: Install the `@trivago/prettier-plugin-sort-imports` plugin and reformat all the files.
+- a340b90: Run build, test, and lint on every push and pull request.
+
+### Patch Changes
+
+- 199871f: Restore the background color while loading the map.
+- 11abdc2: bump `@vitejs/plugin-react-swc` to `3.9.0`
+- 11abdc2: Bump `vite` to `6.3.5`
+- 11abdc2: bump `vitest` to `3.1.3`
+- 0f9ec6c: Add `*.ts` and `*.tsx` files to lint-staged configuration to run `prettier` and `eslint` on them.
+
 ## 1.8.1
 
 ### Patch Changes

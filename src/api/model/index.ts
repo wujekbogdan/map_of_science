@@ -19,7 +19,7 @@ export const CityLabelSchema = (z: typeof zod) =>
     }));
 export type CityLabel = zod.infer<ReturnType<typeof CityLabelSchema>>;
 
-export const DataSchema = (z: typeof zod) =>
+export const DataSchema = (z: typeof zod, labels: Map<number, CityLabel>) =>
   z
     .object({
       cluster_id: z.coerce.number(),
@@ -38,5 +38,6 @@ export const DataSchema = (z: typeof zod) =>
       clusterCategory: data.cluster_category,
       growthRating: data.growth_rating,
       keyConcepts: data.key_concepts.split(",").map((id) => Number(id)),
+      cityLabel: labels.get(data.cluster_id)?.label || null,
     }));
 export type DataPoint = zod.infer<ReturnType<typeof DataSchema>>;

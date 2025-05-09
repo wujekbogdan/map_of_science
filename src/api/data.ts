@@ -1,34 +1,6 @@
-import { z, ZodSchema, ZodTypeDef } from "zod";
-import { arrayCollector, mapCollector } from "../csv/collector.ts";
-import { createProcessor, withHttpProvider } from "../csv/parse.ts";
+import { z } from "zod";
 import { DataSchema, ConceptSchema, CityLabelSchema } from "./model";
-
-type Options<T> = {
-  url: string;
-  schema: ZodSchema<T, ZodTypeDef, unknown>;
-};
-
-const loadAsArray = async <T>({ url, schema }: Options<T>) => {
-  const collector = arrayCollector<T>();
-  const processor = createProcessor(schema, collector);
-
-  await withHttpProvider(url, processor.process);
-
-  return processor.getResults();
-};
-
-const loadAsMap = async <T, K>({
-  url,
-  schema,
-  getKey,
-}: Options<T> & { getKey: (item: T) => K }) => {
-  const collector = mapCollector<K, T>(getKey);
-  const processor = createProcessor(schema, collector);
-
-  await withHttpProvider(url, processor.process);
-
-  return processor.getResults();
-};
+import { loadAsMap } from "./utils.ts";
 
 /**
  * - City labels loading doesn't depend on anything.
@@ -39,24 +11,32 @@ const loadAsMap = async <T, K>({
  * and then wait for city labels to finish before loading data points.
  */
 export const loadData = async () => {
-  const [concepts, dataPoints, labels] = await Promise.all([
-    loadAsMap({
-      url: new URL("../../asset/keys.tsv", import.meta.url).href,
-      schema: ConceptSchema(z),
-      getKey: (item) => item.index,
-    }),
+  const loadingConcepts = loadAsMap({
+    url: new URL("../../asset/keys.tsv", import.meta.url).href,
+    schema: ConceptSchema(z),
+    getKey: (item) => item.index,
+  });
+
+  const loadingLabels = loadAsMap({
+    url: new URL("../../asset/labels.tsv", import.meta.url).href,
+    schema: CityLabelSchema(z),
+    getKey: (item) => item.clusterId,
+  });
+
+  // We're awaiting the labels promise only because at this point we don't care about concepts yet
+  const rawLabels = await loadingLabels;
+
+  const [concepts, dataPoints] = await Promise.all([
+    loadingConcepts,
     loadAsMap({
       url: new URL("../../asset/data.tsv", import.meta.url).href,
-      schema: DataSchema(z),
+      schema: DataSchema(z, rawLabels),
       getKey: (item) => item.clusterId,
-    }),
-    loadAsArray({
-      url: new URL("../../asset/labels.tsv", import.meta.url).href,
-      schema: CityLabelSchema(z),
     }),
   ]);
 
-  const labelsFiltered = labels
+  // Populate labels with x,y coordinates
+  const labels = [...rawLabels.values()]
     .map(({ clusterId, label }) => {
       const point = dataPoints.get(clusterId);
       return {
@@ -74,7 +54,7 @@ export const loadData = async () => {
 
   return {
     concepts,
-    labels: labelsFiltered,
+    labels,
     dataPoints: dataPointsOrdered,
   };
 };

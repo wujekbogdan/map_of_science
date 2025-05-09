@@ -1,4 +1,4 @@
-import { useArticleStore } from "../store.ts";
+import { useArticleStore } from "../../store.ts";
 import { ArticleModal } from "./ArticleModal.tsx";
 import { IframeArticle } from "./IframeArticle.tsx";
 import { LocalArticle } from "./LocalArticle.tsx";

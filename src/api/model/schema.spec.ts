@@ -4,8 +4,8 @@ import { describe, it, expect } from "vitest";
 import { z } from "zod";
 import { ZodSchema } from "zod";
 import { DataSchema, ConceptSchema, CityLabelSchema } from ".";
-import { setCollector } from "../csv/collector.ts";
-import { parse as csvParse } from "../csv/parse.ts";
+import { setCollector } from "../../csv/collector.ts";
+import { parse as csvParse } from "../../csv/parse.ts";
 
 const parse = async (name: string, schema: ZodSchema) => {
   const filePath = fileURLToPath(

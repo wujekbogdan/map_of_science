@@ -1,6 +1,6 @@
 import { ScaleLinear } from "d3";
 import mitt from "mitt";
-import { Concept, DataPoint } from "./schema";
+import { Concept, DataPoint } from "./api/model";
 
 export type Events = {
   // TODO: This name isn't great. In the future it will get renamed to

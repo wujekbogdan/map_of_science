@@ -1,17 +1,17 @@
 import { useEffect, useState, useCallback } from "react";
 import styled from "styled-components";
-import map from "../asset/foreground.svg?parse";
+import map from "../../asset/foreground.svg?parse";
+import { Concept } from "../api/model";
+import { config } from "../config.ts";
+import { eventBus, Events } from "../event-bus.ts";
+import { i18n } from "../i18n.ts";
+import { init } from "../js/main";
+import { useStore } from "../store.ts";
+import { useWindowSize } from "../useWindowSize.ts";
 import { Article } from "./Article/Article.tsx";
 import { DevTool } from "./DevTool.tsx";
 import { Header } from "./Header/Header.tsx";
 import MapComponent from "./Map";
-import { config } from "./config.ts";
-import { eventBus, Events } from "./event-bus.ts";
-import { i18n } from "./i18n.ts";
-import { init } from "./js/main";
-import { Concept } from "./schema";
-import { useStore } from "./store.ts";
-import { useWindowSize } from "./useWindowSize.ts";
 
 let isInitialized = false;
 

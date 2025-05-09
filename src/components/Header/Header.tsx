@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import map from "../../asset/foreground.svg?parse";
+import map from "../../../asset/foreground.svg?parse";
 import { Search } from "./Search/Search.tsx";
 import { ZoomControls } from "./ZoomControls/ZoomControls.tsx";
 

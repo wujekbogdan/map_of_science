@@ -1,8 +1,8 @@
 import { useState } from "react";
 import styled from "styled-components";
 import { useShallow } from "zustand/react/shallow";
-import { i18n } from "./i18n";
-import { useStore } from "./store";
+import { i18n } from "../i18n.ts";
+import { useStore } from "../store.ts";
 
 export const DevTool = () => {
   const [visibility, setVisibility] = useState<"collapsed" | "expanded">(

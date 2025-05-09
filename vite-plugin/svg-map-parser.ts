@@ -1,11 +1,11 @@
-import { Plugin } from "vite";
 import { createFilter } from "@rollup/pluginutils";
-import { Parser } from "xml2js";
 import { readFileSync, existsSync } from "fs";
 import { resolve } from "path";
-import { z } from "zod";
 import styleToObject from "style-to-object";
 import { svgPathBbox } from "svg-path-bbox";
+import { Plugin } from "vite";
+import { Parser } from "xml2js";
+import { z } from "zod";
 
 const l1L2Schema = z.object({
   attributes: z.object({

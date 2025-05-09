@@ -1,11 +1,11 @@
+import debounce from "lodash/debounce";
 import { useState, useMemo } from "react";
 import styled from "styled-components";
-import debounce from "lodash/debounce";
 import useSWR from "swr";
-import { MapSvgRepresentation as Map } from "../../../vite-plugin/svg-map-parser.ts";
-import { Dropdown, Option } from "./Dropdown.tsx";
 import { useShallow } from "zustand/react/shallow";
+import { MapSvgRepresentation as Map } from "../../../vite-plugin/svg-map-parser.ts";
 import { useStore } from "../../store.ts";
+import { Dropdown, Option } from "./Dropdown.tsx";
 
 const worker = new ComlinkSharedWorker<typeof import("./search.ts")>(
   new URL("./search.ts", import.meta.url),

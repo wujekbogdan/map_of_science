@@ -1,7 +1,7 @@
-import { LocalArticle } from "./LocalArticle.tsx";
-import { ArticleModal } from "./ArticleModal.tsx";
 import { useArticleStore } from "../store.ts";
+import { ArticleModal } from "./ArticleModal.tsx";
 import { IframeArticle } from "./IframeArticle.tsx";
+import { LocalArticle } from "./LocalArticle.tsx";
 
 export const Article = () => {
   const { type, id, article, reset } = useArticleStore();

@@ -1,5 +1,3 @@
-import { useState } from "react";
-import { createPortal } from "react-dom";
 import {
   offset,
   useFloating,
@@ -7,6 +5,8 @@ import {
   useInteractions,
   useTransitionStyles,
 } from "@floating-ui/react";
+import { useState } from "react";
+import { createPortal } from "react-dom";
 import { DataPointDetails } from "./DataPointDetails.tsx";
 import { Concept, DataPoint as Point } from "./schema";
 import { useArticleStore } from "./store.ts";

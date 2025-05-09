@@ -1,5 +1,6 @@
 {
-  "*.{js,jsx}": ["eslint --fix", "prettier --write  --ignore-unknown"],
+  "*.{js,jsx,ts,tsx}": ["eslint --fix", "prettier --write --ignore-unknown"],
+  "*.css": "prettier --write",
   "package.json": "prettier --write",
   "*.md": "prettier --write"
 }

@@ -7,6 +7,7 @@ import {
 } from "@floating-ui/react";
 import { useState } from "react";
 import { createPortal } from "react-dom";
+import styled from "styled-components";
 import { DataPointDetails } from "./DataPointDetails.tsx";
 import { Concept, DataPoint as Point } from "./schema";
 import { useArticleStore } from "./store.ts";
@@ -65,13 +66,13 @@ export const DataPoint = ({ point, concepts, zoom }: Props) => {
 
   const shape = () => {
     if (config.shape === "square") {
-      // TODO: adjust size
       const outer = 14;
       const inner = 8;
 
       return (
         <>
           <rect
+            className="square outer"
             x={-outer / 2}
             y={-outer / 2}
             width={outer}
@@ -81,6 +82,7 @@ export const DataPoint = ({ point, concepts, zoom }: Props) => {
             strokeWidth={1}
           />
           <rect
+            className="square inner"
             x={-inner / 2}
             y={-inner / 2}
             width={inner}
@@ -95,6 +97,7 @@ export const DataPoint = ({ point, concepts, zoom }: Props) => {
       return (
         <>
           <circle
+            className="double-circle outer"
             x={0}
             y={0}
             r={config.radius}
@@ -103,6 +106,7 @@ export const DataPoint = ({ point, concepts, zoom }: Props) => {
             strokeWidth={1}
           />
           <circle
+            className="double-circle inner"
             cx={0}
             cy={0}
             r={config.innerRadius}
@@ -116,6 +120,7 @@ export const DataPoint = ({ point, concepts, zoom }: Props) => {
 
     return (
       <circle
+        className="circle outer"
         x={0}
         y={0}
         r={config.radius}
@@ -128,7 +133,7 @@ export const DataPoint = ({ point, concepts, zoom }: Props) => {
 
   return (
     <>
-      <g
+      <Group
         style={{ cursor: "pointer" }}
         aria-label={label}
         transform={transform}
@@ -139,7 +144,7 @@ export const DataPoint = ({ point, concepts, zoom }: Props) => {
         }}
       >
         {shape()}
-      </g>
+      </Group>
 
       {isMounted && (
         <>
@@ -158,3 +163,41 @@ export const DataPoint = ({ point, concepts, zoom }: Props) => {
     </>
   );
 };
+
+const hoverColor = "#9b5b9b";
+const Group = styled.g`
+  &:hover {
+    cursor: pointer;
+    .square,
+    .circle,
+    .double-circle {
+      transition:
+        fill 0.3s,
+        stroke 0.3s;
+    }
+
+    .square {
+      &.outer {
+        stroke: ${hoverColor};
+      }
+      &.inner {
+        fill: ${hoverColor};
+      }
+    }
+
+    .circle {
+      stroke: white;
+      fill: ${hoverColor};
+    }
+
+    .double-circle {
+      &.outer {
+        stroke: ${hoverColor};
+      }
+      &.inner {
+        stroke: ${hoverColor};
+        fill: ${hoverColor};
+      }
+    }
+  }
+`;

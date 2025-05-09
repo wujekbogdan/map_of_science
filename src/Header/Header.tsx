@@ -5,21 +5,27 @@ import { ZoomControls } from "./ZoomControls/ZoomControls.tsx";
 
 export const Header = () => {
   return (
-    <HeaderStyles>
-      <Search map={map} />
-      <ZoomControls />
-    </HeaderStyles>
+    <>
+      <SearchWrap>
+        <Search map={map} />
+      </SearchWrap>
+      <ZoomControlsWrap>
+        <ZoomControls />
+      </ZoomControlsWrap>
+    </>
   );
 };
 
-const HeaderStyles = styled.div`
-  z-index: 20;
+const offset = "12px";
+
+const SearchWrap = styled.div`
   position: fixed;
-  top: 0;
-  right: 0;
-  left: 0;
-  background-color: transparent;
-  display: flex;
-  justify-content: space-between;
-  padding: 12px;
+  top: ${offset};
+  left: ${offset};
+`;
+
+const ZoomControlsWrap = styled.div`
+  position: fixed;
+  top: ${offset};
+  right: ${offset};
 `;

@@ -7,7 +7,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd());
 
   return {
-    plugins: [react(), svgMapParser(), comlink()],
+    plugins: [react(), comlink(), svgMapParser()],
     base: env.VITE_BASE_URL || "/map_of_science/",
     root: "src",
     envDir: "../",

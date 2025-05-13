@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState } from "react";
+import { ZoomTransform } from "d3";
+import { CSSProperties, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { useShallow } from "zustand/react/shallow";
 import { MapSvgRepresentation } from "../../vite-plugin/svg-map-parser.ts";
@@ -7,10 +8,10 @@ import { Concept, DataPoint as Point } from "../api/model";
 import { useArticleStore, useStore } from "../store";
 import { useD3Zoom } from "../useD3Zoom.ts";
 import { useLayersOpacity } from "../useLayersOpacity.ts";
-import { DataPoint } from "./DataPoint.tsx";
+import { DataPoints } from "./DataPoints/DataPoints.tsx";
 
 type Label = {
-  key: string;
+  id: string;
   x: number;
   y: number;
   text: string;
@@ -38,7 +39,6 @@ const Label = (props: Label) => {
   return (
     <LabelText
       display={props.opacity ? "block" : "none"}
-      key={props.key}
       textAnchor="middle"
       alignmentBaseline="middle"
       x={props.x}
@@ -54,6 +54,37 @@ const Label = (props: Label) => {
   );
 };
 
+const filterDataByViewport = (
+  dataPoints: Point[],
+  transform: ZoomTransform,
+  limit: number,
+  size: {
+    width: number;
+    height: number;
+  },
+) => {
+  const dataInViewport: Point[] = [];
+
+  // Although .filter() would feel more natural, the regular for loop is way
+  // faster since we can easily break the loop when we reach the limit.
+  for (const point of dataPoints) {
+    const screenX = transform.applyX(point.x);
+    const screenY = transform.applyY(point.y);
+
+    if (
+      screenX >= 0 &&
+      screenX <= size.width &&
+      screenY >= 0 &&
+      screenY <= size.height
+    ) {
+      dataInViewport.push(point);
+      if (dataInViewport.length >= limit) break;
+    }
+  }
+
+  return dataInViewport;
+};
+
 type Props = {
   map: MapSvgRepresentation;
   size: {
@@ -66,7 +97,7 @@ type Props = {
     x: number;
     y: number;
   }[];
-  dataPoints: Point[];
+  dataPoints: Map<number, Point>;
   concepts: Map<number, Concept>;
   on?: {
     labelClick?: OnLabelClick;
@@ -75,15 +106,21 @@ type Props = {
 
 export default function Map(props: Props) {
   const { map, cityLabels, on } = props;
-  const [scaleFactor, fontSize, desiredZoom, maxDataPointsInViewport] =
-    useStore(
-      useShallow((s) => [
-        s.scaleFactor,
-        s.fontSize,
-        s.desiredZoom,
-        s.maxDataPointsInViewport,
-      ]),
-    );
+  const [
+    scaleFactor,
+    fontSize,
+    desiredZoom,
+    maxDataPointsInViewport,
+    clustersToHighlight,
+  ] = useStore(
+    useShallow((s) => [
+      s.scaleFactor,
+      s.fontSize,
+      s.desiredZoom,
+      s.maxDataPointsInViewport,
+      s.pointsToHighlight,
+    ]),
+  );
   const fetchLocalArticle = useArticleStore(
     ({ fetchLocalArticle }) => fetchLocalArticle,
   );
@@ -212,33 +249,43 @@ export default function Map(props: Props) {
     },
   }));
 
-  // TODO: dataPoints seem to use the same coordinate system as the SVG.
-  // The (0, 0) point is not the top-left corner — it's the center of the SVG map and the data space.
-  // Not sure where this alignment comes from — it's just an observed behavior.
-  // It's fine for now, but we might want to introduce d3-based scaling to decouple the map from data coordinates.
-  const data = useMemo(() => {
-    return props.dataPoints.map((point) => ({
-      ...point,
-      y: -point.y,
-    }));
-  }, [props.dataPoints]);
-
-  // TODO: This isn't efficient. Use quadtree or a similar method to determine which points are in the viewport.
-  const dataInViewport = data
-    .filter((point) => {
-      if (!transform) return false;
-
-      const screenX = transform.applyX(point.x);
-      const screenY = transform.applyY(point.y);
-
-      return (
-        screenX >= 0 &&
-        screenX <= props.size.width &&
-        screenY >= 0 &&
-        screenY <= props.size.height
+  const dataInViewport = !transform
+    ? []
+    : filterDataByViewport(
+        [...props.dataPoints.values()],
+        transform,
+        maxDataPointsInViewport,
+        props.size,
       );
-    })
-    .slice(0, maxDataPointsInViewport);
+
+  const HighlightedPoints = useMemo(() => {
+    const pointsToHighlight = clustersToHighlight
+      .map((id) => props.dataPoints.get(id))
+      .filter((point) => point !== undefined);
+
+    const inViewport = !transform
+      ? []
+      : filterDataByViewport(
+          pointsToHighlight,
+          transform,
+          Infinity,
+          props.size,
+        );
+
+    return (
+      <DataPoints
+        points={inViewport}
+        forcedSize={true}
+        concepts={props.concepts}
+      />
+    );
+  }, [
+    clustersToHighlight,
+    transform,
+    props.size,
+    props.concepts,
+    props.dataPoints,
+  ]);
 
   return (
     <MapSvg
@@ -246,9 +293,9 @@ export default function Map(props: Props) {
       ref={svgRoot}
       width={props.size.width}
       height={props.size.height}
+      $zoom={zoom}
     >
       <g transform={transformValue} opacity={opacity.layer1}>
-        {/* Layer 1 */}
         <g id={map.layer1.attributes.id} style={map.layer1.attributes.style}>
           {map.layer1.children.map(({ path }) => (
             <path
@@ -261,7 +308,6 @@ export default function Map(props: Props) {
           ))}
         </g>
 
-        {/* Layer 2 */}
         <g
           id={map.layer2.attributes.id}
           style={map.layer2.attributes.style}
@@ -278,21 +324,17 @@ export default function Map(props: Props) {
           ))}
         </g>
 
-        <g id="data-points">
-          {dataInViewport.map((point) => (
-            <DataPoint
-              zoom={zoom}
-              point={point}
-              concepts={props.concepts}
-              key={point.clusterId}
-            />
-          ))}
+        <g>
+          <DataPoints points={dataInViewport} concepts={props.concepts} />
+
+          {HighlightedPoints}
         </g>
 
-        <g id="labels">
+        <g>
           {labels.map((label) => (
             <Label
               {...label}
+              id={label.key}
               key={label.key}
               onClick={({ text }) => {
                 void fetchLocalArticle(text);
@@ -305,9 +347,14 @@ export default function Map(props: Props) {
   );
 }
 
-const MapSvg = styled.svg<{
+const MapSvg = styled.svg.attrs<{
   $visibility: "visible" | "hidden";
-}>`
+  $zoom: number;
+}>((props) => ({
+  style: {
+    "--zoom-scale": props.$zoom,
+  } as CSSProperties,
+}))`
   visibility: ${(props) => props.$visibility};
   display: block;
 `;
@@ -325,15 +372,19 @@ const labelFillColor = ($level: 1 | 2 | 3 | 4) => {
   }
 };
 
-const LabelText = styled.text<{
-  $opacity: number;
+const LabelText = styled.text.attrs<{
   $fontSize: number;
+  $opacity: number;
+}>((props) => ({
+  style: {
+    fontSize: `${props.$fontSize.toString()}px`,
+    opacity: props.$opacity,
+  },
+}))<{
   $level: 1 | 2 | 3 | 4;
   $hasArticle: boolean;
 }>`
   cursor: ${(props) => (props.$hasArticle ? "pointer" : "default")};
-  font-size: ${(props) => props.$fontSize}px;
-  opacity: ${(props) => props.$opacity};
   font-weight: bold;
   // TODO: It can be, very likely, replaced with a simplified text-shadow
   text-shadow:

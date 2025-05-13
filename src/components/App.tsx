@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import styled from "styled-components";
 import useSWR from "swr";
+import { useShallow } from "zustand/react/shallow";
 import map from "../../asset/foreground.svg?parse";
 import { loadData } from "../api/worker.ts";
 import { config } from "../config.ts";
@@ -17,8 +18,16 @@ const Loader = () => {
 };
 
 function App() {
-  const { data, isLoading } = useSWR("data", loadData);
-  const setMapSize = useStore((s) => s.setMapSize);
+  const [setMapSize, setDataPoints, setConcepts] = useStore(
+    useShallow((s) => [s.setMapSize, s.setDataPoints, s.setConcepts]),
+  );
+  const { data, isLoading } = useSWR("data", loadData, {
+    onSuccess: ({ dataPoints, concepts }) => {
+      setDataPoints(dataPoints);
+      setConcepts(concepts);
+    },
+  });
+
   const size = useWindowSize(
     useCallback(
       (size: { width: number; height: number }) => {
@@ -38,10 +47,11 @@ function App() {
         <MapComponent
           size={size}
           /* TODO: This condition isn't really required. values are never
-           *  undefined. It's just an issue with typing.
+           * undefined. It's just an issue with SWR typing. SWR doesn't narrow
+           * the type of data based on the isLoading value.
            * */
           cityLabels={data?.labels ?? []}
-          dataPoints={data?.dataPoints ?? []}
+          dataPoints={data?.dataPoints ?? new Map()}
           concepts={data?.concepts ?? new Map()}
           map={map}
         />

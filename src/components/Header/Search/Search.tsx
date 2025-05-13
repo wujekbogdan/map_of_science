@@ -3,38 +3,125 @@ import { useState, useMemo } from "react";
 import styled from "styled-components";
 import useSWR from "swr";
 import { useShallow } from "zustand/react/shallow";
-import { MapSvgRepresentation as Map } from "../../../../vite-plugin/svg-map-parser.ts";
+import map from "../../../../asset/foreground.svg?parse";
 import { useStore } from "../../../store.ts";
-import { Dropdown, Option } from "./Dropdown.tsx";
+import { BoundingBox, Dropdown, Option } from "./Dropdown.tsx";
 
-const worker = new ComlinkSharedWorker<typeof import("./search.ts")>(
+const worker = new ComlinkWorker<typeof import("./search.ts")>(
   new URL("./search.ts", import.meta.url),
 );
 
-type Props = {
-  map: Map;
-};
-
-export const Search = (props: Props) => {
-  const { map } = props;
-  const [setDesiredZoom, mapSize] = useStore(
-    useShallow((s) => [s.setDesiredZoom, s.mapSize]),
-  );
+export const Search = () => {
+  const [setDesiredZoom, setPointsToHighlight, mapSize, dataPoints, concepts] =
+    useStore(
+      useShallow((s) => [
+        s.setDesiredZoom,
+        s.setPointsToHighlight,
+        s.mapSize,
+        s.dataPoints,
+        s.concepts,
+      ]),
+    );
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { data: results = [] } = useSWR(
+  const { data: results } = useSWR(
     searchTerm ? [map, searchTerm] : null,
-    ([map, query]) => {
-      if (!query) return [];
-      return worker.search(map, query);
+    async ([map, query]) => {
+      if (!query)
+        return {
+          labels: [],
+          points: [],
+        };
+
+      const result = worker.search(
+        {
+          map,
+          dataPoints,
+          concepts,
+        },
+        query,
+      );
+      return result;
     },
   );
 
-  const dropdownOptions = results.map(({ id, label, boundingBox }) => ({
-    id,
-    label,
-    boundingBox,
-  }));
+  const { labels, points } = results || {
+    labels: [],
+    points: [],
+  };
+
+  const getCenteredBoundingBox = (
+    point: { x: number; y: number },
+    mapSize: { width: number; height: number },
+  ): BoundingBox => {
+    const halfWidth = mapSize.width / 2;
+    const halfHeight = mapSize.height / 2;
+
+    return {
+      min: { x: point.x - halfWidth, y: point.y - halfHeight },
+      max: { x: point.x + halfWidth, y: point.y + halfHeight },
+      center: { x: point.x, y: point.y },
+    };
+  };
+
+  const getBoundingBox = (
+    clusters: { x: number; y: number }[],
+    mapSize: {
+      width: number;
+      height: number;
+    },
+  ) => {
+    if (clusters.length === 1) {
+      return getCenteredBoundingBox(clusters[0], mapSize);
+    }
+
+    const xs = clusters.map((c) => c.x);
+    const ys = clusters.map((c) => c.y);
+
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const minY = Math.min(...ys);
+    const maxY = Math.max(...ys);
+
+    const width = maxX - minX;
+    const height = maxY - minY;
+
+    const paddingX = width * 0.1;
+    const paddingY = height * 0.1;
+
+    const paddedMinX = minX - paddingX;
+    const paddedMaxX = maxX + paddingX;
+    const paddedMinY = minY - paddingY;
+    const paddedMaxY = maxY + paddingY;
+
+    return {
+      min: { x: paddedMinX, y: paddedMinY },
+      max: { x: paddedMaxX, y: paddedMaxY },
+      center: {
+        x: (paddedMinX + paddedMaxX) / 2,
+        y: (paddedMinY + paddedMaxY) / 2,
+      },
+    };
+  };
+
+  const dropdownOptions = [
+    ...labels.map(({ id, label, boundingBox }) => ({
+      type: "label" as const,
+      id,
+      label,
+      boundingBox,
+    })),
+    ...points.map(({ id, name, clusters }) => {
+      // TODO: Consider moving cords to the model, but getting cords here is more efficient
+      return {
+        type: "point" as const,
+        id: id.toString(),
+        label: `${name} [${clusters.length.toString()}]`,
+        clusters,
+        boundingBox: getBoundingBox(clusters, mapSize),
+      };
+    }),
+  ];
 
   const onInput = useMemo(
     () =>
@@ -53,7 +140,7 @@ export const Search = (props: Props) => {
     [],
   );
 
-  const zoomTo = (bbox: Option["boundingBox"]) => {
+  const zoomToBoundingBox = (bbox: BoundingBox) => {
     const boxWidth = bbox.max.x - bbox.min.x;
     const boxHeight = bbox.max.y - bbox.min.y;
 
@@ -73,8 +160,16 @@ export const Search = (props: Props) => {
   };
 
   const onSelectionChange = (option: Option) => {
-    console.log(option.label);
-    zoomTo(option.boundingBox);
+    switch (option.type) {
+      case "label":
+        setPointsToHighlight([]);
+        zoomToBoundingBox(option.boundingBox);
+        break;
+      case "point":
+        zoomToBoundingBox(option.boundingBox);
+        setPointsToHighlight(option.clusters.map(({ clusterId }) => clusterId));
+        break;
+    }
   };
 
   return (

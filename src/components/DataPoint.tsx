@@ -18,9 +18,10 @@ type Props = {
   point: Point;
   concepts: Map<number, Concept>;
   zoom: number;
+  forceShape?: boolean;
 };
 
-export const DataPoint = ({ point, concepts, zoom }: Props) => {
+export const DataPoint = ({ point, concepts, zoom, forceShape }: Props) => {
   const setRemoteArticleId = useArticleStore(
     ({ setRemoteArticleId }) => setRemoteArticleId,
   );
@@ -67,6 +68,20 @@ export const DataPoint = ({ point, concepts, zoom }: Props) => {
   const transform = `translate(${x}, ${y}) scale(${1 / zoom})`;
 
   const shape = () => {
+    if (forceShape) {
+      return (
+        <circle
+          className="circle outer"
+          x={0}
+          y={0}
+          r={10}
+          fill="red"
+          stroke="black"
+          strokeWidth={1}
+        />
+      );
+    }
+
     if (config.shape === "square") {
       const outer = 14;
       const inner = 8;

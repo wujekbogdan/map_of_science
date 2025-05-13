@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { mapModel, search } from "./search.ts";
+import { DataPoint } from "../../../api/model";
+import { createLabelsCollection, search } from "./search.ts";
 
 const map = {
   layer1: {
@@ -225,9 +226,16 @@ const map = {
   },
 };
 
+const dataPoints: DataPoint[] = [];
+
+const options = {
+  map,
+  dataPoints,
+};
+
 describe("mapModel", () => {
   it("should map and flatten the model", () => {
-    const model = mapModel(map);
+    const model = createLabelsCollection(map);
     expect(model).toMatchSnapshot();
   });
 
@@ -258,7 +266,7 @@ describe("mapModel", () => {
       },
     });
 
-    const model = mapModel({
+    const model = createLabelsCollection({
       layer1: {
         children: phrases.map((phrase) => ({
           path: el(phrase),
@@ -304,7 +312,7 @@ describe("mapModel", () => {
 
 describe("search", () => {
   it("should return search results", () => {
-    expect(search(map, "sygnały")).toEqual([
+    expect(search(options, "sygnały")).toEqual([
       {
         boundingBox: {
           center: {
@@ -326,7 +334,7 @@ describe("search", () => {
       },
     ]);
 
-    expect(search(map, "sygnaly")).toEqual([
+    expect(search(options, "sygnaly")).toEqual([
       {
         boundingBox: {
           center: {
@@ -350,7 +358,7 @@ describe("search", () => {
   });
 
   it("should return empty array if no results", () => {
-    expect(search(map, "nonexistent")).toEqual([]);
-    expect(search(map, "")).toEqual([]);
+    expect(search(options, "nonexistent")).toEqual([]);
+    expect(search(options, "")).toEqual([]);
   });
 });

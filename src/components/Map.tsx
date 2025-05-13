@@ -1,3 +1,4 @@
+import { ZoomTransform } from "d3";
 import { useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { useShallow } from "zustand/react/shallow";
@@ -10,7 +11,7 @@ import { useLayersOpacity } from "../useLayersOpacity.ts";
 import { DataPoint } from "./DataPoint.tsx";
 
 type Label = {
-  key: string;
+  id: string;
   x: number;
   y: number;
   text: string;
@@ -38,7 +39,6 @@ const Label = (props: Label) => {
   return (
     <LabelText
       display={props.opacity ? "block" : "none"}
-      key={props.key}
       textAnchor="middle"
       alignmentBaseline="middle"
       x={props.x}
@@ -54,6 +54,37 @@ const Label = (props: Label) => {
   );
 };
 
+const filterDataByViewport = (
+  dataPoints: Map<number, Point>,
+  transform: ZoomTransform,
+  limit: number,
+  size: {
+    width: number;
+    height: number;
+  },
+) => {
+  const dataInViewport: Point[] = [];
+
+  // Although .filter() would feel more natural, the regular for loop is way
+  // faster since we can easily break the loop when we reach the limit.
+  for (const [, point] of dataPoints) {
+    const screenX = transform.applyX(point.x);
+    const screenY = transform.applyY(point.y);
+
+    if (
+      screenX >= 0 &&
+      screenX <= size.width &&
+      screenY >= 0 &&
+      screenY <= size.height
+    ) {
+      dataInViewport.push(point);
+      if (dataInViewport.length >= limit) break;
+    }
+  }
+
+  return dataInViewport;
+};
+
 type Props = {
   map: MapSvgRepresentation;
   size: {
@@ -66,7 +97,7 @@ type Props = {
     x: number;
     y: number;
   }[];
-  dataPoints: Point[];
+  dataPoints: Map<number, Point>;
   concepts: Map<number, Concept>;
   on?: {
     labelClick?: OnLabelClick;
@@ -75,15 +106,21 @@ type Props = {
 
 export default function Map(props: Props) {
   const { map, cityLabels, on } = props;
-  const [scaleFactor, fontSize, desiredZoom, maxDataPointsInViewport] =
-    useStore(
-      useShallow((s) => [
-        s.scaleFactor,
-        s.fontSize,
-        s.desiredZoom,
-        s.maxDataPointsInViewport,
-      ]),
-    );
+  const [
+    scaleFactor,
+    fontSize,
+    desiredZoom,
+    maxDataPointsInViewport,
+    clustersToHighlight,
+  ] = useStore(
+    useShallow((s) => [
+      s.scaleFactor,
+      s.fontSize,
+      s.desiredZoom,
+      s.maxDataPointsInViewport,
+      s.pointsToHighlight,
+    ]),
+  );
   const fetchLocalArticle = useArticleStore(
     ({ fetchLocalArticle }) => fetchLocalArticle,
   );
@@ -212,33 +249,31 @@ export default function Map(props: Props) {
     },
   }));
 
-  // TODO: dataPoints seem to use the same coordinate system as the SVG.
-  // The (0, 0) point is not the top-left corner — it's the center of the SVG map and the data space.
-  // Not sure where this alignment comes from — it's just an observed behavior.
-  // It's fine for now, but we might want to introduce d3-based scaling to decouple the map from data coordinates.
-  const data = useMemo(() => {
-    return props.dataPoints.map((point) => ({
-      ...point,
-      y: -point.y,
-    }));
-  }, [props.dataPoints]);
-
-  // TODO: This isn't efficient. Use quadtree or a similar method to determine which points are in the viewport.
-  const dataInViewport = data
-    .filter((point) => {
-      if (!transform) return false;
-
-      const screenX = transform.applyX(point.x);
-      const screenY = transform.applyY(point.y);
-
-      return (
-        screenX >= 0 &&
-        screenX <= props.size.width &&
-        screenY >= 0 &&
-        screenY <= props.size.height
+  const dataInViewport = !transform
+    ? []
+    : filterDataByViewport(
+        props.dataPoints,
+        transform,
+        maxDataPointsInViewport,
+        props.size,
       );
-    })
-    .slice(0, maxDataPointsInViewport);
+
+  const HighlightedPoints = useMemo(
+    () =>
+      clustersToHighlight
+        .map((id) => props.dataPoints.get(id))
+        .filter((point) => point !== undefined)
+        .map((point) => (
+          <DataPoint
+            zoom={zoom}
+            point={point}
+            concepts={props.concepts}
+            key={point.clusterId}
+            forceShape={true}
+          />
+        )),
+    [clustersToHighlight, props.dataPoints, props.concepts, zoom],
+  );
 
   return (
     <MapSvg
@@ -287,12 +322,15 @@ export default function Map(props: Props) {
               key={point.clusterId}
             />
           ))}
+
+          {HighlightedPoints}
         </g>
 
         <g id="labels">
           {labels.map((label) => (
             <Label
               {...label}
+              id={label.key}
               key={label.key}
               onClick={({ text }) => {
                 void fetchLocalArticle(text);
@@ -325,15 +363,48 @@ const labelFillColor = ($level: 1 | 2 | 3 | 4) => {
   }
 };
 
-const LabelText = styled.text<{
-  $opacity: number;
+// const LabelText = styled.text<{
+//   $opacity: number;
+//   $fontSize: number;
+//   $level: 1 | 2 | 3 | 4;
+//   $hasArticle: boolean;
+// }>`
+//   cursor: ${(props) => (props.$hasArticle ? "pointer" : "default")};
+//   font-size: ${(props) => props.$fontSize}px;
+//   opacity: ${(props) => props.$opacity};
+//   font-weight: bold;
+//   // TODO: It can be, very likely, replaced with a simplified text-shadow
+//   text-shadow:
+//     0 0 1px #f2efe9,
+//     0 0 2px #f2efe9,
+//     0 0 5px #f2efe9,
+//     0 0 5px #f2efe9,
+//     0 0 5px #f2efe9,
+//     0 0 5px #f2efe9,
+//     0 0 5px #f2efe9,
+//     0 0 5px #f2efe9,
+//     0 0 5px #f2efe9,
+//     0 0 5px #f2efe9;
+//   fill: ${(props) => labelFillColor(props.$level)};
+//   &:hover {
+//     fill: ${(props) =>
+//       props.$hasArticle ? "#4A90E2" : labelFillColor(props.$level)};
+//   }
+// `;
+
+const LabelText = styled.text.attrs<{
   $fontSize: number;
+  $opacity: number;
+}>((props) => ({
+  style: {
+    fontSize: `${props.$fontSize.toString()}px`,
+    opacity: props.$opacity,
+  },
+}))<{
   $level: 1 | 2 | 3 | 4;
   $hasArticle: boolean;
 }>`
   cursor: ${(props) => (props.$hasArticle ? "pointer" : "default")};
-  font-size: ${(props) => props.$fontSize}px;
-  opacity: ${(props) => props.$opacity};
   font-weight: bold;
   // TODO: It can be, very likely, replaced with a simplified text-shadow
   text-shadow:

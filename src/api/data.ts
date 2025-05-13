@@ -2,6 +2,9 @@ import { z } from "zod";
 import { DataSchema, ConceptSchema, CityLabelSchema } from "./model";
 import { loadAsMap } from "./utils.ts";
 
+// TODO: move this out from here. It does not belong to the API layer.
+// It's more of a service layer.
+
 /**
  * - City labels loading doesn't depend on anything.
  * - Concepts loading doesn't depend on anything either.
@@ -35,7 +38,7 @@ export const loadData = async () => {
     }),
   ]);
 
-  // Populate labels with x,y coordinates
+  // Populate labels with x,y coordinates coming from data points
   const labels = [...rawLabels.values()]
     .map(({ clusterId, label }) => {
       const point = dataPoints.get(clusterId);
@@ -48,8 +51,10 @@ export const loadData = async () => {
     })
     .filter(({ x, y }) => !Number.isNaN(x) && !Number.isNaN(y));
 
-  const dataPointsOrdered = [...dataPoints.values()].sort(
-    (a, b) => b.numRecentArticles - a.numRecentArticles,
+  const dataPointsOrdered = new Map(
+    [...dataPoints.entries()].sort(
+      ([, a], [, b]) => b.numRecentArticles - a.numRecentArticles,
+    ),
   );
 
   return {

@@ -1,5 +1,6 @@
 import { createFilter } from "@rollup/pluginutils";
 import { readFileSync, existsSync } from "fs";
+import camelCase from "lodash/camelCase";
 import { resolve } from "path";
 import styleToObject from "style-to-object";
 import { svgPathBbox } from "svg-path-bbox";
@@ -72,7 +73,14 @@ export const parse = async (svgString: string) => {
 
   const validated = schema.parse(parsedSvg);
 
-  const style = (style: string) => styleToObject(style) ?? {};
+  const style = (style: string) => {
+    return Object.fromEntries(
+      Object.entries(styleToObject(style) ?? {}).map(([property, value]) => [
+        camelCase(property),
+        value,
+      ]),
+    );
+  };
 
   const map1st2ndLayer = (layer: z.infer<typeof l1L2Schema>) => ({
     attributes: {

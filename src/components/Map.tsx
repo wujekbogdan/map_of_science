@@ -372,35 +372,6 @@ const labelFillColor = ($level: 1 | 2 | 3 | 4) => {
   }
 };
 
-// const LabelText = styled.text<{
-//   $opacity: number;
-//   $fontSize: number;
-//   $level: 1 | 2 | 3 | 4;
-//   $hasArticle: boolean;
-// }>`
-//   cursor: ${(props) => (props.$hasArticle ? "pointer" : "default")};
-//   font-size: ${(props) => props.$fontSize}px;
-//   opacity: ${(props) => props.$opacity};
-//   font-weight: bold;
-//   // TODO: It can be, very likely, replaced with a simplified text-shadow
-//   text-shadow:
-//     0 0 1px #f2efe9,
-//     0 0 2px #f2efe9,
-//     0 0 5px #f2efe9,
-//     0 0 5px #f2efe9,
-//     0 0 5px #f2efe9,
-//     0 0 5px #f2efe9,
-//     0 0 5px #f2efe9,
-//     0 0 5px #f2efe9,
-//     0 0 5px #f2efe9,
-//     0 0 5px #f2efe9;
-//   fill: ${(props) => labelFillColor(props.$level)};
-//   &:hover {
-//     fill: ${(props) =>
-//       props.$hasArticle ? "#4A90E2" : labelFillColor(props.$level)};
-//   }
-// `;
-
 const LabelText = styled.text.attrs<{
   $fontSize: number;
   $opacity: number;

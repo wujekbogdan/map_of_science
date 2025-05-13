@@ -1,5 +1,28 @@
 # map_of_science
 
+## 1.10.0
+
+### Minor Changes
+
+- 6e92d4e: Restore data points colour change on hover
+- 2c96369: Restore data points fade in on zoom
+- e673394: Drop the last legacy JS code dependency by removing point.js, which also lets us drop the event bus in favor of a more declarative approach using React state and SWR.
+- 3888e26: Add the ability to search by data point keywords.
+- 3888e26: Multiple performance improvements:
+
+  - Replace several `.filter()` loops with regular `for` loops to allow breaking the loop early when the threshold is hit.
+  - Replace `DataPoint` `styled-components` with (S)CSS modules.
+  - Replace multiple `DataPoint` instances with a single `DataPoints` component rendering all data points in a single loop.
+  - Replace `DataPoint` dynamically generated SVG attributes with a CSS-based solution using CSS `calc()`.
+  - Simplify `DataPoint` shape generation by using a single shape for all data points, regardless of the article count.
+
+### Patch Changes
+
+- 10475f7: Reimplement `article.js` in TypeScript.
+- 3888e26: Fix a bug causing the parsed map inline styles to include a `-` separator that's incompatible with React - use camelCased CSS properties instead.
+- 6e92d4e: Adjust data point tooltip position dynamically to prevent overflow.
+- 10475f7: Move all the components to the `components` directory.
+
 ## 1.9.0
 
 ### Minor Changes

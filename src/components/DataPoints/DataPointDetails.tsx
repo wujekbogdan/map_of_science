@@ -1,4 +1,4 @@
-import { Concept, DataPoint } from "../api/model";
+import { Concept, DataPoint } from "../../api/model";
 
 // TODO: This is a temp solution - a direct copy of the old code.
 // Let's adjust HTML and CSS and get rid of the conceptsData dependency.

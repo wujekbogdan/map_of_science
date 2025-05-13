@@ -1,5 +1,5 @@
 import { ZoomTransform } from "d3";
-import { useMemo, useRef, useState } from "react";
+import { CSSProperties, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { useShallow } from "zustand/react/shallow";
 import { MapSvgRepresentation } from "../../vite-plugin/svg-map-parser.ts";
@@ -8,7 +8,7 @@ import { Concept, DataPoint as Point } from "../api/model";
 import { useArticleStore, useStore } from "../store";
 import { useD3Zoom } from "../useD3Zoom.ts";
 import { useLayersOpacity } from "../useLayersOpacity.ts";
-import { DataPoint } from "./DataPoint.tsx";
+import { DataPoints } from "./DataPoints/DataPoints.tsx";
 
 type Label = {
   id: string;
@@ -55,7 +55,7 @@ const Label = (props: Label) => {
 };
 
 const filterDataByViewport = (
-  dataPoints: Map<number, Point>,
+  dataPoints: Point[],
   transform: ZoomTransform,
   limit: number,
   size: {
@@ -67,7 +67,7 @@ const filterDataByViewport = (
 
   // Although .filter() would feel more natural, the regular for loop is way
   // faster since we can easily break the loop when we reach the limit.
-  for (const [, point] of dataPoints) {
+  for (const point of dataPoints) {
     const screenX = transform.applyX(point.x);
     const screenY = transform.applyY(point.y);
 
@@ -252,28 +252,40 @@ export default function Map(props: Props) {
   const dataInViewport = !transform
     ? []
     : filterDataByViewport(
-        props.dataPoints,
+        [...props.dataPoints.values()],
         transform,
         maxDataPointsInViewport,
         props.size,
       );
 
-  const HighlightedPoints = useMemo(
-    () =>
-      clustersToHighlight
-        .map((id) => props.dataPoints.get(id))
-        .filter((point) => point !== undefined)
-        .map((point) => (
-          <DataPoint
-            zoom={zoom}
-            point={point}
-            concepts={props.concepts}
-            key={point.clusterId}
-            forceShape={true}
-          />
-        )),
-    [clustersToHighlight, props.dataPoints, props.concepts, zoom],
-  );
+  const HighlightedPoints = useMemo(() => {
+    const pointsToHighlight = clustersToHighlight
+      .map((id) => props.dataPoints.get(id))
+      .filter((point) => point !== undefined);
+
+    const inViewport = !transform
+      ? []
+      : filterDataByViewport(
+          pointsToHighlight,
+          transform,
+          Infinity,
+          props.size,
+        );
+
+    return (
+      <DataPoints
+        points={inViewport}
+        forcedSize={true}
+        concepts={props.concepts}
+      />
+    );
+  }, [
+    clustersToHighlight,
+    transform,
+    props.size,
+    props.concepts,
+    props.dataPoints,
+  ]);
 
   return (
     <MapSvg
@@ -281,9 +293,9 @@ export default function Map(props: Props) {
       ref={svgRoot}
       width={props.size.width}
       height={props.size.height}
+      $zoom={zoom}
     >
       <g transform={transformValue} opacity={opacity.layer1}>
-        {/* Layer 1 */}
         <g id={map.layer1.attributes.id} style={map.layer1.attributes.style}>
           {map.layer1.children.map(({ path }) => (
             <path
@@ -296,7 +308,6 @@ export default function Map(props: Props) {
           ))}
         </g>
 
-        {/* Layer 2 */}
         <g
           id={map.layer2.attributes.id}
           style={map.layer2.attributes.style}
@@ -313,20 +324,13 @@ export default function Map(props: Props) {
           ))}
         </g>
 
-        <g id="data-points">
-          {dataInViewport.map((point) => (
-            <DataPoint
-              zoom={zoom}
-              point={point}
-              concepts={props.concepts}
-              key={point.clusterId}
-            />
-          ))}
+        <g>
+          <DataPoints points={dataInViewport} concepts={props.concepts} />
 
           {HighlightedPoints}
         </g>
 
-        <g id="labels">
+        <g>
           {labels.map((label) => (
             <Label
               {...label}
@@ -343,9 +347,14 @@ export default function Map(props: Props) {
   );
 }
 
-const MapSvg = styled.svg<{
+const MapSvg = styled.svg.attrs<{
   $visibility: "visible" | "hidden";
-}>`
+  $zoom: number;
+}>((props) => ({
+  style: {
+    "--zoom-scale": props.$zoom,
+  } as CSSProperties,
+}))`
   visibility: ${(props) => props.$visibility};
   display: block;
 `;

@@ -70,6 +70,7 @@ export const useD3Zoom = (options: Options) => {
       .scaleExtent([0.5, 50])
       .on("zoom", (event: D3ZoomEvent<SVGSVGElement, unknown>) => {
         // TODO: consider moving transform to Zustand
+        // https://github.com/wujekbogdan/map-of-science/issues/61
         setTransform(event.transform);
         setCurrentZoom({
           x: event.transform.x,

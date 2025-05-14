@@ -233,6 +233,7 @@ const options = {
 } as never; // TODO: Fix this type
 
 // TODO: Add tests for points
+// https://github.com/wujekbogdan/map-of-science/issues/60
 describe("mapModel", () => {
   it("should map and flatten the model", () => {
     const model = createLabelsCollection(map);

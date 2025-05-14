@@ -7,6 +7,7 @@ export const LAYER_ZOOM_THRESHOLD_3 = 9.6;
 // Probably the original intent was to be able to separate the zoom level from
 // the opacity level. But in the end, they are the same. I'm leaving it as is for
 // now.
+// https://github.com/wujekbogdan/map-of-science/issues/62
 export const LAYER_ZOOM_RADIUS_0 = LAYER_ZOOM_THRESHOLD_0;
 export const LAYER_ZOOM_RADIUS_1 = LAYER_ZOOM_THRESHOLD_1;
 export const LAYER_ZOOM_RADIUS_2 = LAYER_ZOOM_THRESHOLD_2;

@@ -44,6 +44,7 @@ const defaults: State = {
 };
 
 // TODO: break the main store into per-feature stores
+// https://github.com/wujekbogdan/map-of-science/issues/61
 export const useStore = create(
   combine(defaults, (set) => ({
     setDesiredZoom: (zoom: Zoom | null) => {

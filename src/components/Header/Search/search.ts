@@ -130,6 +130,7 @@ export const search = (options: Options, phrase: string) => {
 
     // TODO: Implement a better/more efficient way to filter and sort the
     // results. Fuse.js maybe?
+    // https://github.com/users/wujekbogdan/projects/1/views/1?pane=issue&itemId=110658002
     return results
       .sort((a, b) => b.articlesCount - a.articlesCount)
       .slice(0, 30);

@@ -11,6 +11,7 @@ export const LocalArticle = ({ html }: Props) => {
 };
 
 // TODO: Implement proper styling for Markdown content.
+// https://github.com/wujekbogdan/map-of-science/issues/58
 const Article = styled.div`
   line-height: 1.42;
 `;

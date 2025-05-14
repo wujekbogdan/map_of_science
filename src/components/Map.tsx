@@ -145,6 +145,7 @@ export default function Map(props: Props) {
   const opacity = useLayersOpacity(zoom);
 
   // TODO: move to the model and display labels conditionally in the JSX rather than rendering an empty text element
+  // https://github.com/users/wujekbogdan/projects/1/views/1?pane=issue&itemId=110651849
   const replaceHash = (str: string) =>
     str.startsWith("#") ? str.replace("#", "") : "";
 

@@ -4,6 +4,7 @@ import { loadAsMap } from "./utils.ts";
 
 // TODO: move this out from here. It does not belong to the API layer.
 // It's more of a service layer.
+// https://github.com/wujekbogdan/map-of-science/issues/57
 
 /**
  * - City labels loading doesn't depend on anything.

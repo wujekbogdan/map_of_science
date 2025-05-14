@@ -10,7 +10,7 @@ Navigate continents of scientific fields, dive into countries of subfields, and 
 
 1. Required: [Node.js@^22](https://nodejs.org/en/download/)
 2. Required: [pnpm](https://pnpm.io/) package manager. You can either install it globally or follow the Corepack setup instructions below to let Node.js manage it for you.
-3. Optional: [nvm](https://github.com/nvm-sh/nvm) for managing Node.js versions.
+3. Optional: [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm) for managing Node.js versions.
 4. Optional: [Docker](https://docs.docker.com/get-docker/) for running the application in a container.
 
 You can verify the installation by running in the command line:
@@ -20,10 +20,16 @@ node -v
 npm -v
 ```
 
-If you're an `nvm` user, you can install the required Node.js version by running:
+If you're an `nvm` or `fnm` user, you can install the required Node.js version by running:
 
 ```
 nvm install
+```
+
+or
+
+```
+fnm install
 ```
 
 ### Package manager setup

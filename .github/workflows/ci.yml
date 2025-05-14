@@ -15,6 +15,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: 'pnpm'
+      - run: corepack enable
       - run: pnpm i
       - run: pnpm lint
 

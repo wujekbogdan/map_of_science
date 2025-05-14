@@ -40,24 +40,17 @@ Corepack currently needs to be explicitly enabled to have any effect. To do that
 corepack enable
 ```
 
-Then run the following command to activate the `pnpm` package manager based on the `"packageManager"` field in
-`package.json`:
-
-```
-corepack prepare --activate
-```
-
 ### Building and running
 
 #### Running for development
 
 1. Install dependencies:
    ```bash
-   npm install
+   pnpm install
    ```
 2. Start the application locally:
    ```bash
-   npm run dev
+   pnpm dev
    ```
 3. Open the application in the browser at the address displayed in the logs, probably [http://localhost:5173/](http://localhost:5173/)
 
@@ -74,11 +67,11 @@ corepack prepare --activate
 
 1. Install dependencies:
    ```bash
-   npm install
+   pnpm install
    ```
 2. Build the application:
    ```bash
-   npm run build
+   pnpm build
    ```
 3. Compiled files will be located in the `dist` directory.
 4. Serve the application using a static server, e.g., [http-server](https://www.npmjs.com/package/http-server):

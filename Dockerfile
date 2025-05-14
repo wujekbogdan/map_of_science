@@ -1,4 +1,4 @@
-FROM node:22.11.0-alpine3.20 AS base
+FROM node:22.15.0-alpine3.20 AS base
 
 FROM base AS builder
 
@@ -9,7 +9,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
 ENV HUSKY=0
 RUN corepack enable
-RUN corepack prepare --activate
+RUN #corepack prepare --activate
 RUN pnpm i --frozen-lockfile
 
 COPY . .

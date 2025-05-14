@@ -15,14 +15,18 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
-
+        
+      - name: Enable Corepack
+        run: corepack enable
+        
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
+          cache: 'pnpm'
 
       - name: Install Dependencies
-        run: npm install
+        run: pnpm i
 
       - name: Set Date Environment Variable
         run: echo "RELEASE_DATE=$(date '+%Y-%m-%d')" >> $GITHUB_ENV

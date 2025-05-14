@@ -9,8 +9,8 @@ Navigate continents of scientific fields, dive into countries of subfields, and 
 ### Prerequisites
 
 1. Required: [Node.js@^22](https://nodejs.org/en/download/)
-2. Required: [npm](https://www.npmjs.com/get-npm) (Node Package Manager), which comes with Node.js.
-3. Optional: [nvm](https://github.com/nvm-sh/nvm) for managing Node.js versions.
+2. Required: [pnpm](https://pnpm.io/) package manager. You can either install it globally or follow the Corepack setup instructions below to let Node.js manage it for you.
+3. Optional: [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm) for managing Node.js versions.
 4. Optional: [Docker](https://docs.docker.com/get-docker/) for running the application in a container.
 
 You can verify the installation by running in the command line:
@@ -20,10 +20,30 @@ node -v
 npm -v
 ```
 
-If you're an `nvm` user, you can install the required Node.js version by running:
+If you're an `nvm` or `fnm` user, you can install the required Node.js version by running:
 
 ```
 nvm install
+```
+
+or
+
+```
+fnm install
+```
+
+### Package manager setup
+
+This is a one-off task that lets you use the pnpm command for this project without installing it globally.
+
+[Corepack](https://nodejs.org/api/corepack.html) manages package manager versions by running the specified package
+manager (e.g., Yarn, PNPM) for your project as configured in `package.json`. Using Corepack eliminates the need to
+install package managers globally.
+
+Corepack currently needs to be explicitly enabled to have any effect. To do that, run:
+
+```
+corepack enable
 ```
 
 ### Building and running
@@ -32,11 +52,11 @@ nvm install
 
 1. Install dependencies:
    ```bash
-   npm install
+   pnpm install
    ```
 2. Start the application locally:
    ```bash
-   npm run dev
+   pnpm dev
    ```
 3. Open the application in the browser at the address displayed in the logs, probably [http://localhost:5173/](http://localhost:5173/)
 
@@ -53,11 +73,11 @@ nvm install
 
 1. Install dependencies:
    ```bash
-   npm install
+   pnpm install
    ```
 2. Build the application:
    ```bash
-   npm run build
+   pnpm build
    ```
 3. Compiled files will be located in the `dist` directory.
 4. Serve the application using a static server, e.g., [http-server](https://www.npmjs.com/package/http-server):

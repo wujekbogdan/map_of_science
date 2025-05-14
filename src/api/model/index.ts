@@ -38,6 +38,6 @@ export const DataSchema = (z: typeof zod, labels: Map<number, CityLabel>) =>
       clusterCategory: data.cluster_category,
       growthRating: data.growth_rating,
       keyConcepts: data.key_concepts.split(",").map((id) => Number(id)),
-      cityLabel: labels.get(data.cluster_id)?.label || null,
+      cityLabel: labels.get(data.cluster_id)?.label ?? null,
     }));
 export type DataPoint = zod.infer<ReturnType<typeof DataSchema>>;

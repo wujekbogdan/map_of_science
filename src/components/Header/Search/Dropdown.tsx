@@ -112,7 +112,7 @@ export const Dropdown = (props: Dropdown) => {
             placeholder={i18n(
               `Wyszukaj na Mapie Nauki, np. "${randomPlaceholder}"`,
             )}
-            displayValue={(option: Option | null) => option?.label || query}
+            displayValue={(option: Option | null) => option?.label ?? query}
             onChange={onQueryChange}
           />
           <ComboboxOptions

@@ -18,7 +18,7 @@ export const DataPointDetails = (props: {
         background: "white",
       }}
     >
-      <strong>{point.cityLabel || `#${point.clusterId.toString()}`}</strong>
+      <strong>{point.cityLabel ?? `#${point.clusterId.toString()}`}</strong>
       <br />
 
       <span

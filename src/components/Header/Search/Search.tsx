@@ -45,7 +45,7 @@ export const Search = () => {
     },
   );
 
-  const { labels, points } = results || {
+  const { labels, points } = results ?? {
     labels: [],
     points: [],
   };

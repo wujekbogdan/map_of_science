@@ -15,7 +15,9 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: 'pnpm'
-      - run: corepack enable
+      - run: |
+          corepack enable
+          corepack prepare pnpm@10.11.0 --activate
       - run: pnpm i
       - run: pnpm lint
 
@@ -27,7 +29,9 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: 'pnpm'
-      - run: corepack enable
+      - run: |
+          corepack enable
+          corepack prepare pnpm@10.11.0 --activate
       - run: pnpm i
       - run: pnpm test
 
@@ -39,6 +43,8 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: 'pnpm'
-      - run: corepack enable
+      - run: |
+          corepack enable
+          corepack prepare pnpm@10.11.0 --activate
       - run: pnpm i
       - run: pnpm build

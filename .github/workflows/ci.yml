@@ -14,8 +14,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-      - run: npm ci
-      - run: npm run lint
+          cache: 'pnpm'
+      - run: pnpm i
+      - run: pnpm lint
 
   test:
     runs-on: ubuntu-24.04
@@ -24,8 +25,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-      - run: npm ci
-      - run: npm run test
+          cache: 'pnpm'
+      - run: pnpm i
+      - run: pnpm test
 
   build:
     runs-on: ubuntu-24.04
@@ -34,5 +36,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-      - run: npm ci
-      - run: npm run build
+          cache: 'pnpm'
+      - run: pnpm i
+      - run: pnpm build

@@ -9,7 +9,7 @@ Navigate continents of scientific fields, dive into countries of subfields, and 
 ### Prerequisites
 
 1. Required: [Node.js@^22](https://nodejs.org/en/download/)
-2. Required: [npm](https://www.npmjs.com/get-npm) (Node Package Manager), which comes with Node.js.
+2. Required: [pnpm](https://pnpm.io/) package manager. You can either install it globally or follow the Corepack setup instructions below to let Node.js manage it for you.
 3. Optional: [nvm](https://github.com/nvm-sh/nvm) for managing Node.js versions.
 4. Optional: [Docker](https://docs.docker.com/get-docker/) for running the application in a container.
 
@@ -24,6 +24,27 @@ If you're an `nvm` user, you can install the required Node.js version by running
 
 ```
 nvm install
+```
+
+### Package manager setup
+
+This is a one-off task that lets you use the pnpm command for this project without installing it globally.
+
+[Corepack](https://nodejs.org/api/corepack.html) manages package manager versions by running the specified package
+manager (e.g., Yarn, PNPM) for your project as configured in `package.json`. Using Corepack eliminates the need to
+install package managers globally.
+
+Corepack currently needs to be explicitly enabled to have any effect. To do that, run:
+
+```
+corepack enable
+```
+
+Then run the following command to activate the `pnpm` package manager based on the `"packageManager"` field in
+`package.json`:
+
+```
+corepack prepare --activate
 ```
 
 ### Building and running

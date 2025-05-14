@@ -5,10 +5,12 @@ FROM base AS builder
 WORKDIR /home/node
 
 # Copy just the package.json and package-lock.json to utilize Docker's caching mechanism and cache the npm install step.
-COPY package.json package-lock.json ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
 ENV HUSKY=0
-RUN npm ci
+RUN corepack enable
+RUN corepack prepare --activate
+RUN pnpm i --frozen-lockfile
 
 COPY . .
 

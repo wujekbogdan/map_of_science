@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { mapModel, search } from "./search.ts";
+import { Concept, DataPoint } from "../../../api/model";
+import { createLabelsCollection, search } from "./search.ts";
 
 const map = {
   layer1: {
@@ -225,9 +226,16 @@ const map = {
   },
 };
 
+const options = {
+  map,
+  dataPoints: new Map<number, DataPoint[]>(),
+  concepts: new Map<number, Concept[]>(),
+} as never; // TODO: Fix this type
+
+// TODO: Add tests for points
 describe("mapModel", () => {
   it("should map and flatten the model", () => {
-    const model = mapModel(map);
+    const model = createLabelsCollection(map);
     expect(model).toMatchSnapshot();
   });
 
@@ -258,7 +266,7 @@ describe("mapModel", () => {
       },
     });
 
-    const model = mapModel({
+    const model = createLabelsCollection({
       layer1: {
         children: phrases.map((phrase) => ({
           path: el(phrase),
@@ -304,53 +312,65 @@ describe("mapModel", () => {
 
 describe("search", () => {
   it("should return search results", () => {
-    expect(search(map, "sygnały")).toEqual([
-      {
-        boundingBox: {
-          center: {
-            x: -431.8910662922816,
-            y: 22.71598460951293,
+    expect(search(options, "sygnały")).toEqual({
+      labels: [
+        {
+          boundingBox: {
+            center: {
+              x: -431.8910662922816,
+              y: 22.71598460951293,
+            },
+            max: {
+              x: -322.8051709687215,
+              y: 258.8283511316347,
+            },
+            min: {
+              x: -540.9769616158417,
+              y: -213.39638191260883,
+            },
           },
-          max: {
-            x: -322.8051709687215,
-            y: 258.8283511316347,
-          },
-          min: {
-            x: -540.9769616158417,
-            y: -213.39638191260883,
-          },
+          id: "path186",
+          label: "Symbole-bity-sygnały",
+          normalizedLabel: "symbole-bity-sygnaly",
         },
-        id: "path186",
-        label: "Symbole-bity-sygnały",
-        normalizedLabel: "symbole-bity-sygnaly",
-      },
-    ]);
+      ],
+      points: [],
+    });
 
-    expect(search(map, "sygnaly")).toEqual([
-      {
-        boundingBox: {
-          center: {
-            x: -431.8910662922816,
-            y: 22.71598460951293,
+    expect(search(options, "sygnaly")).toEqual({
+      labels: [
+        {
+          boundingBox: {
+            center: {
+              x: -431.8910662922816,
+              y: 22.71598460951293,
+            },
+            max: {
+              x: -322.8051709687215,
+              y: 258.8283511316347,
+            },
+            min: {
+              x: -540.9769616158417,
+              y: -213.39638191260883,
+            },
           },
-          max: {
-            x: -322.8051709687215,
-            y: 258.8283511316347,
-          },
-          min: {
-            x: -540.9769616158417,
-            y: -213.39638191260883,
-          },
+          id: "path186",
+          label: "Symbole-bity-sygnały",
+          normalizedLabel: "symbole-bity-sygnaly",
         },
-        id: "path186",
-        label: "Symbole-bity-sygnały",
-        normalizedLabel: "symbole-bity-sygnaly",
-      },
-    ]);
+      ],
+      points: [],
+    });
   });
 
   it("should return empty array if no results", () => {
-    expect(search(map, "nonexistent")).toEqual([]);
-    expect(search(map, "")).toEqual([]);
+    expect(search(options, "nonexistent")).toEqual({
+      labels: [],
+      points: [],
+    });
+    expect(search(options, "")).toEqual({
+      labels: [],
+      points: [],
+    });
   });
 });

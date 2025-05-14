@@ -9,15 +9,30 @@ import { ChangeEvent, useMemo, useState } from "react";
 import styled from "styled-components";
 import { i18n } from "../../../i18n.ts";
 
-export type Option = {
-  label: string;
-  id: string;
-  boundingBox: {
-    min: { x: number; y: number };
-    max: { x: number; y: number };
-    center: { x: number; y: number };
-  };
+export type BoundingBox = {
+  min: { x: number; y: number };
+  max: { x: number; y: number };
+  center: { x: number; y: number };
 };
+
+export type Option =
+  | {
+      type: "label";
+      label: string;
+      id: string;
+      boundingBox: BoundingBox;
+    }
+  | {
+      type: "point";
+      label: string;
+      id: string;
+      boundingBox: BoundingBox;
+      clusters: {
+        clusterId: number;
+        x: number;
+        y: number;
+      }[];
+    };
 
 type Dropdown = {
   options: Option[];
@@ -41,7 +56,7 @@ const placeholders = [
 
 export const Dropdown = (props: Dropdown) => {
   const [query, setQuery] = useState("");
-  const [selection, setSelection] = useState<Option | null>(null);
+  const [selection, setSelection] = useState<Option | undefined>(undefined);
   const options = query
     ? props.options.filter((option) =>
         normalizeSync(option.label.toLowerCase()).includes(
@@ -74,7 +89,7 @@ export const Dropdown = (props: Dropdown) => {
 
   const onQueryChange = (event: ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value;
-    setSelection(null);
+    setSelection(undefined);
     setQuery(query);
     props.onInput(query);
   };

@@ -33,7 +33,7 @@ export const DataSchema = (z: typeof zod, labels: Map<number, CityLabel>) =>
     .transform((data) => ({
       clusterId: data.cluster_id,
       x: data.x,
-      y: data.y,
+      y: -data.y, // To align it with the map coordinate system
       numRecentArticles: data.num_recent_articles,
       clusterCategory: data.cluster_category,
       growthRating: data.growth_rating,

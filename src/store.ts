@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { combine } from "zustand/middleware";
 import { fetchArticle } from "./api";
-import { DataPoint } from "./api/model";
+import { Concept, DataPoint } from "./api/model";
 
 type Zoom = { x: number; y: number; scale: number };
 type PartialDefaults = typeof partialDefaults;
@@ -15,7 +15,9 @@ type Size = {
 };
 
 const partialDefaults = {
-  dataPoints: [] as DataPoint[],
+  dataPoints: new Map<number, DataPoint>(),
+  concepts: new Map<number, Concept>(),
+  pointsToHighlight: [] as number[],
   zoomStepFactor: 1.6,
   mapSize: {
     width: 0,
@@ -83,8 +85,14 @@ export const useStore = create(
     setMaxDataPointsInViewport: (maxDataPointsInViewport: number) => {
       set({ maxDataPointsInViewport });
     },
-    setDataPoints: (dataPoints: DataPoint[]) => {
+    setDataPoints: (dataPoints: Map<number, DataPoint>) => {
       set({ dataPoints });
+    },
+    setConcepts: (concepts: Map<number, Concept>) => {
+      set({ concepts });
+    },
+    setPointsToHighlight: (clusterIds: number[]) => {
+      set({ pointsToHighlight: clusterIds });
     },
   })),
 );

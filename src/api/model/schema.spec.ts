@@ -40,7 +40,7 @@ describe("schema", () => {
         {
           clusterId: 84872,
           x: -90.2114,
-          y: -71.396,
+          y: 71.396,
           numRecentArticles: 228,
           clusterCategory: 5,
           growthRating: 15.43,
@@ -50,7 +50,7 @@ describe("schema", () => {
         {
           clusterId: 72062,
           x: -76.1376,
-          y: -37.2588,
+          y: 37.2588,
           numRecentArticles: 239,
           clusterCategory: 5,
           growthRating: 3.22,

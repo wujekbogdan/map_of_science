@@ -11,13 +11,11 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+      - run: corepack enable
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: 'pnpm'
-      - run: |
-          corepack enable
-          corepack prepare pnpm@10.11.0 --activate
       - run: pnpm i
       - run: pnpm lint
 
@@ -25,13 +23,11 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+      - run: corepack enable
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: 'pnpm'
-      - run: |
-          corepack enable
-          corepack prepare pnpm@10.11.0 --activate
       - run: pnpm i
       - run: pnpm test
 
@@ -39,12 +35,10 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+      - run: corepack enable
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: 'pnpm'
-      - run: |
-          corepack enable
-          corepack prepare pnpm@10.11.0 --activate
       - run: pnpm i
       - run: pnpm build

@@ -1,4 +1,4 @@
-import { ZoomTransform } from "d3";
+import { ZoomTransform, quadtree, Quadtree } from "d3";
 import { CSSProperties, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { useShallow } from "zustand/react/shallow";
@@ -81,6 +81,43 @@ const filterDataByViewport = (
       if (dataInViewport.length >= limit) break;
     }
   }
+
+  return dataInViewport;
+};
+
+const filterDataByViewportQuad = (
+  tree: Quadtree<Point>,
+  transform: ZoomTransform,
+  limit: number,
+  size: { width: number; height: number },
+) => {
+  const dataInViewport: Point[] = [];
+
+  const inViewport = (x: number, y: number) => {
+    const screenX = transform.applyX(x);
+    const screenY = transform.applyY(y);
+    return (
+      screenX >= 0 &&
+      screenX <= size.width &&
+      screenY >= 0 &&
+      screenY <= size.height
+    );
+  };
+
+  tree.visit((node, x0, y0, x1, y1) => {
+    if (dataInViewport.length >= limit) return true;
+    if (node.length) {
+      return false;
+    }
+
+    if (!node.length) {
+      if (inViewport(node.data.x, node.data.y)) {
+        dataInViewport.push(node.data);
+      }
+    }
+
+    return false;
+  });
 
   return dataInViewport;
 };
@@ -250,7 +287,8 @@ export default function Map(props: Props) {
     },
   }));
 
-  const dataInViewport = !transform
+  console.time("standard");
+  const dataInViewport_ = !transform
     ? []
     : filterDataByViewport(
         [...props.dataPoints.values()],
@@ -258,6 +296,30 @@ export default function Map(props: Props) {
         maxDataPointsInViewport,
         props.size,
       );
+  console.log("standard.length", dataInViewport_.length);
+  console.timeEnd("standard");
+
+  const quadData = useMemo(
+    () =>
+      quadtree(
+        [...props.dataPoints.values()],
+        ({ x }) => x,
+        ({ y }) => y,
+      ),
+    [props.dataPoints],
+  );
+
+  console.time("quad");
+  const dataInViewport = !transform
+    ? []
+    : filterDataByViewportQuad(
+        quadData,
+        transform,
+        maxDataPointsInViewport,
+        props.size,
+      );
+  console.log("quad.length", dataInViewport.length);
+  console.timeEnd("quad");
 
   const HighlightedPoints = useMemo(() => {
     const pointsToHighlight = clustersToHighlight

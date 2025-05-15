@@ -1,9 +1,7 @@
 /// <reference types="vite/client" />
 /// <reference types="vite-plugin-comlink/client" />
 
-type StyleObject = {
-  [name: string]: string;
-};
+type StyleObject = Record<string, string>;
 
 // TODO: This is redundant. The following declaration should be enough:
 // declare module '*.svg?parse' {

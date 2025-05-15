@@ -1,5 +1,19 @@
 # map_of_science
 
+## 1.11.0
+
+### Minor Changes
+
+- 14edc86: Migrate from `npm` to `pnpm`
+- b3f8027: Drop JS-specific ESLint rules and simplify ESLint config
+
+### Patch Changes
+
+- e846889: Bump `react` and `react-dom` to version `19.1.0`.
+- f98871c: Add GitHub links to the vast majority of TODOs in the code.
+- 14edc86: Add a missing `comlink` dependency
+- b3f8027: Bump `eslint-config-prettier"` to `10.1.5`
+
 ## 1.10.0
 
 ### Minor Changes

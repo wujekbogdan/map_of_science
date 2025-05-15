@@ -16,7 +16,7 @@ type Zoom = {
 };
 
 type Options = {
-  svg: RefObject<SVGSVGElement>;
+  svg: RefObject<SVGSVGElement | null>;
   initialZoom: Zoom;
   initialized?: () => void;
   desiredZoom: Zoom | null;

@@ -106,9 +106,10 @@ const filterDataByViewportQuad = (
 
   tree.visit((node, x0, y0, x1, y1) => {
     if (dataInViewport.length >= limit) return true;
-    if (node.length) {
-      return false;
-    }
+
+    const outside = false;
+
+    if (outside) return true;
 
     if (!node.length) {
       if (inViewport(node.data.x, node.data.y)) {

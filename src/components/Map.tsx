@@ -93,26 +93,38 @@ const filterDataByViewportQuad = (
 ) => {
   const dataInViewport: Point[] = [];
 
-  const inViewport = (x: number, y: number) => {
-    const screenX = transform.applyX(x);
-    const screenY = transform.applyY(y);
-    return (
-      screenX >= 0 &&
-      screenX <= size.width &&
-      screenY >= 0 &&
-      screenY <= size.height
-    );
-  };
-
   tree.visit((node, x0, y0, x1, y1) => {
-    if (dataInViewport.length >= limit) return true;
+    if (node.length && node.length > 0) {
+      const screenPosition = {
+        topLeft: {
+          x: transform.applyX(x0),
+          y: transform.applyY(y0),
+        },
+        bottomRight: {
+          x: transform.applyX(x1),
+          y: transform.applyY(y1),
+        },
+      };
 
-    const outside = false;
-
-    if (outside) return true;
+      // Skip the entire subtree if it's outside the viewport
+      return (
+        screenPosition.bottomRight.x < 0 || // node is left of viewport
+        screenPosition.topLeft.x > size.width || // node is right of viewport
+        screenPosition.bottomRight.y < 0 || // node is above viewport
+        screenPosition.topLeft.y > size.height // node is below viewport
+      );
+    }
 
     if (!node.length) {
-      if (inViewport(node.data.x, node.data.y)) {
+      const screenX = transform.applyX(node.data.x);
+      const screenY = transform.applyY(node.data.y);
+      const inViewport =
+        screenX >= 0 &&
+        screenX <= size.width &&
+        screenY >= 0 &&
+        screenY <= size.height;
+
+      if (inViewport) {
         dataInViewport.push(node.data);
       }
     }
@@ -120,7 +132,12 @@ const filterDataByViewportQuad = (
     return false;
   });
 
-  return dataInViewport;
+  // This ruins the performance of the quadtree. In contrast to the regular approach, we can break the visit() loop
+  // when we reach the limit. We need to traverse the entire quadtree and only then we can slice the data so that
+  // the priority is given to the clusters having the highest articles count.
+  return dataInViewport
+    .sort((a, b) => b.numRecentArticles - a.numRecentArticles)
+    .slice(0, limit);
 };
 
 type Props = {
@@ -297,7 +314,7 @@ export default function Map(props: Props) {
         maxDataPointsInViewport,
         props.size,
       );
-  console.log("standard.length", dataInViewport_.length);
+  console.log("count:", dataInViewport_.length);
   console.timeEnd("standard");
 
   const quadData = useMemo(
@@ -319,7 +336,7 @@ export default function Map(props: Props) {
         maxDataPointsInViewport,
         props.size,
       );
-  console.log("quad.length", dataInViewport.length);
+  console.log("count:", dataInViewport.length);
   console.timeEnd("quad");
 
   const HighlightedPoints = useMemo(() => {

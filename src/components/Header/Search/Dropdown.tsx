@@ -4,8 +4,7 @@ import {
   ComboboxOptions as ComboboxOptionsHeadless,
   ComboboxOption as ComboboxOptionHeadless,
 } from "@headlessui/react";
-import { normalizeSync } from "normalize-diacritics";
-import { ChangeEvent, useMemo, useState } from "react";
+import { ChangeEvent, useMemo, useState, memo } from "react";
 import styled from "styled-components";
 import { i18n } from "../../../i18n.ts";
 
@@ -54,16 +53,69 @@ const placeholders = [
   "logika rozmyta",
 ];
 
+type Token = { text: string; type: "regular" | "bold" };
+
+const tokenizeLabel = (label: string, query: string): Token[] => {
+  const i = label.toLowerCase().indexOf(query.toLowerCase());
+  if (i === -1) return [{ text: label, type: "regular" }];
+
+  const before = label.slice(0, i);
+  const match = label.slice(i, i + query.length);
+  const after = label.slice(i + query.length);
+
+  return [
+    { text: before, type: "regular" } as const,
+    { text: match, type: "bold" } as const,
+    { text: after, type: "regular" } as const,
+  ].filter(({ text }) => text);
+};
+
+const Label = ({ tokens }: { tokens: Token[] }) => {
+  return (
+    <>
+      {tokens.map((token, index) => (
+        <Token key={index} $type={token.type}>
+          {token.text}
+        </Token>
+      ))}
+    </>
+  );
+};
+
+type OptionRowProps = {
+  id: string;
+  focus: boolean;
+  selected: boolean;
+  tokens: Token[];
+};
+
+const OptionRow = memo(
+  (props: OptionRowProps) => (
+    <ComboboxOption $focus={props.focus} $selected={props.selected}>
+      <Label tokens={props.tokens} />
+    </ComboboxOption>
+  ),
+  (prev, next) => {
+    return (
+      prev.id === next.id &&
+      prev.selected == next.selected &&
+      prev.focus === next.focus
+    );
+  },
+);
+
 export const Dropdown = (props: Dropdown) => {
+  const { options: rawOptions } = props;
   const [query, setQuery] = useState("");
   const [selection, setSelection] = useState<Option | undefined>(undefined);
-  const options = query
-    ? props.options.filter((option) =>
-        normalizeSync(option.label.toLowerCase()).includes(
-          normalizeSync(query.toLowerCase()),
-        ),
-      )
-    : props.options;
+  const options = useMemo(
+    () =>
+      rawOptions.map((option) => ({
+        ...option,
+        tokens: tokenizeLabel(option.label, query),
+      })),
+    [rawOptions, query],
+  );
   const hasNoResultsText = query.length > 1 && options.length === 0;
   const noResultsText = (() => {
     if (query.length < 3) {
@@ -127,9 +179,12 @@ export const Dropdown = (props: Dropdown) => {
               options.map((option) => (
                 <ComboboxOptionHeadless key={option.id} value={option}>
                   {({ focus, selected }) => (
-                    <ComboboxOption $focus={focus} $selected={selected}>
-                      {option.label}
-                    </ComboboxOption>
+                    <OptionRow
+                      id={option.id}
+                      focus={focus}
+                      selected={selected}
+                      tokens={option.tokens}
+                    />
                   )}
                 </ComboboxOptionHeadless>
               ))
@@ -190,4 +245,10 @@ const ComboboxOption = styled.div<{
   color: #333;
   padding: 12px;
   background-color: ${({ $focus }) => ($focus ? "#eee" : "transparent")};
+`;
+
+const Token = styled.span<{
+  $type: "regular" | "bold";
+}>`
+  font-weight: ${({ $type }) => ($type === "bold" ? "bold" : "normal")};
 `;

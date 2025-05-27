@@ -12,7 +12,6 @@ export const ArticleModal = ({ children, onClose }: Props) => {
   const ref = useRef(null);
 
   useClickAway(ref, () => {
-    console.log("click away");
     onClose?.();
   });
 

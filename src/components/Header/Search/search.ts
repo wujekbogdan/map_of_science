@@ -128,12 +128,13 @@ export const search = (options: Options, phrase: string) => {
       },
     );
 
+    const LIMIT = 300;
     // TODO: Implement a better/more efficient way to filter and sort the
     // results. Fuse.js maybe?
     // https://github.com/users/wujekbogdan/projects/1/views/1?pane=issue&itemId=110658002
     return results
-      .sort((a, b) => b.articlesCount - a.articlesCount)
-      .slice(0, 30);
+      .sort((a, b) => b.clusters.length - a.clusters.length)
+      .slice(0, LIMIT);
   };
 
   return {

@@ -24,7 +24,7 @@ export const Search = () => {
     );
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { data: results } = useSWR(
+  const { data: results, isLoading } = useSWR(
     searchTerm ? [map, searchTerm] : null,
     async ([map, query]) => {
       if (!query)
@@ -125,18 +125,14 @@ export const Search = () => {
 
   const onInput = useMemo(
     () =>
-      debounce(
-        (query: string) => {
-          if (query.length < 3) {
-            setSearchTerm("");
-            return;
-          }
+      debounce((query: string) => {
+        if (query.length < 3) {
+          setSearchTerm("");
+          return;
+        }
 
-          setSearchTerm(query);
-        },
-        300,
-        { leading: true },
-      ),
+        setSearchTerm(query);
+      }, 300),
     [],
   );
 
@@ -179,12 +175,7 @@ export const Search = () => {
       }}
     >
       <Dropdown
-        // TODO: passing SWR isLoading doesn't make sense because loading is too
-        // fast. It's only causing the dropdown to flicker.
-        // Ideally, we should show the loading indicator only when search already
-        // took some time e.g. 0.3s or so.
-        // SWR `onLoadingSlow` could be used for that.
-        isLoading={false}
+        isLoading={isLoading}
         options={dropdownOptions}
         onInput={onInput}
         onSelect={onSelectionChange}

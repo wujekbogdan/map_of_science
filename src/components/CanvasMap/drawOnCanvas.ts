@@ -4,6 +4,7 @@ import { DataPoint } from "../../api/model";
 export type ConfigEntry = {
   min: number;
   size: number;
+  visible: boolean;
 };
 
 type Props = {
@@ -25,10 +26,11 @@ export const drawOnCanvas = (props: Props) => {
 
   cachedCanvas = canvas;
   const { width, height, data, config } = props;
+  const sortedConfig = [...config].sort((a, b) => a.min - b.min);
 
-  const getCircleSize = (num: number): number => {
-    const sortedConfig = [...config].sort((a, b) => a.min - b.min);
-    return sortedConfig.findLast((item) => num >= item.min)?.size ?? 1;
+  const findConfig = (num: number) => {
+    const found = sortedConfig.findLast((item) => num >= item.min);
+    return found ?? { size: 1, visible: true };
   };
 
   const ctx = canvas.getContext("2d");
@@ -61,21 +63,22 @@ export const drawOnCanvas = (props: Props) => {
     .domain([-viewHeight / 2, viewHeight / 2])
     .range([0, height]);
 
+  console.time("render");
   ctx.clearRect(0, 0, width, height);
   ctx.save();
-
   data.forEach((point) => {
+    const config = findConfig(point.numRecentArticles);
+
+    if (!config.visible) {
+      return;
+    }
+
     ctx.beginPath();
-    ctx.arc(
-      xScale(point.x),
-      yScale(point.y),
-      getCircleSize(point.numRecentArticles),
-      0,
-      2 * Math.PI,
-    );
+    ctx.arc(xScale(point.x), yScale(point.y), config.size, 0, 2 * Math.PI);
     ctx.fillStyle = "black";
     ctx.fill();
   });
+  console.timeEnd("render");
 
   ctx.restore();
   console.timeEnd("canvasMap");

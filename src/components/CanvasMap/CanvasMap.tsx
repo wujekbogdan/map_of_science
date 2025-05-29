@@ -31,12 +31,12 @@ const draw = (args: DrawParams) => {
 
 const CanvasMap = () => {
   const [config, setConfig] = useState<ConfigEntry[]>([
-    { min: 0, size: 1 },
-    { min: 51, size: 2 },
-    { min: 201, size: 3 },
-    { min: 501, size: 5 },
-    { min: 1001, size: 5 },
-    { min: 2001, size: 6 },
+    { min: 0, size: 1, visible: true },
+    { min: 51, size: 2, visible: true },
+    { min: 201, size: 3, visible: true },
+    { min: 501, size: 5, visible: true },
+    { min: 1001, size: 5, visible: true },
+    { min: 2001, size: 6, visible: true },
   ]);
   const [size, setSize] = useState({ width: 1000, height: 1000 });
   const canvas = useRef<HTMLCanvasElement>(null);

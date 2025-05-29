@@ -19,13 +19,18 @@ export const ConfigEditor = ({
   onConfigChange,
   onSizeChange,
 }: Props) => {
-  const update = (index: number, field: keyof ConfigEntry, value: number) => {
+  const update = (
+    index: number,
+    field: keyof ConfigEntry,
+    value: number | boolean,
+  ) => {
     const newConfig = [...config];
     newConfig[index] = { ...newConfig[index], [field]: value };
     onConfigChange(newConfig);
   };
 
-  const addRow = () => onConfigChange([...config, { min: 0, size: 1 }]);
+  const addRow = () =>
+    onConfigChange([...config, { min: 0, size: 1, visible: true }]);
 
   const removeRow = (index: number) => {
     const newConfig = config.filter((_, i) => i !== index);
@@ -59,6 +64,15 @@ export const ConfigEditor = ({
                 onChange={(e) => {
                   e.preventDefault();
                   update(i, "size", +e.target.value);
+                }}
+              />
+            </FormControl>
+            <FormControl>
+              <input
+                type="checkbox"
+                checked={entry.visible}
+                onChange={(e) => {
+                  update(i, "visible", e.target.checked);
                 }}
               />
             </FormControl>

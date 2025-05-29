@@ -7,25 +7,39 @@ export type ConfigEntry = {
 };
 
 type Props = {
-  canvasContext: CanvasRenderingContext2D;
+  canvas?: OffscreenCanvas;
   width: number;
   height: number;
   data: DataPoint[];
   config: ConfigEntry[];
 };
 
+let cachedCanvas: OffscreenCanvas | null = null;
+
 export const drawOnCanvas = (props: Props) => {
-  const { width, height, data, config, canvasContext: ctx } = props;
+  const canvas = cachedCanvas ?? props.canvas;
+
+  if (!canvas) {
+    throw new Error("Canvas is not provided or initialized");
+  }
+
+  cachedCanvas = canvas;
+  const { width, height, data, config } = props;
+
   const getCircleSize = (num: number): number => {
     const sortedConfig = [...config].sort((a, b) => a.min - b.min);
     return sortedConfig.findLast((item) => num >= item.min)?.size ?? 1;
   };
+
+  const ctx = canvas.getContext("2d");
 
   if (!ctx) {
     throw new Error("Cannot initialize canvas context");
   }
 
   console.time("canvasMap");
+  canvas.width = width;
+  canvas.height = height;
   const xExtent = d3.extent(data, (d) => d.x) as [number, number];
   const yExtent = d3.extent(data, (d) => d.y) as [number, number];
 

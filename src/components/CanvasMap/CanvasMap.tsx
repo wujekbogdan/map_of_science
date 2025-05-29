@@ -1,3 +1,4 @@
+import { transfer } from "comlink";
 import { useRef, useEffect, useState } from "react";
 import styled from "styled-components";
 import useSWR from "swr";
@@ -6,6 +7,27 @@ import { loadData } from "../../api/worker.ts";
 import { useStore } from "../../store.ts";
 import ConfigEditor from "./ConfigEditor.tsx";
 import { ConfigEntry, drawOnCanvas } from "./drawOnCanvas.ts";
+
+type DrawParams = Parameters<typeof drawOnCanvas>[0] & {
+  shouldTransfer: boolean;
+  canvas: OffscreenCanvas;
+};
+
+const worker = new ComlinkWorker<typeof import("./drawOnCanvas.ts")>(
+  new URL("./drawOnCanvas.ts", import.meta.url),
+);
+
+const draw = (args: DrawParams) => {
+  const { canvas, ...otherProps } = args;
+  const obj = { canvas, ...otherProps };
+
+  if (args.shouldTransfer) {
+    transfer(obj, [canvas]);
+  }
+  const props = args.shouldTransfer ? obj : { ...otherProps };
+
+  return worker.drawOnCanvas(props);
+};
 
 const CanvasMap = () => {
   const [config, setConfig] = useState<ConfigEntry[]>([
@@ -18,6 +40,7 @@ const CanvasMap = () => {
   ]);
   const [size, setSize] = useState({ width: 1000, height: 1000 });
   const canvas = useRef<HTMLCanvasElement>(null);
+  const offscreenRef = useRef<OffscreenCanvas | null>(null);
   const hasInitialized = useRef(false);
 
   const [setDataPoints] = useStore(useShallow((s) => [s.setDataPoints]));
@@ -29,18 +52,17 @@ const CanvasMap = () => {
 
   useEffect(() => {
     if (!canvas.current || !data?.dataPoints) return;
-    const context = canvas.current.getContext("2d");
+    offscreenRef.current ??= canvas.current.transferControlToOffscreen();
 
-    if (!context) {
-      throw new Error("Failed to get canvas context");
-    }
-
-    drawOnCanvas({
+    draw({
+      shouldTransfer: !hasInitialized.current,
       config,
-      canvasContext: context,
+      canvas: offscreenRef.current,
       width: size.width,
       height: size.height,
       data: [...data.dataPoints.values()],
+    }).catch((error) => {
+      throw new Error("Error drawing on canvas: " + error);
     });
 
     hasInitialized.current = true;
@@ -58,7 +80,7 @@ const CanvasMap = () => {
           onSizeChange={setSize}
         />
       </EditorContainer>
-      <Canvas ref={canvas} width={size.width} height={size.height} />
+      <Canvas ref={canvas} />
     </Container>
   );
 };
@@ -76,7 +98,6 @@ const EditorContainer = styled.div`
   position: fixed;
   top: 0;
   left: 0;
-  width: 300px;
 `;
 
 export default CanvasMap;

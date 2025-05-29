@@ -118,12 +118,13 @@ export const ConfigEditor = ({
   );
 };
 
-const Section = styled.section`
-  margin-top: 16px;
-`;
-
 const Form = styled.form`
   padding: 10px;
+  background: rgba(255, 255, 255, 0.8);
+`;
+
+const Section = styled.section`
+  margin-top: 24px;
 `;
 
 const Row = styled.div`
@@ -134,7 +135,6 @@ const Row = styled.div`
 
 const FormControl = styled.div`
   margin-right: 8px;
-  flex: 1;
 `;
 
 export default ConfigEditor;

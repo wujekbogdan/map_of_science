@@ -1,74 +1,126 @@
 import styled from "styled-components";
 import { ConfigEntry } from "./drawOnCanvas.ts";
 
-type Props = {
-  config: ConfigEntry[];
-  onChange: (config: ConfigEntry[]) => void;
+type Size = {
+  width: number;
+  height: number;
 };
 
-export const ConfigEditor = ({ config, onChange }: Props) => {
+type Props = {
+  config: ConfigEntry[];
+  size: Size;
+  onConfigChange: (config: ConfigEntry[]) => void;
+  onSizeChange: (size: Size) => void;
+};
+
+export const ConfigEditor = ({
+  config,
+  size,
+  onConfigChange,
+  onSizeChange,
+}: Props) => {
   const update = (index: number, field: keyof ConfigEntry, value: number) => {
     const newConfig = [...config];
     newConfig[index] = { ...newConfig[index], [field]: value };
-    onChange(newConfig);
+    onConfigChange(newConfig);
   };
 
-  const addRow = () => onChange([...config, { min: 0, size: 1 }]);
+  const addRow = () => onConfigChange([...config, { min: 0, size: 1 }]);
 
   const removeRow = (index: number) => {
     const newConfig = config.filter((_, i) => i !== index);
-    onChange(newConfig);
+    onConfigChange(newConfig);
   };
 
   return (
     <Form>
-      {config.map((entry, i) => (
-        <Row key={i}>
+      <Section>
+        <h2>Threshold / size</h2>
+        {config.map((entry, i) => (
+          <Row key={i}>
+            <FormControl>
+              <input
+                placeholder="Threshold"
+                type="number"
+                min={1}
+                value={entry.min}
+                onChange={(e) => {
+                  e.preventDefault();
+                  update(i, "min", +e.target.value);
+                }}
+              />
+            </FormControl>
+            <FormControl>
+              <input
+                placeholder="Size"
+                type="number"
+                min={1}
+                value={entry.size}
+                onChange={(e) => {
+                  e.preventDefault();
+                  update(i, "size", +e.target.value);
+                }}
+              />
+            </FormControl>
+            <FormControl>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  removeRow(i);
+                }}
+              >
+                ×
+              </button>
+            </FormControl>
+          </Row>
+        ))}
+
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            addRow();
+          }}
+        >
+          + Add
+        </button>
+      </Section>
+
+      <Section>
+        <h2>Canvas size</h2>
+        <Row>
           <FormControl>
             <input
-              placeholder="Threshold"
+              placeholder="Width"
               type="number"
-              value={entry.min}
+              min={1}
+              value={size.width}
               onChange={(e) => {
                 e.preventDefault();
-                update(i, "min", +e.target.value);
+                onSizeChange({ ...size, width: +e.target.value });
               }}
             />
           </FormControl>
           <FormControl>
             <input
-              placeholder="Size"
+              placeholder="Height"
               type="number"
-              value={entry.size}
+              min={1}
+              value={size.height}
               onChange={(e) => {
                 e.preventDefault();
-                update(i, "size", +e.target.value);
+                onSizeChange({ ...size, height: +e.target.value });
               }}
             />
-          </FormControl>
-          <FormControl>
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                removeRow(i);
-              }}
-            >
-              ×
-            </button>
           </FormControl>
         </Row>
-      ))}
-      <button
-        onClick={(e) => {
-          e.preventDefault();
-          addRow();
-        }}
-      >
-        + Add
-      </button>
+      </Section>
     </Form>
   );
 };
+
+const Section = styled.section`
+  margin-top: 16px;
+`;
 
 const Form = styled.form`
   padding: 10px;

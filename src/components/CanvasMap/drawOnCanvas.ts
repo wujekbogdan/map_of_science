@@ -7,33 +7,20 @@ export type ConfigEntry = {
 };
 
 type Props = {
-  canvas?: OffscreenCanvas;
+  canvasContext: CanvasRenderingContext2D;
   width: number;
   height: number;
   data: DataPoint[];
   config: ConfigEntry[];
 };
 
-let cachedCanvas: OffscreenCanvas | null = null;
-
 export const drawOnCanvas = (props: Props) => {
-  console.log("draw");
-  const canvas = cachedCanvas ?? props.canvas;
-
-  if (!canvas) {
-    throw new Error("Canvas is not provided or initialized");
-  }
-
-  cachedCanvas = canvas;
-  const { width, height, data, config } = props;
-  const ctx = canvas.getContext("2d");
-  const getCircleSize = (num: number) => {
+  const { width, height, data, config, canvasContext: ctx } = props;
+  const getCircleSize = (num: number): number => {
     const sortedConfig = [...config].sort((a, b) => a.min - b.min);
 
-    for (const c of sortedConfig) {
-      if (num >= c.min) return c.size;
-    }
-    return 1;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return,@typescript-eslint/no-unsafe-call
+    return sortedConfig.findLast((item) => num >= item.min)?.size ?? 1;
   };
 
   if (!ctx) {
@@ -43,17 +30,23 @@ export const drawOnCanvas = (props: Props) => {
   console.time("canvasMap");
   const xExtent = d3.extent(data, (d) => d.x) as [number, number];
   const yExtent = d3.extent(data, (d) => d.y) as [number, number];
-  const maxExtent = Math.max(xExtent[1] - xExtent[0], yExtent[1] - yExtent[0]);
-  const halfExtent = maxExtent / 2;
+
+  const dataWidth = xExtent[1] - xExtent[0];
+  const dataHeight = yExtent[1] - yExtent[0];
+
+  const scale = Math.min(width / dataWidth, height / dataHeight);
+
+  const viewWidth = width / scale;
+  const viewHeight = height / scale;
 
   const xScale = d3
     .scaleLinear()
-    .domain([-halfExtent, halfExtent])
+    .domain([-viewWidth / 2, viewWidth / 2])
     .range([0, width]);
 
   const yScale = d3
     .scaleLinear()
-    .domain([-halfExtent, halfExtent])
+    .domain([-viewHeight / 2, viewHeight / 2])
     .range([0, height]);
 
   ctx.clearRect(0, 0, width, height);

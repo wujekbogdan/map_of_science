@@ -3,7 +3,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router";
 import App from "./components/App.tsx";
-import CanvasMap from "./components/CanvasMap.tsx";
+import CanvasMap from "./components/CanvasMap/CanvasMap.tsx";
 import "./css/global.css";
 
 const root = document.getElementById("root");

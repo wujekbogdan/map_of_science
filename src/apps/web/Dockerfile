@@ -15,7 +15,7 @@ RUN pnpm i --frozen-lockfile
 COPY . .
 
 RUN export HUSKY=0
-RUN npm run build
+RUN pnpm build
 
 # Use a separate image as a runner to reduce the final image size.
 FROM nginx:1.27.2-alpine AS runner

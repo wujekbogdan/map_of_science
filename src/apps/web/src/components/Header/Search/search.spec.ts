@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "@map-of-science/vitest";
 import { Concept, DataPoint } from "../../../api/model";
 import { createLabelsCollection, search } from "./search.ts";
 

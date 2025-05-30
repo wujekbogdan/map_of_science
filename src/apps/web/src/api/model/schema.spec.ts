@@ -1,8 +1,8 @@
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { describe, it, expect } from "vitest";
 import { z } from "zod";
 import { ZodSchema } from "zod";
+import { describe, it, expect } from "@map-of-science/vitest";
 import { DataSchema, ConceptSchema, CityLabelSchema } from ".";
 import { setCollector } from "../../csv/collector.ts";
 import { parse as csvParse } from "../../csv/parse.ts";

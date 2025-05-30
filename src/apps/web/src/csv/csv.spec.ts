@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi } from "@map-of-science/vitest";
 import { withRequestInterception } from "../test-utils/request-interception.ts";
 import { parse, withHttpProvider } from "./parse";
 

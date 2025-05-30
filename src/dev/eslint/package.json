@@ -12,5 +12,8 @@
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.14"
+  },
+  "bin": {
+    "eslint": "./node_modules/eslint/bin/eslint.js"
   }
 }

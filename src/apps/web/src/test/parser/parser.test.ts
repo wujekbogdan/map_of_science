@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
 import { ZodError } from "zod";
+import { describe, it, expect } from "@map-of-science/vitest";
 import { parse } from "../../../vite-plugin/svg-map-parser.ts";
 import validSvg from "./valid-svg.test.svg?raw";
 

@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 import { DataPoint } from "../../api/model";
 
-export type ConfigEntry = {
+export type Threshold = {
   min: number;
   size: number;
   visible: boolean;
@@ -12,7 +12,8 @@ type Props = {
   width: number;
   height: number;
   data: DataPoint[];
-  config: ConfigEntry[];
+  thresholds: Threshold[];
+  blur: number;
 };
 
 let cachedCanvas: OffscreenCanvas | null = null;
@@ -25,23 +26,25 @@ export const drawOnCanvas = (props: Props) => {
   }
 
   cachedCanvas = canvas;
-  const { width, height, data, config } = props;
-  const sortedConfig = [...config].sort((a, b) => a.min - b.min);
+  const { width, height, data, thresholds, blur } = props;
+  const sortedThresholds = [...thresholds].sort((a, b) => a.min - b.min);
 
-  const findConfig = (num: number) => {
-    const found = sortedConfig.findLast((item) => num >= item.min);
+  const findThreshold = (num: number) => {
+    const found = sortedThresholds.findLast((item) => num >= item.min);
     return found ?? { size: 1, visible: true };
   };
 
-  const ctx = canvas.getContext("2d");
+  const mainCtx = canvas.getContext("2d");
 
-  if (!ctx) {
+  if (!mainCtx) {
     throw new Error("Cannot initialize canvas context");
   }
 
   console.time("canvasMap");
+
   canvas.width = width;
   canvas.height = height;
+
   const xExtent = d3.extent(data, (d) => d.x) as [number, number];
   const yExtent = d3.extent(data, (d) => d.y) as [number, number];
 
@@ -64,22 +67,27 @@ export const drawOnCanvas = (props: Props) => {
     .range([0, height]);
 
   console.time("render");
-  ctx.clearRect(0, 0, width, height);
-  ctx.save();
+  const tempCanvas = new OffscreenCanvas(width, height);
+  const tempCtx = tempCanvas.getContext("2d")!;
+
   data.forEach((point) => {
-    const config = findConfig(point.numRecentArticles);
+    const config = findThreshold(point.numRecentArticles);
 
     if (!config.visible) {
       return;
     }
 
-    ctx.beginPath();
-    ctx.arc(xScale(point.x), yScale(point.y), config.size, 0, 2 * Math.PI);
-    ctx.fillStyle = "black";
-    ctx.fill();
+    tempCtx.beginPath();
+    tempCtx.arc(xScale(point.x), yScale(point.y), config.size, 0, 2 * Math.PI);
+    tempCtx.fillStyle = "black";
+    tempCtx.fill();
   });
-  console.timeEnd("render");
 
-  ctx.restore();
+  mainCtx.clearRect(0, 0, width, height);
+  mainCtx.save();
+  mainCtx.filter = blur ? `blur(${blur}px)` : "none";
+  mainCtx.drawImage(tempCanvas, 0, 0);
+  mainCtx.restore();
+
   console.timeEnd("canvasMap");
 };

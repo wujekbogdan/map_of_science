@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { ConfigEntry } from "./drawOnCanvas.ts";
+import { Threshold } from "./drawOnCanvas.ts";
 
 type Size = {
   width: number;
@@ -7,41 +7,44 @@ type Size = {
 };
 
 type Props = {
-  config: ConfigEntry[];
+  thresholds: Threshold[];
   size: Size;
-  onConfigChange: (config: ConfigEntry[]) => void;
+  blur: number;
+  onThresholdsChange: (config: Threshold[]) => void;
   onSizeChange: (size: Size) => void;
+  onBlurChange: (blur: number) => void;
 };
 
 export const ConfigEditor = ({
-  config,
+  thresholds,
   size,
-  onConfigChange,
+  onThresholdsChange,
   onSizeChange,
+  onBlurChange,
 }: Props) => {
   const update = (
     index: number,
-    field: keyof ConfigEntry,
+    field: keyof Threshold,
     value: number | boolean,
   ) => {
-    const newConfig = [...config];
+    const newConfig = [...thresholds];
     newConfig[index] = { ...newConfig[index], [field]: value };
-    onConfigChange(newConfig);
+    onThresholdsChange(newConfig);
   };
 
   const addRow = () =>
-    onConfigChange([...config, { min: 0, size: 1, visible: true }]);
+    onThresholdsChange([...thresholds, { min: 0, size: 1, visible: true }]);
 
   const removeRow = (index: number) => {
-    const newConfig = config.filter((_, i) => i !== index);
-    onConfigChange(newConfig);
+    const newConfig = thresholds.filter((_, i) => i !== index);
+    onThresholdsChange(newConfig);
   };
 
   return (
     <Form>
       <Section>
-        <h2>Threshold / size</h2>
-        {config.map((entry, i) => (
+        <Header>Threshold / size</Header>
+        {thresholds.map((entry, i) => (
           <Row key={i}>
             <FormControl>
               <input
@@ -100,7 +103,7 @@ export const ConfigEditor = ({
       </Section>
 
       <Section>
-        <h2>Canvas size</h2>
+        <Header>Canvas size</Header>
         <Row>
           <FormControl>
             <input
@@ -128,6 +131,23 @@ export const ConfigEditor = ({
           </FormControl>
         </Row>
       </Section>
+
+      <Section>
+        <Header>Blur</Header>
+        <FormControl>
+          <input
+            placeholder="Blur radius"
+            type="number"
+            min={0}
+            defaultValue={0}
+            onChange={(e) => {
+              e.preventDefault();
+              const blurRadius = +e.target.value;
+              onBlurChange(blurRadius);
+            }}
+          />
+        </FormControl>
+      </Section>
     </Form>
   );
 };
@@ -137,7 +157,7 @@ const Form = styled.form`
   background: rgba(255, 255, 255, 0.8);
 `;
 
-const Section = styled.section`
+const Section = styled.div`
   margin-top: 24px;
 `;
 
@@ -149,6 +169,11 @@ const Row = styled.div`
 
 const FormControl = styled.div`
   margin-right: 8px;
+`;
+
+const Header = styled.h2`
+  margin: 16px 0 8px;
+  font-size: 16px;
 `;
 
 export default ConfigEditor;

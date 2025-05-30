@@ -1,4 +1,5 @@
 import { transfer } from "comlink";
+import debounce from "lodash/debounce";
 import { useRef, useEffect, useState } from "react";
 import styled from "styled-components";
 import useSWR from "swr";
@@ -6,7 +7,7 @@ import { useShallow } from "zustand/react/shallow";
 import { loadData } from "../../api/worker.ts";
 import { useStore } from "../../store.ts";
 import ConfigEditor from "./ConfigEditor.tsx";
-import { ConfigEntry, drawOnCanvas } from "./drawOnCanvas.ts";
+import { Threshold, drawOnCanvas } from "./drawOnCanvas.ts";
 
 type DrawParams = Parameters<typeof drawOnCanvas>[0] & {
   shouldTransfer: boolean;
@@ -29,8 +30,14 @@ const draw = (args: DrawParams) => {
   return worker.drawOnCanvas(props);
 };
 
+const debouncedDraw = debounce((args: DrawParams) => {
+  draw(args).catch((error) => {
+    throw new Error("Error drawing on canvas: " + error);
+  });
+}, 150);
+
 const CanvasMap = () => {
-  const [config, setConfig] = useState<ConfigEntry[]>([
+  const [thresholds, setThresholds] = useState<Threshold[]>([
     { min: 0, size: 1, visible: true },
     { min: 51, size: 2, visible: true },
     { min: 201, size: 3, visible: true },
@@ -39,6 +46,7 @@ const CanvasMap = () => {
     { min: 2001, size: 6, visible: true },
   ]);
   const [size, setSize] = useState({ width: 1000, height: 1000 });
+  const [blur, setBlur] = useState(0);
   const canvas = useRef<HTMLCanvasElement>(null);
   const offscreenRef = useRef<OffscreenCanvas | null>(null);
   const hasInitialized = useRef(false);
@@ -54,19 +62,18 @@ const CanvasMap = () => {
     if (!canvas.current || !data?.dataPoints) return;
     offscreenRef.current ??= canvas.current.transferControlToOffscreen();
 
-    draw({
+    debouncedDraw({
+      blur: blur,
       shouldTransfer: !hasInitialized.current,
-      config,
+      thresholds: thresholds,
       canvas: offscreenRef.current,
       width: size.width,
       height: size.height,
       data: [...data.dataPoints.values()],
-    }).catch((error) => {
-      throw new Error("Error drawing on canvas: " + error);
     });
 
     hasInitialized.current = true;
-  }, [config, data, size]);
+  }, [thresholds, data, size, blur]);
 
   return isLoading ? (
     <>Loading...</>
@@ -74,10 +81,12 @@ const CanvasMap = () => {
     <Container>
       <EditorContainer>
         <ConfigEditor
-          config={config}
+          thresholds={thresholds}
           size={size}
-          onConfigChange={setConfig}
+          blur={0}
+          onThresholdsChange={setThresholds}
           onSizeChange={setSize}
+          onBlurChange={setBlur}
         />
       </EditorContainer>
       <Canvas ref={canvas} />

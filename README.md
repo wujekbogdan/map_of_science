@@ -56,7 +56,7 @@ corepack enable
    ```
 2. Start the application locally:
    ```bash
-   pnpm dev
+   pnpm turbo @map-of-science/web#dev
    ```
 3. Open the application in the browser at the address displayed in the logs, probably [http://localhost:5173/](http://localhost:5173/)
 
@@ -65,6 +65,7 @@ corepack enable
 1. Install and run [Docker](https://docs.docker.com/get-docker/).
 2. Build and run the application:
    ```bash
+   cd src/apps/web
    docker compose up # or docker-compose up
    ```
 3. Open the application in the browser at [http://localhost:8080/](http://localhost:8080/)
@@ -77,11 +78,12 @@ corepack enable
    ```
 2. Build the application:
    ```bash
-   pnpm build
+   pnpm turbo @map-of-science/web#build
    ```
 3. Compiled files will be located in the `dist` directory.
 4. Serve the application using a static server, e.g., [http-server](https://www.npmjs.com/package/http-server):
    ```bash
+   cd src/apps/web
    npx http-server dist
    ```
 

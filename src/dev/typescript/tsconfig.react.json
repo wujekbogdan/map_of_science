@@ -25,7 +25,9 @@
     // TODO: Remove once the project is fully migrated to TypeScript
     "allowJs": true,
     "checkJs": false,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+
+    "plugins": [{ "name": "typescript-plugin-css-modules" }]
   },
   "include": ["src"]
 }

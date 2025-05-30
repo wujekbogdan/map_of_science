@@ -43,7 +43,9 @@ const CanvasMaps = () => {
               href={`#${id}`}
               onClick={(e) => {
                 e.preventDefault();
-                ref.current?.scrollIntoView();
+                ref.current?.scrollIntoView({
+                  behavior: "smooth",
+                });
               }}
             >
               {name}

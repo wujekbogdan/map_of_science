@@ -1,5 +1,5 @@
 import { transfer } from "comlink";
-import debounce from "lodash/debounce";
+import { select, ZoomTransform, zoom, zoomIdentity } from "d3";
 import { useRef, useEffect, useState } from "react";
 import styled from "styled-components";
 import useSWR from "swr";
@@ -30,12 +30,6 @@ const draw = (args: DrawParams) => {
   return worker.drawOnCanvas(props);
 };
 
-const debouncedDraw = debounce((args: DrawParams) => {
-  draw(args).catch((error) => {
-    throw new Error("Error drawing on canvas: " + error);
-  });
-}, 150);
-
 const CanvasMap = () => {
   const [thresholds, setThresholds] = useState<Threshold[]>([
     { min: 0, size: 1, visible: true },
@@ -47,6 +41,7 @@ const CanvasMap = () => {
   ]);
   const [size, setSize] = useState({ width: 1000, height: 1000 });
   const [blur, setBlur] = useState(0);
+  const [transform, setTransform] = useState(zoomIdentity);
   const canvas = useRef<HTMLCanvasElement>(null);
   const offscreenRef = useRef<OffscreenCanvas | null>(null);
   const hasInitialized = useRef(false);
@@ -59,10 +54,27 @@ const CanvasMap = () => {
   });
 
   useEffect(() => {
+    if (!canvas.current) return;
+
+    const d3Zoom = zoom<HTMLCanvasElement, unknown>()
+      .scaleExtent([0.5, 10])
+      .on("zoom", (event: { transform: ZoomTransform }) => {
+        setTransform(event.transform);
+      });
+
+    select(canvas.current).call(d3Zoom);
+  });
+
+  useEffect(() => {
     if (!canvas.current || !data?.dataPoints) return;
     offscreenRef.current ??= canvas.current.transferControlToOffscreen();
 
-    debouncedDraw({
+    draw({
+      transform: {
+        x: transform.x,
+        y: transform.y,
+        k: transform.k,
+      },
       blur: blur,
       shouldTransfer: !hasInitialized.current,
       thresholds: thresholds,
@@ -70,10 +82,12 @@ const CanvasMap = () => {
       width: size.width,
       height: size.height,
       data: [...data.dataPoints.values()],
+    }).catch((error) => {
+      throw new Error("Error drawing on canvas: " + error);
     });
 
     hasInitialized.current = true;
-  }, [thresholds, data, size, blur]);
+  }, [thresholds, data, size, blur, transform]);
 
   return isLoading ? (
     <>Loading...</>
@@ -101,6 +115,7 @@ const Container = styled.div`
 const Canvas = styled.canvas`
   display: block;
   margin: 20px auto;
+  cursor: pointer;
 `;
 
 const EditorContainer = styled.div`

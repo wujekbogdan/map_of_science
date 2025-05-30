@@ -1,4 +1,4 @@
-import * as d3 from "d3";
+import { extent, scaleLinear } from "d3";
 import { DataPoint } from "../../api/model";
 
 export type Threshold = {
@@ -14,6 +14,11 @@ type Props = {
   data: DataPoint[];
   thresholds: Threshold[];
   blur: number;
+  transform: {
+    x: number;
+    y: number;
+    k: number;
+  };
 };
 
 let cachedCanvas: OffscreenCanvas | null = null;
@@ -26,7 +31,7 @@ export const drawOnCanvas = (props: Props) => {
   }
 
   cachedCanvas = canvas;
-  const { width, height, data, thresholds, blur } = props;
+  const { width, height, data, thresholds, blur, transform } = props;
   const sortedThresholds = [...thresholds].sort((a, b) => a.min - b.min);
 
   const findThreshold = (num: number) => {
@@ -40,14 +45,11 @@ export const drawOnCanvas = (props: Props) => {
     throw new Error("Cannot initialize canvas context");
   }
 
-  console.time("canvasMap");
-
   canvas.width = width;
   canvas.height = height;
 
-  const xExtent = d3.extent(data, (d) => d.x) as [number, number];
-  const yExtent = d3.extent(data, (d) => d.y) as [number, number];
-
+  const xExtent = extent(data, (d) => d.x) as [number, number];
+  const yExtent = extent(data, (d) => d.y) as [number, number];
   const dataWidth = xExtent[1] - xExtent[0];
   const dataHeight = yExtent[1] - yExtent[0];
 
@@ -56,15 +58,18 @@ export const drawOnCanvas = (props: Props) => {
   const viewWidth = width / scale;
   const viewHeight = height / scale;
 
-  const xScale = d3
-    .scaleLinear()
+  const xScale = scaleLinear()
     .domain([-viewWidth / 2, viewWidth / 2])
     .range([0, width]);
 
-  const yScale = d3
-    .scaleLinear()
+  const yScale = scaleLinear()
     .domain([-viewHeight / 2, viewHeight / 2])
     .range([0, height]);
+
+  const applyTransform = (x: number, y: number) => ({
+    x: x * transform.k + transform.x,
+    y: y * transform.k + transform.y,
+  });
 
   console.time("render");
   const tempCanvas = new OffscreenCanvas(width, height);
@@ -77,17 +82,14 @@ export const drawOnCanvas = (props: Props) => {
       return;
     }
 
+    const { x, y } = applyTransform(xScale(point.x), yScale(point.y));
     tempCtx.beginPath();
-    tempCtx.arc(xScale(point.x), yScale(point.y), config.size, 0, 2 * Math.PI);
+    tempCtx.arc(x, y, config.size, 0, 2 * Math.PI);
     tempCtx.fillStyle = "black";
     tempCtx.fill();
   });
 
   mainCtx.clearRect(0, 0, width, height);
-  mainCtx.save();
   mainCtx.filter = blur ? `blur(${blur}px)` : "none";
   mainCtx.drawImage(tempCanvas, 0, 0);
-  mainCtx.restore();
-
-  console.timeEnd("canvasMap");
 };

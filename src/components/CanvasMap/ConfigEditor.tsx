@@ -145,9 +145,8 @@ export const ConfigEditor = () => {
         <FormControl>
           <input
             placeholder="Blur radius"
-            type="number"
+            type="range"
             min={0}
-            defaultValue={0}
             value={blur}
             onChange={(e) => {
               e.preventDefault();
@@ -155,6 +154,7 @@ export const ConfigEditor = () => {
               setBlur(blurRadius);
             }}
           />
+          <span>{blur}</span>
         </FormControl>
       </Section>
 
@@ -173,7 +173,7 @@ export const ConfigEditor = () => {
           <input
             disabled={!oneBitMode}
             placeholder="One bit threshold"
-            type="number"
+            type="range"
             min={0}
             max={255}
             step={10}
@@ -184,6 +184,7 @@ export const ConfigEditor = () => {
               setOneBitThreshold(oneBitThreshold);
             }}
           />
+          <span>{oneBitThreshold}</span>
         </FormControl>
       </Section>
     </Form>
@@ -205,8 +206,17 @@ const Row = styled.div`
 const FormControl = styled.div`
   margin-right: 8px;
 
+  input {
+    vertical-align: middle;
+  }
+
   input[disabled] {
     color: #999;
+  }
+
+  span {
+    margin-left: 8px;
+    vertical-align: middle;
   }
 `;
 

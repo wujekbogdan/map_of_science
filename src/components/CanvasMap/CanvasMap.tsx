@@ -8,7 +8,7 @@ import { loadData } from "../../api/worker.ts";
 import { useStore } from "../../store.ts";
 import ConfigEditor from "./ConfigEditor.tsx";
 import { drawOnCanvas } from "./drawOnCanvas.ts";
-import { useConfigStore } from "./store.ts";
+import { schema, useConfigStore } from "./store.ts";
 
 type DrawParams = Parameters<typeof drawOnCanvas>[0] & {
   shouldTransfer: boolean;
@@ -32,13 +32,29 @@ const draw = (args: DrawParams) => {
 };
 
 const CanvasMap = () => {
-  const [thresholds, size, blur, oneBitMode, oneBitThreshold] = useConfigStore(
+  const [
+    thresholds,
+    size,
+    blur,
+    oneBitMode,
+    oneBitThreshold,
+    setThresholds,
+    setSize,
+    setBlur,
+    setOneBitThreshold,
+    setOneBitMode,
+  ] = useConfigStore(
     useShallow((s) => [
       s.thresholds,
       s.size,
       s.blur,
       s.oneBitMode,
       s.oneBitThreshold,
+      s.setThresholds,
+      s.setSize,
+      s.setBlur,
+      s.setOneBitThreshold,
+      s.setOneBitMode,
     ]),
   );
 
@@ -57,6 +73,16 @@ const CanvasMap = () => {
     if (!data?.dataPoints) return [];
     return Array.from(data.dataPoints.values());
   }, [data?.dataPoints]);
+  const serializedFormState = JSON.stringify({
+    blur,
+    thresholds,
+    size: {
+      width: size.width,
+      height: size.height,
+    },
+    oneBitMode,
+    oneBitThreshold,
+  });
 
   useEffect(() => {
     if (!canvas.current) return;
@@ -105,6 +131,28 @@ const CanvasMap = () => {
     data?.dataPoints,
   ]);
 
+  const textareaOnChange = (value: string) => {
+    const json = (): unknown => {
+      try {
+        return JSON.parse(value);
+      } catch {
+        return "";
+      }
+    };
+    const parsed = schema.safeParse(json());
+    if (!parsed.success) {
+      return;
+    }
+
+    const { data } = parsed;
+
+    setBlur(data.blur);
+    setThresholds(data.thresholds);
+    setSize(data.size);
+    setOneBitMode(data.oneBitMode);
+    setOneBitThreshold(data.oneBitThreshold);
+  };
+
   return isLoading ? (
     <>Loading...</>
   ) : (
@@ -130,6 +178,13 @@ const CanvasMap = () => {
             Reset pan/zoom
           </button>
         </p>
+        <Textarea
+          rows={6}
+          onChange={(e) => {
+            textareaOnChange(e.target.value);
+          }}
+          value={serializedFormState}
+        />
       </EditorContainer>
       <Canvas ref={canvas} />
     </Container>
@@ -152,6 +207,12 @@ const EditorContainer = styled.div`
   left: 0;
   padding: 10px;
   background: rgba(255, 255, 255, 0.8);
+`;
+
+const Textarea = styled.textarea`
+  font-family: monospace;
+  width: 100%;
+  resize: none;
 `;
 
 export default CanvasMap;

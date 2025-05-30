@@ -1,16 +1,26 @@
+import { z } from "zod";
 import { create } from "zustand";
 import { combine } from "zustand/middleware";
 
-export type Threshold = {
-  min: number;
-  size: number;
-  visible: boolean;
-};
+export const schema = z.object({
+  blur: z.number(),
+  thresholds: z.array(
+    z.object({
+      min: z.number(),
+      size: z.number(),
+      visible: z.boolean(),
+    }),
+  ),
+  size: z.object({
+    width: z.number(),
+    height: z.number(),
+  }),
+  oneBitMode: z.boolean(),
+  oneBitThreshold: z.number(),
+});
 
-type Size = {
-  width: number;
-  height: number;
-};
+export type Threshold = z.infer<typeof schema.shape.thresholds.element>;
+export type Size = z.infer<typeof schema.shape.size>;
 
 const defaults = {
   thresholds: [

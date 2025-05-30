@@ -7,7 +7,6 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "lint": "tubro lint",
-    "preview": "turbo preview",
     "test": "turbo test",
     "commit": "cz"
   },

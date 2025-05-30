@@ -1,11 +1,6 @@
 import { extent, scaleLinear } from "d3";
 import { DataPoint } from "../../api/model";
-
-export type Threshold = {
-  min: number;
-  size: number;
-  visible: boolean;
-};
+import { Threshold } from "./store.ts";
 
 type Props = {
   canvas?: OffscreenCanvas;
@@ -13,6 +8,8 @@ type Props = {
   height: number;
   data: DataPoint[];
   thresholds: Threshold[];
+  oneBitThreshold: number;
+  oneBitMode: boolean;
   blur: number;
   transform: {
     x: number;
@@ -23,6 +20,27 @@ type Props = {
 
 let cachedCanvas: OffscreenCanvas | null = null;
 
+const toOneBit = (
+  ctx: OffscreenCanvasRenderingContext2D,
+  width: number,
+  height: number,
+  threshold: number,
+) => {
+  const imgData = ctx.getImageData(0, 0, width, height);
+  const data = imgData.data;
+
+  for (let i = 0; i < data.length; i += 4) {
+    const alpha = data[i + 3];
+    const val = alpha >= threshold ? 0 : 255;
+    data[i] = val;
+    data[i + 1] = val;
+    data[i + 2] = val;
+    data[i + 3] = 255;
+  }
+
+  ctx.putImageData(imgData, 0, 0);
+};
+
 export const drawOnCanvas = (props: Props) => {
   const canvas = cachedCanvas ?? props.canvas;
 
@@ -31,7 +49,16 @@ export const drawOnCanvas = (props: Props) => {
   }
 
   cachedCanvas = canvas;
-  const { width, height, data, thresholds, blur, transform } = props;
+  const {
+    width,
+    height,
+    data,
+    thresholds,
+    blur,
+    transform,
+    oneBitThreshold,
+    oneBitMode,
+  } = props;
   const sortedThresholds = [...thresholds].sort((a, b) => a.min - b.min);
 
   const findThreshold = (num: number) => {
@@ -96,4 +123,8 @@ export const drawOnCanvas = (props: Props) => {
   mainCtx.clearRect(0, 0, width, height);
   mainCtx.filter = blur ? `blur(${blur}px)` : "none";
   mainCtx.drawImage(tempCanvas, 0, 0);
+
+  if (oneBitMode) {
+    toOneBit(mainCtx, width, height, oneBitThreshold);
+  }
 };

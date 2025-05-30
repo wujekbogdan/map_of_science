@@ -1,43 +1,51 @@
 import styled from "styled-components";
-import { Threshold } from "./drawOnCanvas.ts";
+import { useShallow } from "zustand/react/shallow";
+import { Threshold, useConfigStore } from "./store.ts";
 
-type Size = {
-  width: number;
-  height: number;
-};
+export const ConfigEditor = () => {
+  const [
+    thresholds,
+    size,
+    blur,
+    oneBitMode,
+    oneBitThreshold,
+    setThresholds,
+    setSize,
+    setBlur,
+    setOneBitThreshold,
+    setOneBitMode,
+  ] = useConfigStore(
+    useShallow((s) => [
+      s.thresholds,
+      s.size,
+      s.blur,
+      s.oneBitMode,
+      s.oneBitThreshold,
+      s.setThresholds,
+      s.setSize,
+      s.setBlur,
+      s.setOneBitThreshold,
+      s.setOneBitMode,
+    ]),
+  );
 
-type Props = {
-  thresholds: Threshold[];
-  size: Size;
-  blur: number;
-  onThresholdsChange: (config: Threshold[]) => void;
-  onSizeChange: (size: Size) => void;
-  onBlurChange: (blur: number) => void;
-};
-
-export const ConfigEditor = ({
-  thresholds,
-  size,
-  onThresholdsChange,
-  onSizeChange,
-  onBlurChange,
-}: Props) => {
   const update = (
     index: number,
     field: keyof Threshold,
     value: number | boolean,
   ) => {
-    const newConfig = [...thresholds];
-    newConfig[index] = { ...newConfig[index], [field]: value };
-    onThresholdsChange(newConfig);
+    const newConfig = thresholds.map((item, idx) =>
+      idx === index ? { ...item, [field]: value } : item,
+    );
+    setThresholds(newConfig);
   };
 
   const addRow = () =>
-    onThresholdsChange([...thresholds, { min: 0, size: 1, visible: true }]);
+    setThresholds([...thresholds, { min: 0, size: 1, visible: true }]);
 
   const removeRow = (index: number) => {
     const newConfig = thresholds.filter((_, i) => i !== index);
-    onThresholdsChange(newConfig);
+    setThresholds(newConfig);
   };
 
   return (
@@ -113,7 +121,7 @@ export const ConfigEditor = ({
               value={size.width}
               onChange={(e) => {
                 e.preventDefault();
-                onSizeChange({ ...size, width: +e.target.value });
+                setSize({ ...size, width: +e.target.value });
               }}
             />
           </FormControl>
@@ -125,7 +133,7 @@ export const ConfigEditor = ({
               value={size.height}
               onChange={(e) => {
                 e.preventDefault();
-                onSizeChange({ ...size, height: +e.target.value });
+                setSize({ ...size, height: +e.target.value });
               }}
             />
           </FormControl>
@@ -140,10 +148,40 @@ export const ConfigEditor = ({
             type="number"
             min={0}
             defaultValue={0}
+            value={blur}
             onChange={(e) => {
               e.preventDefault();
               const blurRadius = +e.target.value;
-              onBlurChange(blurRadius);
+              setBlur(blurRadius);
+            }}
+          />
+        </FormControl>
+      </Section>
+
+      <Section>
+        <Header>
+          1-bit color mode
+          <InlineCheckbox
+            type="checkbox"
+            checked={oneBitMode}
+            onChange={(e) => {
+              setOneBitMode(e.target.checked);
+            }}
+          />
+        </Header>
+        <FormControl>
+          <input
+            disabled={!oneBitMode}
+            placeholder="One bit threshold"
+            type="number"
+            min={0}
+            max={255}
+            step={10}
+            value={oneBitThreshold}
+            onChange={(e) => {
+              e.preventDefault();
+              const oneBitThreshold = +e.target.value;
+              setOneBitThreshold(oneBitThreshold);
             }}
           />
         </FormControl>
@@ -166,11 +204,20 @@ const Row = styled.div`
 
 const FormControl = styled.div`
   margin-right: 8px;
+
+  input[disabled] {
+    color: #999;
+  }
 `;
 
 const Header = styled.h2`
   margin: 16px 0 8px;
   font-size: 16px;
+`;
+
+const InlineCheckbox = styled.input`
+  margin-left: 8px;
+  vertical-align: middle;
 `;
 
 export default ConfigEditor;

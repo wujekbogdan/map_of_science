@@ -1,13 +1,14 @@
 import { transfer } from "comlink";
 import { select, ZoomTransform, zoom, zoomIdentity } from "d3";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import styled from "styled-components";
 import useSWR from "swr";
 import { useShallow } from "zustand/react/shallow";
 import { loadData } from "../../api/worker.ts";
 import { useStore } from "../../store.ts";
 import ConfigEditor from "./ConfigEditor.tsx";
-import { Threshold, drawOnCanvas } from "./drawOnCanvas.ts";
+import { drawOnCanvas } from "./drawOnCanvas.ts";
+import { useConfigStore } from "./store.ts";
 
 type DrawParams = Parameters<typeof drawOnCanvas>[0] & {
   shouldTransfer: boolean;
@@ -31,16 +32,16 @@ const draw = (args: DrawParams) => {
 };
 
 const CanvasMap = () => {
-  const [thresholds, setThresholds] = useState<Threshold[]>([
-    { min: 0, size: 1, visible: true },
-    { min: 51, size: 2, visible: true },
-    { min: 201, size: 3, visible: true },
-    { min: 501, size: 5, visible: true },
-    { min: 1001, size: 5, visible: true },
-    { min: 2001, size: 6, visible: true },
-  ]);
-  const [size, setSize] = useState({ width: 1000, height: 1000 });
-  const [blur, setBlur] = useState(0);
+  const [thresholds, size, blur, oneBitMode, oneBitThreshold] = useConfigStore(
+    useShallow((s) => [
+      s.thresholds,
+      s.size,
+      s.blur,
+      s.oneBitMode,
+      s.oneBitThreshold,
+    ]),
+  );
+
   const [transform, setTransform] = useState(zoomIdentity);
   const canvas = useRef<HTMLCanvasElement>(null);
   const offscreenRef = useRef<OffscreenCanvas | null>(null);
@@ -52,6 +53,10 @@ const CanvasMap = () => {
       setDataPoints(dataPoints);
     },
   });
+  const dataAsArray = useMemo(() => {
+    if (!data?.dataPoints) return [];
+    return Array.from(data.dataPoints.values());
+  }, [data?.dataPoints]);
 
   useEffect(() => {
     if (!canvas.current) return;
@@ -81,27 +86,31 @@ const CanvasMap = () => {
       canvas: offscreenRef.current,
       width: size.width,
       height: size.height,
-      data: [...data.dataPoints.values()],
+      oneBitMode,
+      oneBitThreshold,
+      data: dataAsArray,
     }).catch((error) => {
       throw new Error("Error drawing on canvas: " + error);
     });
 
     hasInitialized.current = true;
-  }, [thresholds, data, size, blur, transform]);
+  }, [
+    thresholds,
+    dataAsArray,
+    size,
+    blur,
+    transform,
+    oneBitThreshold,
+    oneBitMode,
+    data?.dataPoints,
+  ]);
 
   return isLoading ? (
     <>Loading...</>
   ) : (
     <Container>
       <EditorContainer>
-        <ConfigEditor
-          thresholds={thresholds}
-          size={size}
-          blur={0}
-          onThresholdsChange={setThresholds}
-          onSizeChange={setSize}
-          onBlurChange={setBlur}
-        />
+        <ConfigEditor />
         <p>
           Transform:
           {` x: ${transform.x.toFixed(2)}, y: ${transform.y.toFixed(

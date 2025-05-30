@@ -1,0 +1,4 @@
+{
+  "extends": "@map-of-science/typescript/react",
+  "include": ["src"]
+}

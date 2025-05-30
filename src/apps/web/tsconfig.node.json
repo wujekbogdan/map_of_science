@@ -1,0 +1,4 @@
+{
+  "extends": "@map-of-science/typescript/node",
+  "include": ["vite.config.ts", "vite-plugin"]
+}

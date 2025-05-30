@@ -71,7 +71,6 @@ export const drawOnCanvas = (props: Props) => {
     y: y * transform.k + transform.y,
   });
 
-  console.time("render");
   const tempCanvas = new OffscreenCanvas(width, height);
   const tempCtx = tempCanvas.getContext("2d")!;
 

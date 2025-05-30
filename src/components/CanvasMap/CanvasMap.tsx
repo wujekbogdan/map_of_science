@@ -57,7 +57,7 @@ const CanvasMap = () => {
     if (!canvas.current) return;
 
     const d3Zoom = zoom<HTMLCanvasElement, unknown>()
-      .scaleExtent([0.5, 10])
+      .scaleExtent([1, 20])
       .on("zoom", (event: { transform: ZoomTransform }) => {
         setTransform(event.transform);
       });
@@ -102,6 +102,25 @@ const CanvasMap = () => {
           onSizeChange={setSize}
           onBlurChange={setBlur}
         />
+        <p>
+          Transform:
+          {` x: ${transform.x.toFixed(2)}, y: ${transform.y.toFixed(
+            2,
+          )}, zoom: ${transform.k.toFixed(2)}`}
+        </p>
+        <p>
+          <button
+            onClick={() => {
+              setTransform({
+                x: 0,
+                y: 0,
+                k: 1,
+              } as ZoomTransform);
+            }}
+          >
+            Reset pan/zoom
+          </button>
+        </p>
       </EditorContainer>
       <Canvas ref={canvas} />
     </Container>
@@ -122,6 +141,8 @@ const EditorContainer = styled.div`
   position: fixed;
   top: 0;
   left: 0;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.8);
 `;
 
 export default CanvasMap;

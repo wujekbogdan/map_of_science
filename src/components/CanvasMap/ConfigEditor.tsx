@@ -152,10 +152,7 @@ export const ConfigEditor = ({
   );
 };
 
-const Form = styled.form`
-  padding: 10px;
-  background: rgba(255, 255, 255, 0.8);
-`;
+const Form = styled.form``;
 
 const Section = styled.div`
   margin-top: 24px;

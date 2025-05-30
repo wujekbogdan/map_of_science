@@ -82,6 +82,11 @@ export const drawOnCanvas = (props: Props) => {
     }
 
     const { x, y } = applyTransform(xScale(point.x), yScale(point.y));
+
+    if (x < 0 || x > width || y < 0 || y > height) {
+      return;
+    }
+
     tempCtx.beginPath();
     tempCtx.arc(x, y, config.size, 0, 2 * Math.PI);
     tempCtx.fillStyle = "black";

@@ -56,7 +56,9 @@ const CanvasMaps = () => {
       <Maps>
         {stores.map(({ store, id, name, ref }) => (
           <>
-            <h1 ref={ref}>{name}</h1>
+            <h1 style={{ marginLeft: "12px" }} ref={ref}>
+              {name}
+            </h1>
             <CanvasMap key={id} data={dataAsArray} store={store} />
           </>
         ))}

@@ -176,9 +176,10 @@ const Canvas = styled.canvas`
 const EditorContainer = styled.div`
   position: absolute;
   top: 0;
-  left: 0;
-  padding: 10px;
+  left: 12px;
+  padding: 12px;
   background: rgba(255, 255, 255, 0.8);
+  background: #ededed;
 `;
 
 const Textarea = styled.textarea`

@@ -11,4 +11,4 @@ packages:
   # Shared runtime code (e.g. UI components, utils)
   # - 'src/packages/*'
   # Development-only tooling (e.g. configs, linters, build tools)
-  # - 'src/dev/*'
+  - 'src/dev/*'

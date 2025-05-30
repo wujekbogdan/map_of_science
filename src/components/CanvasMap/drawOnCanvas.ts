@@ -3,6 +3,7 @@ import { DataPoint } from "../../api/model";
 import { Threshold } from "./store.ts";
 
 type Props = {
+  id: string;
   canvas?: OffscreenCanvas;
   width: number;
   height: number;
@@ -18,7 +19,7 @@ type Props = {
   };
 };
 
-let cachedCanvas: OffscreenCanvas | null = null;
+const cache: Record<string, OffscreenCanvas> = {};
 
 const toOneBit = (
   ctx: OffscreenCanvasRenderingContext2D,
@@ -42,13 +43,12 @@ const toOneBit = (
 };
 
 export const drawOnCanvas = (props: Props) => {
-  const canvas = cachedCanvas ?? props.canvas;
-
+  const canvas = cache[props.id] ?? props.canvas;
   if (!canvas) {
     throw new Error("Canvas is not provided or initialized");
   }
+  cache[props.id] = canvas;
 
-  cachedCanvas = canvas;
   const {
     width,
     height,

@@ -1,37 +1,21 @@
-import { transfer } from "comlink";
 import { select, ZoomTransform, zoom, zoomIdentity } from "d3";
+import uniqueId from "lodash/uniqueId";
 import { useRef, useEffect, useState, useMemo } from "react";
 import styled from "styled-components";
-import useSWR from "swr";
 import { useShallow } from "zustand/react/shallow";
-import { loadData } from "../../api/worker.ts";
-import { useStore } from "../../store.ts";
+import { DataPoint } from "../../api/model";
 import ConfigEditor from "./ConfigEditor.tsx";
-import { drawOnCanvas } from "./drawOnCanvas.ts";
-import { schema, useConfigStore } from "./store.ts";
+import { useCanvasDrawer } from "./canvasDrawer.ts";
+import { defineStore, schema } from "./store.ts";
 
-type DrawParams = Parameters<typeof drawOnCanvas>[0] & {
-  shouldTransfer: boolean;
-  canvas: OffscreenCanvas;
+type Props = {
+  data: DataPoint[];
+  store: ReturnType<typeof defineStore>;
 };
 
-const worker = new ComlinkWorker<typeof import("./drawOnCanvas.ts")>(
-  new URL("./drawOnCanvas.ts", import.meta.url),
-);
-
-const draw = (args: DrawParams) => {
-  const { canvas, ...otherProps } = args;
-  const obj = { canvas, ...otherProps };
-
-  if (args.shouldTransfer) {
-    transfer(obj, [canvas]);
-  }
-  const props = args.shouldTransfer ? obj : { ...otherProps };
-
-  return worker.drawOnCanvas(props);
-};
-
-const CanvasMap = () => {
+const CanvasMap = (props: Props) => {
+  const id = useMemo(() => uniqueId(), []);
+  const { draw } = useCanvasDrawer();
   const [
     thresholds,
     size,
@@ -43,7 +27,7 @@ const CanvasMap = () => {
     setBlur,
     setOneBitThreshold,
     setOneBitMode,
-  ] = useConfigStore(
+  ] = props.store(
     useShallow((s) => [
       s.thresholds,
       s.size,
@@ -57,22 +41,11 @@ const CanvasMap = () => {
       s.setOneBitMode,
     ]),
   );
-
   const [transform, setTransform] = useState(zoomIdentity);
   const canvas = useRef<HTMLCanvasElement>(null);
   const offscreenRef = useRef<OffscreenCanvas | null>(null);
   const hasInitialized = useRef(false);
 
-  const [setDataPoints] = useStore(useShallow((s) => [s.setDataPoints]));
-  const { data, isLoading } = useSWR("data", loadData, {
-    onSuccess: ({ dataPoints }) => {
-      setDataPoints(dataPoints);
-    },
-  });
-  const dataAsArray = useMemo(() => {
-    if (!data?.dataPoints) return [];
-    return Array.from(data.dataPoints.values());
-  }, [data?.dataPoints]);
   const serializedFormState = JSON.stringify({
     blur,
     thresholds,
@@ -97,10 +70,11 @@ const CanvasMap = () => {
   });
 
   useEffect(() => {
-    if (!canvas.current || !data?.dataPoints) return;
+    if (!canvas.current) return;
     offscreenRef.current ??= canvas.current.transferControlToOffscreen();
 
     draw({
+      id,
       transform: {
         x: transform.x,
         y: transform.y,
@@ -114,7 +88,7 @@ const CanvasMap = () => {
       height: size.height,
       oneBitMode,
       oneBitThreshold,
-      data: dataAsArray,
+      data: props.data,
     }).catch((error) => {
       throw new Error("Error drawing on canvas: " + error);
     });
@@ -122,13 +96,13 @@ const CanvasMap = () => {
     hasInitialized.current = true;
   }, [
     thresholds,
-    dataAsArray,
+    props.data,
     size,
     blur,
     transform,
     oneBitThreshold,
     oneBitMode,
-    data?.dataPoints,
+    draw,
   ]);
 
   const textareaOnChange = (value: string) => {
@@ -153,12 +127,10 @@ const CanvasMap = () => {
     setOneBitThreshold(data.oneBitThreshold);
   };
 
-  return isLoading ? (
-    <>Loading...</>
-  ) : (
+  return (
     <Container>
       <EditorContainer>
-        <ConfigEditor />
+        <ConfigEditor store={props.store} />
         <p>
           Transform:
           {` x: ${transform.x.toFixed(2)}, y: ${transform.y.toFixed(
@@ -192,7 +164,7 @@ const CanvasMap = () => {
 };
 
 const Container = styled.div`
-  min-height: 100vh;
+  position: relative;
 `;
 
 const Canvas = styled.canvas`
@@ -202,7 +174,7 @@ const Canvas = styled.canvas`
 `;
 
 const EditorContainer = styled.div`
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   padding: 10px;

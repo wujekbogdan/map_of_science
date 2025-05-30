@@ -1,8 +1,12 @@
 import styled from "styled-components";
 import { useShallow } from "zustand/react/shallow";
-import { Threshold, useConfigStore } from "./store.ts";
+import { defineStore, Threshold } from "./store.ts";
 
-export const ConfigEditor = () => {
+type Props = {
+  store: ReturnType<typeof defineStore>;
+};
+
+export const ConfigEditor = (props: Props) => {
   const [
     thresholds,
     size,
@@ -14,7 +18,7 @@ export const ConfigEditor = () => {
     setBlur,
     setOneBitThreshold,
     setOneBitMode,
-  ] = useConfigStore(
+  ] = props.store(
     useShallow((s) => [
       s.thresholds,
       s.size,

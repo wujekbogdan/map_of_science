@@ -3,7 +3,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { HashRouter, Routes, Route } from "react-router";
 import App from "./components/App.tsx";
-import CanvasMap from "./components/CanvasMap/CanvasMap.tsx";
+import CanvasMaps from "./components/CanvasMap/CanvasMaps.tsx";
 import "./css/global.css";
 
 const root = document.getElementById("root");
@@ -17,7 +17,7 @@ createRoot(root).render(
     <HashRouter>
       <Routes>
         <Route path="/" element={<App />} />
-        <Route path="/canvas" element={<CanvasMap />} />
+        <Route path="/canvas" element={<CanvasMaps />} />
       </Routes>
     </HashRouter>
   </StrictMode>,

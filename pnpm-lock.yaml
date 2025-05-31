@@ -150,6 +150,9 @@ importers:
       vite:
         specifier: ^6.3.5
         version: 6.3.5(@types/node@22.15.18)(jiti@2.4.2)(less@4.3.0)(sass-embedded@1.89.0)(sass@1.89.0)(stylus@0.62.0)(yaml@2.7.1)
+      vite-plugin-checker:
+        specifier: ^0.9.3
+        version: 0.9.3(eslint@9.28.0(jiti@2.4.2))(optionator@0.9.4)(typescript@5.6.3)(vite@6.3.5(@types/node@22.15.18)(jiti@2.4.2)(less@4.3.0)(sass-embedded@1.89.0)(sass@1.89.0)(stylus@0.62.0)(yaml@2.7.1))
       vite-plugin-comlink:
         specifier: ^5.1.0
         version: 5.1.0(comlink@4.4.2)(vite@6.3.5(@types/node@22.15.18)(jiti@2.4.2)(less@4.3.0)(sass-embedded@1.89.0)(sass@1.89.0)(stylus@0.62.0)(yaml@2.7.1))
@@ -2525,6 +2528,10 @@ packages:
     resolution: {integrity: sha512-ppwTtiJZq0O/ai0z7yfudtBpWIoxM8yE6nHi1X47eFR2EWORqfbu6CnPlNsjeN683eT0qG6H/Pyf9fCcvjnnnQ==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
+  npm-run-path@6.0.0:
+    resolution: {integrity: sha512-9qny7Z9DsQU8Ou39ERsPU4OZQlSTP47ShQzuKZ6PRXpYLtIFgl/DEBYEXKlvcEa+9tHVcK8CF81Y2V72qaZhWA==}
+    engines: {node: '>=18'}
+
   once@1.4.0:
     resolution: {integrity: sha512-lNaJgI+2Q5URQBkccEKHTQOPaXdUxnZZElQTZY0MFUAuaEqe1E+Nyvgdz/aIyNi6Z9MzO5dv1H8n58/GELp3+w==}
 
@@ -3202,6 +3209,9 @@ packages:
   through@2.3.8:
     resolution: {integrity: sha512-w89qg7PI8wAdvX60bMDP+bFoD5Dvhm9oLheFp5O4a2QF0cSBGsBX4qZmadPMvVqlLJBBci+WqGGOAPvcDeNSVg==}
 
+  tiny-invariant@1.3.3:
+    resolution: {integrity: sha512-+FbBPE1o9QAYvviau/qC5SE3caw21q3xkvWKBtja5vgqOWIHHJ3ioaq1VPfn/Szqctz2bU/oYeKd9/z5BL+PVg==}
+
   tinybench@2.9.0:
     resolution: {integrity: sha512-0+DUvqWMValLmha6lr4kD8iAMK1HzV0/aKnCtWb9v9641TnP/MFb7Pc2bxoxQjTXAErryXVgUOfv2YqNllqGeg==}
 
@@ -3331,6 +3341,10 @@ packages:
     resolution: {integrity: sha512-lRfVq8fE8gz6QMBuDM6a+LO3IAzTi05H6gCVaUpir2E1Rwpo4ZUog45KpNXKC/Mn3Yb9UDuHumeFTo9iV/D9FQ==}
     engines: {node: '>=18'}
 
+  unicorn-magic@0.3.0:
+    resolution: {integrity: sha512-+QBBXBCvifc56fsbuxZQ6Sic3wqqc3WWaqxs58gvJrcOuN83HGTCwz3oS5phzU9LthRNE9VrJCFCLUgHeeFnfA==}
+    engines: {node: '>=18'}
+
   universalify@0.1.2:
     resolution: {integrity: sha512-rBJeI5CXAlmy1pV+617WB9J63U6XcazHHF2f2dbJix4XzpUF0RS3Zbj0FGIOCAva5P/d/GBOYaACQ1w+0azUkg==}
     engines: {node: '>= 4.0.0'}
@@ -3364,6 +3378,40 @@ packages:
     resolution: {integrity: sha512-6enNwYnpyDo4hEgytbmc6mYWHXDHYEn0D1/rw4Q+tnHUGtKTJsn8T1YkX6Q18wI5LCrS8CTYlBaiCqxOy2kvUA==}
     engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
     hasBin: true
+
+  vite-plugin-checker@0.9.3:
+    resolution: {integrity: sha512-Tf7QBjeBtG7q11zG0lvoF38/2AVUzzhMNu+Wk+mcsJ00Rk/FpJ4rmUviVJpzWkagbU13cGXvKpt7CMiqtxVTbQ==}
+    engines: {node: '>=14.16'}
+    peerDependencies:
+      '@biomejs/biome': '>=1.7'
+      eslint: '>=7'
+      meow: ^13.2.0
+      optionator: ^0.9.4
+      stylelint: '>=16'
+      typescript: '*'
+      vite: '>=2.0.0'
+      vls: '*'
+      vti: '*'
+      vue-tsc: ~2.2.10
+    peerDependenciesMeta:
+      '@biomejs/biome':
+        optional: true
+      eslint:
+        optional: true
+      meow:
+        optional: true
+      optionator:
+        optional: true
+      stylelint:
+        optional: true
+      typescript:
+        optional: true
+      vls:
+        optional: true
+      vti:
+        optional: true
+      vue-tsc:
+        optional: true
 
   vite-plugin-comlink@5.1.0:
     resolution: {integrity: sha512-ROKDAITiEasFstFQD3Hyd0F980qLWUsMfx9HvD1z4r/ZyzJf4agWoj5dfOE9pNxSGj3meOw7bmMujTjzR5zxTA==}
@@ -3438,6 +3486,9 @@ packages:
         optional: true
       jsdom:
         optional: true
+
+  vscode-uri@3.1.0:
+    resolution: {integrity: sha512-/BpdSx+yCQGnCvecbyXdxHDkuk55/G3xwnC0GqY4gmQ3j+A+g8kzzgB4Nk/SINjqn6+waqw3EgbVF2QKExkRxQ==}
 
   wcwidth@1.0.1:
     resolution: {integrity: sha512-XHPEwS0q6TaxcvG85+8EYkbiCux2XtWG2mkc47Ng2A77BQu9+DqIOJldST4HgPkuea7dvKSj5VgX3P1d4rW8Tg==}
@@ -5951,6 +6002,11 @@ snapshots:
     dependencies:
       path-key: 4.0.0
 
+  npm-run-path@6.0.0:
+    dependencies:
+      path-key: 4.0.0
+      unicorn-magic: 0.3.0
+
   once@1.4.0:
     dependencies:
       wrappy: 1.0.2
@@ -6552,6 +6608,8 @@ snapshots:
 
   through@2.3.8: {}
 
+  tiny-invariant@1.3.3: {}
+
   tinybench@2.9.0: {}
 
   tinyexec@0.3.2: {}
@@ -6676,6 +6734,8 @@ snapshots:
 
   unicorn-magic@0.1.0: {}
 
+  unicorn-magic@0.3.0: {}
+
   universalify@0.1.2: {}
 
   universalify@0.2.0: {}
@@ -6719,6 +6779,23 @@ snapshots:
       - terser
       - tsx
       - yaml
+
+  vite-plugin-checker@0.9.3(eslint@9.28.0(jiti@2.4.2))(optionator@0.9.4)(typescript@5.6.3)(vite@6.3.5(@types/node@22.15.18)(jiti@2.4.2)(less@4.3.0)(sass-embedded@1.89.0)(sass@1.89.0)(stylus@0.62.0)(yaml@2.7.1)):
+    dependencies:
+      '@babel/code-frame': 7.27.1
+      chokidar: 4.0.3
+      npm-run-path: 6.0.0
+      picocolors: 1.1.1
+      picomatch: 4.0.2
+      strip-ansi: 7.1.0
+      tiny-invariant: 1.3.3
+      tinyglobby: 0.2.14
+      vite: 6.3.5(@types/node@22.15.18)(jiti@2.4.2)(less@4.3.0)(sass-embedded@1.89.0)(sass@1.89.0)(stylus@0.62.0)(yaml@2.7.1)
+      vscode-uri: 3.1.0
+    optionalDependencies:
+      eslint: 9.28.0(jiti@2.4.2)
+      optionator: 0.9.4
+      typescript: 5.6.3
 
   vite-plugin-comlink@5.1.0(comlink@4.4.2)(vite@6.3.5(@types/node@22.15.18)(jiti@2.4.2)(less@4.3.0)(sass-embedded@1.89.0)(sass@1.89.0)(stylus@0.62.0)(yaml@2.7.1)):
     dependencies:
@@ -6784,6 +6861,8 @@ snapshots:
       - terser
       - tsx
       - yaml
+
+  vscode-uri@3.1.0: {}
 
   wcwidth@1.0.1:
     dependencies:

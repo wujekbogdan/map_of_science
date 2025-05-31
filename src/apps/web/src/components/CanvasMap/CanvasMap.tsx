@@ -4,11 +4,13 @@ import { useRef, useEffect, useState, useMemo } from "react";
 import styled from "styled-components";
 import { useShallow } from "zustand/react/shallow";
 import { DataPoint } from "../../api/model";
+import TogglablePanel from "../TogglablePanel/TogglablePanel.tsx";
 import ConfigEditor from "./ConfigEditor.tsx";
 import { useCanvasDrawer } from "./canvasDrawer.ts";
 import { defineStore, schema } from "./store.ts";
 
 type Props = {
+  name: string;
   data: DataPoint[];
   store: ReturnType<typeof defineStore>;
 };
@@ -130,34 +132,39 @@ const CanvasMap = (props: Props) => {
   return (
     <Container>
       <EditorContainer>
-        <ConfigEditor store={props.store} />
-        <p>
-          Transform:
-          {` x: ${transform.x.toFixed(2)}, y: ${transform.y.toFixed(
-            2,
-          )}, zoom: ${transform.k.toFixed(2)}`}
-        </p>
-        <p>
-          <button
-            onClick={() => {
-              setTransform({
-                x: 0,
-                y: 0,
-                k: 1,
-              } as ZoomTransform);
-            }}
-          >
-            Reset pan/zoom
-          </button>
-        </p>
-        <Textarea
-          rows={6}
-          onChange={(e) => {
-            textareaOnChange(e.target.value);
-          }}
-          value={serializedFormState}
-        />
+        <TogglablePanel header={props.name} initialState="expanded">
+          <>
+            <ConfigEditor store={props.store} />
+            <p>
+              Transform:
+              {` x: ${transform.x.toFixed(2)}, y: ${transform.y.toFixed(
+                2,
+              )}, zoom: ${transform.k.toFixed(2)}`}
+            </p>
+            <p>
+              <button
+                onClick={() => {
+                  setTransform({
+                    x: 0,
+                    y: 0,
+                    k: 1,
+                  } as ZoomTransform);
+                }}
+              >
+                Reset pan/zoom
+              </button>
+            </p>
+            <Textarea
+              rows={6}
+              onChange={(e) => {
+                textareaOnChange(e.target.value);
+              }}
+              value={serializedFormState}
+            />
+          </>
+        </TogglablePanel>
       </EditorContainer>
+
       <Canvas ref={canvas} />
     </Container>
   );

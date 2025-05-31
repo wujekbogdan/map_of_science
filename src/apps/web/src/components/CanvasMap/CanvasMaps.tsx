@@ -36,55 +36,16 @@ const CanvasMaps = () => {
     <>Loading...</>
   ) : (
     <>
-      <Menu>
-        {stores.map(({ id, name, ref }) => (
-          <li key={id}>
-            <a
-              href={`#${id}`}
-              onClick={(e) => {
-                e.preventDefault();
-                ref.current?.scrollIntoView({
-                  behavior: "smooth",
-                });
-              }}
-            >
-              {name}
-            </a>
-          </li>
-        ))}
-      </Menu>
       <Maps>
-        {stores.map(({ store, id, name, ref }) => (
+        {stores.map(({ store, id, name }) => (
           <>
-            <h1 style={{ marginLeft: "12px" }} ref={ref}>
-              {name}
-            </h1>
-            <CanvasMap key={id} data={dataAsArray} store={store} />
+            <CanvasMap key={id} data={dataAsArray} store={store} name={name} />
           </>
         ))}
       </Maps>
     </>
   );
 };
-
-const Menu = styled.ul`
-  z-index: 1;
-  background: #fff;
-  position: fixed;
-  padding: 10px;
-  margin: 0;
-  resize: none;
-  right: 50%;
-  transform: translateX(50%);
-  top: 0;
-  text-align: center;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-
-  li {
-    display: inline-block;
-    margin: 0 10px;
-  }
-`;
 
 const Maps = styled.div`
   margin-top: 24px;

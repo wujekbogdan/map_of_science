@@ -1,4 +1,4 @@
-import { ReactElement, useState } from "react";
+import { ReactNode, useState } from "react";
 import styled from "styled-components";
 import { i18n } from "../../i18n.ts";
 
@@ -6,8 +6,8 @@ type State = "collapsed" | "expanded";
 
 type Props = {
   initialState: State;
-  header: string;
-  children: ReactElement;
+  header: ReactNode;
+  children: ReactNode;
   onToggle?: (state: State) => void;
   isDropdown?: boolean;
 };

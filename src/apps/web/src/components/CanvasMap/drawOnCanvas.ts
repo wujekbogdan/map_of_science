@@ -83,7 +83,7 @@ export const drawOnCanvas = (args: DrawOnCanvasArgs) => {
     return found ?? { size: 1, visible: true };
   };
 
-  const mainCtx = canvas.getContext("2d");
+  const mainCtx = canvas.getContext("2d", { willReadFrequently: true });
 
   if (!mainCtx) {
     throw new Error("Cannot initialize canvas context");
@@ -116,7 +116,7 @@ export const drawOnCanvas = (args: DrawOnCanvasArgs) => {
   });
 
   const tempCanvas = new OffscreenCanvas(width, height);
-  const tempCtx = tempCanvas.getContext("2d")!;
+  const tempCtx = tempCanvas.getContext("2d", { willReadFrequently: true })!;
 
   data.forEach((point) => {
     const config = findThreshold(point.numRecentArticles);

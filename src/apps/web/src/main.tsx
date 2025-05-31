@@ -1,7 +1,7 @@
 import "normalize.css";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router";
+import { HashRouter, Routes, Route } from "react-router";
 import App from "./components/App.tsx";
 import CanvasMaps from "./components/CanvasMap/CanvasMaps.tsx";
 import "./css/global.css";
@@ -14,11 +14,11 @@ if (!root) {
 
 createRoot(root).render(
   <StrictMode>
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/canvas" element={<CanvasMaps />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   </StrictMode>,
 );

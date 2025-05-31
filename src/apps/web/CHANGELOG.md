@@ -1,5 +1,15 @@
 # map_of_science
 
+## 1.13.0
+
+### Minor Changes
+
+- e86d99f: - Move the app from the root directory to the `src/apps/web` directory.
+  - Rename the app to `@map-of-science/web`.
+  - Extract the ESLint config into a separate `@map-of-science/eslint` package.
+  - Extract the Vitest integration into a separate `@map-of-science/vitest` package.
+  - Extract the TypeScript configs into a separate `@map-of-science/typescript` package.
+
 ## 1.12.0
 
 ### Minor Changes

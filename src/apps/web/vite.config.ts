@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react(), comlink(), svgMapParser()],
-    base: env.VITE_BASE_URL || "/map-of-science/",
+    base: env.VITE_BASE_URL,
     root: "src",
     envDir: "../",
     build: {

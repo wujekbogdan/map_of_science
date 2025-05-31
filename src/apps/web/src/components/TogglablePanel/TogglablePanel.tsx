@@ -9,6 +9,7 @@ type Props = {
   header: string;
   children: ReactElement;
   onToggle?: (state: State) => void;
+  isDropdown?: boolean;
 };
 
 export const TogglablePanel = (props: Props) => {
@@ -21,6 +22,7 @@ export const TogglablePanel = (props: Props) => {
     setVisibility(state);
     onToggle?.(state);
   };
+  const PanelComponent = props.isDropdown ? PanelPositionedAbsolutely : Panel;
 
   return (
     <Container>
@@ -31,14 +33,14 @@ export const TogglablePanel = (props: Props) => {
           <Icon $expanded={isExpanded}>{isExpanded ? "▼" : "▲"}</Icon>
         </Toggle>
       </TitleBar>
-      {isExpanded && <Panels>{children}</Panels>}
+      {isExpanded && <PanelComponent>{children}</PanelComponent>}
     </Container>
   );
 };
 
 const Container = styled.div`
+  position: relative;
   width: 100%;
-  background: #fff;
 `;
 
 const SrOnly = styled.span`
@@ -83,10 +85,15 @@ const Title = styled.h2`
   font-size: 18px;
 `;
 
-const Panels = styled.div`
+const Panel = styled.div`
   margin: 12px 12px 0;
   padding: 0 0 12px;
   overflow: hidden;
+`;
+
+const PanelPositionedAbsolutely = styled(Panel)`
+  position: absolute;
+  top: 100%;
 `;
 
 export default TogglablePanel;

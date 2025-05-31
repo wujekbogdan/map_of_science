@@ -45,13 +45,22 @@ const CanvasMaps = () => {
     <>
       <Menu>
         <MenuItem>
-          <TogglablePanel header="Map 1" initialState="expanded">
+          <TogglablePanel
+            header="Map 1"
+            initialState="expanded"
+            isDropdown={true}
+          >
             <ConfigEditor store={firstStore} />
           </TogglablePanel>
         </MenuItem>
         {remainingStores.map(({ name, id, store }) => (
           <MenuItem key={id}>
-            <TogglablePanel header={name} initialState="collapsed" key={id}>
+            <TogglablePanel
+              header={name}
+              initialState="collapsed"
+              key={id}
+              isDropdown={true}
+            >
               <ConfigEditor store={store} />
             </TogglablePanel>
           </MenuItem>

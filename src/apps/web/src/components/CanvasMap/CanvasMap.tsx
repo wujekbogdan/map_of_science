@@ -1,18 +1,31 @@
-import { select, ZoomTransform, zoom, zoomIdentity } from "d3";
+import { select, ZoomTransform, zoom } from "d3";
 import uniqueId from "lodash/uniqueId";
 import { useRef, useEffect, useState, useMemo } from "react";
 import styled from "styled-components";
 import { useShallow } from "zustand/react/shallow";
 import { DataPoint } from "../../api/model";
 import TogglablePanel from "../TogglablePanel/TogglablePanel.tsx";
-import ConfigEditor from "./ConfigEditor.tsx";
 import { useCanvasDrawer } from "./canvasDrawer.ts";
 import { defineStore, schema } from "./store.ts";
+
+type Transform = {
+  x: number;
+  y: number;
+  k: number;
+};
 
 type Props = {
   name: string;
   data: DataPoint[];
   store: ReturnType<typeof defineStore>;
+  onTransformChange?: (transform: Transform) => void;
+  fixed?: {
+    size: {
+      width: number;
+      height: number;
+    };
+    transform: Transform;
+  };
 };
 
 const CanvasMap = (props: Props) => {
@@ -45,7 +58,12 @@ const CanvasMap = (props: Props) => {
       s.setOneBitMode,
     ]),
   );
-  const [transform, setTransform] = useState(zoomIdentity);
+
+  const [transform, setTransform] = useState({
+    x: 0,
+    y: 0,
+    k: 1,
+  });
   const canvas = useRef<HTMLCanvasElement>(null);
   const offscreenRef = useRef<OffscreenCanvas | null>(null);
   const hasInitialized = useRef(false);
@@ -63,10 +81,12 @@ const CanvasMap = (props: Props) => {
 
   useEffect(() => {
     if (!canvas.current) return;
+    if (props.fixed) return;
 
     const d3Zoom = zoom<HTMLCanvasElement, unknown>()
       .scaleExtent([1, 20])
       .on("zoom", (event: { transform: ZoomTransform }) => {
+        props.onTransformChange?.(event.transform);
         setTransform(event.transform);
       });
 
@@ -111,6 +131,14 @@ const CanvasMap = (props: Props) => {
     color,
   ]);
 
+  useEffect(() => {
+    if (!props.fixed) return;
+    const { size, transform } = props.fixed;
+
+    setSize(size);
+    setTransform(transform);
+  }, [props.fixed]);
+
   const textareaOnChange = (value: string) => {
     const json = (): unknown => {
       try {
@@ -135,39 +163,42 @@ const CanvasMap = (props: Props) => {
 
   return (
     <Container>
-      <EditorContainer>
-        <TogglablePanel header={props.name} initialState="expanded">
-          <>
-            <ConfigEditor store={props.store} />
-            <p>
-              Transform:
-              {` x: ${transform.x.toFixed(2)}, y: ${transform.y.toFixed(
-                2,
-              )}, zoom: ${transform.k.toFixed(2)}`}
-            </p>
-            <p>
-              <button
-                onClick={() => {
-                  setTransform({
-                    x: 0,
-                    y: 0,
-                    k: 1,
-                  } as ZoomTransform);
+      <div style={{ display: "none" }}>
+        <EditorContainer>
+          <TogglablePanel header={props.name} initialState="expanded">
+            <>
+              <p>
+                Transform:
+                {` x: ${transform.x.toFixed(2)}, y: ${transform.y.toFixed(
+                  2,
+                )}, zoom: ${transform.k.toFixed(2)}`}
+              </p>
+              <p>
+                <button
+                  onClick={() => {
+                    const reset = {
+                      x: 0,
+                      y: 0,
+                      k: 1,
+                    };
+                    setTransform(reset);
+                    props.onTransformChange?.(reset);
+                  }}
+                >
+                  Reset pan/zoom
+                </button>
+              </p>
+              <Textarea
+                rows={6}
+                onChange={(e) => {
+                  textareaOnChange(e.target.value);
                 }}
-              >
-                Reset pan/zoom
-              </button>
-            </p>
-            <Textarea
-              rows={6}
-              onChange={(e) => {
-                textareaOnChange(e.target.value);
-              }}
-              value={serializedFormState}
-            />
-          </>
-        </TogglablePanel>
-      </EditorContainer>
+                value={serializedFormState}
+              />
+            </>
+          </TogglablePanel>
+        </EditorContainer>
+      </div>
 
       <Canvas ref={canvas} />
     </Container>
@@ -180,7 +211,6 @@ const Container = styled.div`
 
 const Canvas = styled.canvas`
   display: block;
-  margin: 20px auto;
   cursor: pointer;
 `;
 
@@ -189,7 +219,6 @@ const EditorContainer = styled.div`
   top: 0;
   left: 12px;
   padding: 12px;
-  background: rgba(255, 255, 255, 0.8);
   background: #ededed;
 `;
 

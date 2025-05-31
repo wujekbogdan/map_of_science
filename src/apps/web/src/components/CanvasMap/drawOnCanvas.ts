@@ -48,22 +48,12 @@ const toOneBit = (args: ToOneBitArgs) => {
 
   for (let i = 0; i < data.length; i += 4) {
     const alpha = data[i + 3];
-    const val =
-      alpha >= threshold
-        ? {
-            r: color.r,
-            g: color.g,
-            b: color.b,
-          }
-        : {
-            r: 255,
-            g: 255,
-            b: 255,
-          };
-    data[i] = val.r;
-    data[i + 1] = val.g;
-    data[i + 2] = val.b;
-    data[i + 3] = 255;
+    const hit = alpha >= threshold;
+
+    data[i] = color.r;
+    data[i + 1] = color.g;
+    data[i + 2] = color.b;
+    data[i + 3] = hit ? 255 : 0;
   }
 
   ctx.putImageData(imgData, 0, 0);

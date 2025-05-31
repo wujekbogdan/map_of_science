@@ -23,7 +23,7 @@ export const TogglablePanel = (props: Props) => {
   };
 
   return (
-    <>
+    <Container>
       <TitleBar>
         <Title>{header}</Title>
         <Toggle onClick={onChange} role="button">
@@ -32,9 +32,14 @@ export const TogglablePanel = (props: Props) => {
         </Toggle>
       </TitleBar>
       {isExpanded && <Panels>{children}</Panels>}
-    </>
+    </Container>
   );
 };
+
+const Container = styled.div`
+  width: 100%;
+  background: #fff;
+`;
 
 const SrOnly = styled.span`
   position: absolute;
@@ -80,6 +85,7 @@ const Title = styled.h2`
 
 const Panels = styled.div`
   margin: 12px 12px 0;
+  padding: 0 0 12px;
   overflow: hidden;
 `;
 

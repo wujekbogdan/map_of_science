@@ -26,7 +26,7 @@ export const schema = z.object({
 export type Threshold = z.infer<typeof schema.shape.thresholds.element>;
 export type Size = z.infer<typeof schema.shape.size>;
 
-export const defineStore = () => {
+export const defineStore = (color: string = "#000000") => {
   const defaults = {
     thresholds: [
       { min: 0, size: 1, visible: true },
@@ -39,8 +39,8 @@ export const defineStore = () => {
     size: { width: 1000, height: 1000 },
     blur: 0,
     oneBitThreshold: 128,
-    oneBitMode: false,
-    color: "#000000",
+    oneBitMode: true,
+    color: color,
   };
 
   return create(

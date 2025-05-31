@@ -1,10 +1,11 @@
-# map_of_science
+# @map-of-science/web
 
 ## 1.13.0
 
 ### Minor Changes
 
-- e86d99f: - Move the app from the root directory to the `src/apps/web` directory.
+- e86d99f:
+  - Move the app from the root directory to the `src/apps/web` directory.
   - Rename the app to `@map-of-science/web`.
   - Extract the ESLint config into a separate `@map-of-science/eslint` package.
   - Extract the Vitest integration into a separate `@map-of-science/vitest` package.
@@ -14,7 +15,8 @@
 
 ### Minor Changes
 
-- 1f85191: - Highlight query substring in search results dropdown.
+- 1f85191:
+  - Highlight query substring in search results dropdown.
   - Bump search results limit to 300.
   - Order data point search results by cluster count.
   - Add loading state indicator to search.

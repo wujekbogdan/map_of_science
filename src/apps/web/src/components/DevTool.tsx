@@ -1,14 +1,10 @@
-import { useState } from "react";
 import styled from "styled-components";
 import { useShallow } from "zustand/react/shallow";
 import { i18n } from "../i18n.ts";
 import { useStore } from "../store.ts";
+import TogglablePanel from "./TogglablePanel/TogglablePanel.tsx";
 
 export const DevTool = () => {
-  const [visibility, setVisibility] = useState<"collapsed" | "expanded">(
-    "collapsed",
-  );
-  const isExpanded = visibility === "expanded";
   const [
     zoom,
     fontSize,
@@ -35,20 +31,9 @@ export const DevTool = () => {
   const layers = ["layer1", "layer2", "layer3", "layer4"] as const;
   const scaleFactors = ["min", "max", "zoom"] as const;
 
-  const onMinimizeClick = () => {
-    setVisibility(visibility === "expanded" ? "collapsed" : "expanded");
-  };
-
   return (
     <Form>
-      <TitleBar>
-        <Title>{i18n("Dev tools")}</Title>
-        <Toggle onClick={onMinimizeClick} role="button">
-          <SrOnly>{isExpanded ? i18n("Minimize") : i18n("Minimize")}</SrOnly>
-          <Icon $expanded={isExpanded}>{isExpanded ? "▼" : "▲"}</Icon>
-        </Toggle>
-      </TitleBar>
-      {isExpanded && (
+      <TogglablePanel header={i18n("Dev tools")} initialState="collapsed">
         <Panels>
           <Panel>
             <Header>{i18n("Data")}</Header>
@@ -128,22 +113,10 @@ export const DevTool = () => {
             </P>
           </Panel>
         </Panels>
-      )}
+      </TogglablePanel>
     </Form>
   );
 };
-
-const SrOnly = styled.span`
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-`;
 
 const Form = styled.form`
   color: #666;
@@ -152,44 +125,14 @@ const Form = styled.form`
   background: rgba(255, 255, 255, 0.7);
 `;
 
-const TitleBar = styled.div`
-  background-color: #f0f0f0;
-  display: flex;
-  justify-content: space-between;
-`;
-
-const Toggle = styled.div`
-  width: 45px;
-  height: 45px;
-  display: flex;
-  padding: 12px;
-  background-color: #e4e4e4;
-  cursor: pointer;
-  align-items: center;
-  justify-content: center;
-  &:hover {
-    background-color: #d8d8d8;
-  }
-`;
-
-const Icon = styled.div<{ $expanded: boolean }>`
-  color: #999;
-  font-size: 12px;
-`;
-
-const Title = styled.h2`
-  margin: 12px;
-  font-size: 18px;
+const Panels = styled.div`
+  margin: 12px 12px 0;
+  overflow: hidden;
 `;
 
 const Header = styled.h3`
   margin: 4px 0 8px;
   font-size: 16px;
-`;
-
-const Panels = styled.div`
-  margin: 12px 12px 0;
-  overflow: hidden;
 `;
 
 const Panel = styled.div`

@@ -129,6 +129,7 @@ const CanvasMap = (props: Props) => {
     oneBitMode,
     draw,
     color,
+    id,
   ]);
 
   useEffect(() => {
@@ -137,7 +138,7 @@ const CanvasMap = (props: Props) => {
 
     setSize(size);
     setTransform(transform);
-  }, [props.fixed]);
+  }, [props.fixed, setSize, setTransform]);
 
   const textareaOnChange = (value: string) => {
     const json = (): unknown => {

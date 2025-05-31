@@ -1,3 +1,5 @@
+import debounce from "lodash/debounce";
+import { useMemo } from "react";
 import styled from "styled-components";
 import { useShallow } from "zustand/react/shallow";
 import { defineStore, Threshold } from "./store.ts";
@@ -13,11 +15,8 @@ export const ConfigEditor = (props: Props) => {
     blur,
     oneBitMode,
     oneBitThreshold,
-    setThresholds,
-    setSize,
-    setBlur,
-    setOneBitThreshold,
-    setOneBitMode,
+    color,
+    ...rawSetters
   ] = props.store(
     useShallow((s) => [
       s.thresholds,
@@ -25,13 +24,24 @@ export const ConfigEditor = (props: Props) => {
       s.blur,
       s.oneBitMode,
       s.oneBitThreshold,
+      s.color,
       s.setThresholds,
       s.setSize,
       s.setBlur,
       s.setOneBitThreshold,
       s.setOneBitMode,
+      s.setColor,
     ]),
   );
+
+  const [
+    setThresholds,
+    setSize,
+    setBlur,
+    setOneBitThreshold,
+    setOneBitMode,
+    setColor,
+  ] = useMemo(() => rawSetters.map((fn) => debounce(fn, 300)), [rawSetters]);
 
   const update = (
     index: number,
@@ -190,6 +200,18 @@ export const ConfigEditor = (props: Props) => {
           />
           <span>{oneBitThreshold}</span>
         </FormControl>
+        <FormControl>
+          <input
+            disabled={!oneBitMode}
+            placeholder="Color"
+            type="color"
+            value={color}
+            onChange={(e) => {
+              e.preventDefault();
+              setColor(e.target.value);
+            }}
+          />
+        </FormControl>
       </Section>
     </Form>
   );
@@ -216,6 +238,10 @@ const FormControl = styled.div`
 
   input[disabled] {
     color: #999;
+  }
+
+  input[type="color"][disabled] {
+    filter: grayscale(100%);
   }
 
   span {

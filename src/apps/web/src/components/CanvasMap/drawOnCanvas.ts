@@ -2,7 +2,7 @@ import { extent, scaleLinear } from "d3";
 import { DataPoint } from "../../api/model";
 import { Threshold } from "./store.ts";
 
-type Props = {
+type DrawOnCanvasArgs = {
   id: string;
   canvas?: OffscreenCanvas;
   width: number;
@@ -11,6 +11,7 @@ type Props = {
   thresholds: Threshold[];
   oneBitThreshold: number;
   oneBitMode: boolean;
+  color: string;
   blur: number;
   transform: {
     x: number;
@@ -21,33 +22,59 @@ type Props = {
 
 const cache: Record<string, OffscreenCanvas> = {};
 
-const toOneBit = (
-  ctx: OffscreenCanvasRenderingContext2D,
-  width: number,
-  height: number,
-  threshold: number,
-) => {
+type ToOneBitArgs = {
+  ctx: OffscreenCanvasRenderingContext2D;
+  width: number;
+  height: number;
+  threshold: number;
+  color: {
+    r: number;
+    g: number;
+    b: number;
+  };
+};
+
+const hexToRgb = (hex: string) => {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return { r, g, b };
+};
+
+const toOneBit = (args: ToOneBitArgs) => {
+  const { ctx, width, height, threshold, color } = args;
   const imgData = ctx.getImageData(0, 0, width, height);
   const data = imgData.data;
 
   for (let i = 0; i < data.length; i += 4) {
     const alpha = data[i + 3];
-    const val = alpha >= threshold ? 0 : 255;
-    data[i] = val;
-    data[i + 1] = val;
-    data[i + 2] = val;
+    const val =
+      alpha >= threshold
+        ? {
+            r: color.r,
+            g: color.g,
+            b: color.b,
+          }
+        : {
+            r: 255,
+            g: 255,
+            b: 255,
+          };
+    data[i] = val.r;
+    data[i + 1] = val.g;
+    data[i + 2] = val.b;
     data[i + 3] = 255;
   }
 
   ctx.putImageData(imgData, 0, 0);
 };
 
-export const drawOnCanvas = (props: Props) => {
-  const canvas = cache[props.id] ?? props.canvas;
+export const drawOnCanvas = (args: DrawOnCanvasArgs) => {
+  const canvas = cache[args.id] ?? args.canvas;
   if (!canvas) {
     throw new Error("Canvas is not provided or initialized");
   }
-  cache[props.id] = canvas;
+  cache[args.id] = canvas;
 
   const {
     width,
@@ -58,7 +85,7 @@ export const drawOnCanvas = (props: Props) => {
     transform,
     oneBitThreshold,
     oneBitMode,
-  } = props;
+  } = args;
   const sortedThresholds = [...thresholds].sort((a, b) => a.min - b.min);
 
   const findThreshold = (num: number) => {
@@ -125,6 +152,12 @@ export const drawOnCanvas = (props: Props) => {
   mainCtx.drawImage(tempCanvas, 0, 0);
 
   if (oneBitMode) {
-    toOneBit(mainCtx, width, height, oneBitThreshold);
+    toOneBit({
+      ctx: mainCtx,
+      width,
+      height,
+      threshold: oneBitThreshold,
+      color: hexToRgb(args.color),
+    });
   }
 };

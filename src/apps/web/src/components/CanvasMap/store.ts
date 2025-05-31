@@ -16,6 +16,10 @@ export const schema = z.object({
     height: z.number(),
   }),
   oneBitMode: z.boolean(),
+  color: z.string().regex(/^#[0-9a-fA-F]{6}$/, {
+    message:
+      "Invalid color format. Must be a 7-character hex code (e.g., #RRGGBB).",
+  }),
   oneBitThreshold: z.number(),
 });
 
@@ -36,6 +40,7 @@ export const defineStore = () => {
     blur: 0,
     oneBitThreshold: 128,
     oneBitMode: false,
+    color: "#000000",
   };
 
   return create(
@@ -45,6 +50,7 @@ export const defineStore = () => {
       setBlur: (blur: number) => set({ blur }),
       setOneBitThreshold: (oneBitThreshold: number) => set({ oneBitThreshold }),
       setOneBitMode: (oneBitMode: boolean) => set({ oneBitMode }),
+      setColor: (color: string) => set({ color }),
     })),
   );
 };

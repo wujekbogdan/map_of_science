@@ -24,6 +24,7 @@ const CanvasMap = (props: Props) => {
     blur,
     oneBitMode,
     oneBitThreshold,
+    color,
     setThresholds,
     setSize,
     setBlur,
@@ -36,6 +37,7 @@ const CanvasMap = (props: Props) => {
       s.blur,
       s.oneBitMode,
       s.oneBitThreshold,
+      s.color,
       s.setThresholds,
       s.setSize,
       s.setBlur,
@@ -91,6 +93,7 @@ const CanvasMap = (props: Props) => {
       oneBitMode,
       oneBitThreshold,
       data: props.data,
+      color,
     }).catch((error) => {
       throw new Error("Error drawing on canvas: " + error);
     });
@@ -105,6 +108,7 @@ const CanvasMap = (props: Props) => {
     oneBitThreshold,
     oneBitMode,
     draw,
+    color,
   ]);
 
   const textareaOnChange = (value: string) => {

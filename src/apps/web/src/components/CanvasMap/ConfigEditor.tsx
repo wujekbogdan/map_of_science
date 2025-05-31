@@ -217,7 +217,9 @@ export const ConfigEditor = (props: Props) => {
   );
 };
 
-const Form = styled.form``;
+const Form = styled.form`
+  padding: 12px;
+`;
 
 const Section = styled.div`
   margin-top: 24px;

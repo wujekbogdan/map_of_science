@@ -86,8 +86,7 @@ const Title = styled.h2`
 `;
 
 const Panel = styled.div`
-  margin: 12px 12px 0;
-  padding: 0 0 12px;
+  background: #fff;
   overflow: hidden;
 `;
 

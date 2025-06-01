@@ -6,6 +6,8 @@ onlyBuiltDependencies:
   - normalize-diacritics
 
 packages:
+  # Repository root
+  - '.'
   # Deployable apps (e.g. Node.js, React)
   - 'src/apps/*'
   # Shared runtime code (e.g. UI components, utils)

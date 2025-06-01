@@ -1,5 +1,15 @@
 # @map-of-science/web
 
+## 1.14.0
+
+### Minor Changes
+
+- 33a28a3: Add `vite-plugin-checker` to enable type checking in dev mode.
+
+### Patch Changes
+
+- 68136c3: Add `dist` to .gitignore and remove accidentally committed `dist` files.
+
 ## 1.13.0
 
 ### Minor Changes

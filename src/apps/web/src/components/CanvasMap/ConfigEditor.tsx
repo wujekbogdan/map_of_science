@@ -2,7 +2,7 @@ import debounce from "lodash/debounce";
 import { useMemo } from "react";
 import styled from "styled-components";
 import { useShallow } from "zustand/react/shallow";
-import { defineStore, Threshold } from "./store.ts";
+import { defineStore, schema, Threshold } from "./store.ts";
 
 type Props = {
   store: ReturnType<typeof defineStore>;
@@ -48,19 +48,52 @@ export const ConfigEditor = (props: Props) => {
     field: keyof Threshold,
     value: number | boolean,
   ) => {
-    const newConfig = thresholds.map((item, idx) =>
-      idx === index ? { ...item, [field]: value } : item,
+    setThresholds(
+      thresholds.map((item, idx) =>
+        idx === index ? { ...item, [field]: value } : item,
+      ),
     );
-    setThresholds(newConfig);
   };
 
   const addRow = () =>
     setThresholds([...thresholds, { min: 0, size: 1, visible: true }]);
 
   const removeRow = (index: number) => {
-    const newConfig = thresholds.filter((_, i) => i !== index);
-    setThresholds(newConfig);
+    setThresholds(thresholds.filter((_, i) => i !== index));
   };
+
+  const textareaOnChange = (value: string) => {
+    const json = (): unknown => {
+      try {
+        return JSON.parse(value);
+      } catch {
+        return "";
+      }
+    };
+    const parsed = schema.safeParse(json());
+    if (!parsed.success) {
+      return;
+    }
+
+    const { data } = parsed;
+
+    setBlur(data.blur);
+    setThresholds(data.thresholds);
+    setSize(data.size);
+    setOneBitMode(data.oneBitMode);
+    setOneBitThreshold(data.oneBitThreshold);
+  };
+
+  const serializedFormState = JSON.stringify({
+    blur,
+    thresholds,
+    size: {
+      width: size.width,
+      height: size.height,
+    },
+    oneBitMode,
+    oneBitThreshold,
+  });
 
   return (
     <Form>
@@ -213,6 +246,19 @@ export const ConfigEditor = (props: Props) => {
           />
         </FormControl>
       </Section>
+
+      <Section>
+        <Header>Settings</Header>
+        <FormControl>
+          <Textarea
+            rows={6}
+            onChange={(e) => {
+              textareaOnChange(e.target.value);
+            }}
+            value={serializedFormState}
+          />
+        </FormControl>
+      </Section>
     </Form>
   );
 };
@@ -260,6 +306,12 @@ const Header = styled.h2`
 const InlineCheckbox = styled.input`
   margin-left: 8px;
   vertical-align: middle;
+`;
+
+const Textarea = styled.textarea`
+  font-family: monospace;
+  width: 100%;
+  resize: none;
 `;
 
 export default ConfigEditor;

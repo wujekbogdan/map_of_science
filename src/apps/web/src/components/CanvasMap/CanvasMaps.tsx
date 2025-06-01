@@ -9,9 +9,7 @@ import CanvasMap from "./CanvasMap.tsx";
 import ConfigEditor from "./ConfigEditor.tsx";
 import { defineStore } from "./store.ts";
 
-// const COLORS = ["#d8edd0", "#a3cd93", "#7aba5e", "#5db43d", "#4a9131"];
-const COLORS = ["#d8edd0", "#ff0000"];
-
+const COLORS = ["#d8edd0", "#a3cd93", "#7aba5e", "#5db43d", "#4a9131"];
 const allStores = COLORS.map((color) => defineStore(color));
 
 type HeaderProps = {
@@ -54,11 +52,7 @@ const CanvasMaps = () => {
     return Array.from(data.dataPoints.values());
   }, [data?.dataPoints]);
   const toggleVisibility = (index: number, visible: boolean) => {
-    setVisibility((prev) => {
-      const newVisibility = [...prev];
-      newVisibility[index] = visible;
-      return newVisibility;
-    });
+    setVisibility((prev) => prev.map((v, i) => (i === index ? visible : v)));
   };
 
   const stores = useMemo(() => {
@@ -67,7 +61,7 @@ const CanvasMaps = () => {
       header: (
         <>
           <Header
-            header={`Map ${index + 1}`}
+            header={`Layer ${index + 1}`}
             onToggle={(visibility) => {
               toggleVisibility(index, visibility);
             }}
@@ -89,22 +83,28 @@ const CanvasMaps = () => {
         <Items>
           <MenuItem>
             <TogglablePanel
+              mode="hover"
               header="Map 1"
               initialState="expanded"
               isDropdown={true}
             >
-              <ConfigEditor store={firstStore} />
+              <EditorContainer>
+                <ConfigEditor store={firstStore} />
+              </EditorContainer>
             </TogglablePanel>
           </MenuItem>
           {remainingStores.map(({ header, id, store }) => (
             <MenuItem key={id}>
               <TogglablePanel
+                mode="hover"
                 header={header}
                 initialState="collapsed"
                 key={id}
                 isDropdown={true}
               >
-                <ConfigEditor store={store} />
+                <EditorContainer>
+                  <ConfigEditor store={store} />
+                </EditorContainer>
               </TogglablePanel>
             </MenuItem>
           ))}
@@ -126,7 +126,7 @@ const CanvasMaps = () => {
         </Count>
       </Menu>
 
-      <Maps>
+      <Layers>
         <Layer
           style={{
             zIndex: COLORS.length,
@@ -160,7 +160,7 @@ const CanvasMaps = () => {
               />
             </Layer>
           ))}
-      </Maps>
+      </Layers>
     </>
   );
 };
@@ -202,7 +202,11 @@ const MenuItem = styled.div`
   z-index: 1;
 `;
 
-const Maps = styled.div`
+const EditorContainer = styled.div`
+  background: #ededed;
+`;
+
+const Layers = styled.div`
   position: relative;
 `;
 

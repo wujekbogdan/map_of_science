@@ -10,28 +10,42 @@ type Props = {
   children: ReactNode;
   onToggle?: (state: State) => void;
   isDropdown?: boolean;
+  mode?: "hover" | "click";
 };
 
 export const TogglablePanel = (props: Props) => {
-  const { header, children, onToggle } = props;
+  const { header, children, mode: rawMode, onToggle } = props;
+  const mode = rawMode ?? "click";
   const [visibility, setVisibility] = useState<State>(props.initialState);
   const isExpanded = visibility === "expanded";
+  const oppositeState = isExpanded ? "collapsed" : "expanded";
 
-  const onChange = () => {
-    const state = visibility === "expanded" ? "collapsed" : "expanded";
-    setVisibility(state);
-    onToggle?.(state);
+  const onClick = () => {
+    if (mode !== "click") return;
+
+    setVisibility(oppositeState);
+    onToggle?.(oppositeState);
   };
+
+  const onHover = () => {
+    if (mode !== "hover") return;
+
+    setVisibility(oppositeState);
+    onToggle?.(oppositeState);
+  };
+
   const PanelComponent = props.isDropdown ? PanelPositionedAbsolutely : Panel;
 
   return (
-    <Container>
-      <TitleBar>
+    <Container onMouseEnter={onHover} onMouseLeave={onHover}>
+      <TitleBar $hovered={mode === "hover" && isExpanded}>
         <Title>{header}</Title>
-        <Toggle onClick={onChange} role="button">
-          <SrOnly>{isExpanded ? i18n("Minimize") : i18n("Minimize")}</SrOnly>
-          <Icon $expanded={isExpanded}>{isExpanded ? "▼" : "▲"}</Icon>
-        </Toggle>
+        {mode === "click" && (
+          <Toggle onClick={onClick} role="button">
+            <SrOnly>{isExpanded ? i18n("Minimize") : i18n("Minimize")}</SrOnly>
+            <Icon $expanded={isExpanded}>{isExpanded ? "▼" : "▲"}</Icon>
+          </Toggle>
+        )}
       </TitleBar>
       {isExpanded && <PanelComponent>{children}</PanelComponent>}
     </Container>
@@ -46,7 +60,7 @@ const Container = styled.div`
 const SrOnly = styled.span`
   position: absolute;
   width: 1px;
-  height: 1px;
+  height: 1px;999
   padding: 0;
   margin: -1px;
   overflow: hidden;
@@ -55,10 +69,11 @@ const SrOnly = styled.span`
   border: 0;
 `;
 
-const TitleBar = styled.div`
-  background-color: #f0f0f0;
+const TitleBar = styled.div<{ $hovered?: boolean }>`
+  background: ${({ $hovered }) => ($hovered ? "#ededed" : "#f5f4f4")};
   display: flex;
   justify-content: space-between;
+  transition: background 0.2s ease;
 `;
 
 const Toggle = styled.div`

@@ -12,5 +12,8 @@ packages:
   # - 'src/packages/*'
   # Development-only tooling (e.g. configs, linters, build tools)
   - 'src/dev/*'
-   
+
+# These two settings ensure that peer dependencies are explicitly listed in package.json
+# instead of being auto-installed by pnpm, and that their versions are strictly enforced.
 strictPeerDependencies: true
+autoInstallPeers: false

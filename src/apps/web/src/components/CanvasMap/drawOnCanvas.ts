@@ -1,4 +1,4 @@
-import { extent, scaleLinear } from "d3";
+import { scaleLinear } from "d3";
 import { DataPoint } from "../../api/model";
 import { Threshold } from "./store.ts";
 
@@ -8,6 +8,10 @@ type DrawOnCanvasArgs = {
   width: number;
   height: number;
   data: DataPoint[];
+  extent: {
+    x: [number, number];
+    y: [number, number];
+  };
   thresholds: Threshold[];
   oneBitThreshold: number;
   oneBitMode: boolean;
@@ -75,6 +79,7 @@ export const drawOnCanvas = (args: DrawOnCanvasArgs) => {
     transform,
     oneBitThreshold,
     oneBitMode,
+    extent,
   } = args;
   const sortedThresholds = [...thresholds].sort((a, b) => a.min - b.min);
 
@@ -92,10 +97,8 @@ export const drawOnCanvas = (args: DrawOnCanvasArgs) => {
   canvas.width = width;
   canvas.height = height;
 
-  const xExtent = extent(data, (d) => d.x) as [number, number];
-  const yExtent = extent(data, (d) => d.y) as [number, number];
-  const dataWidth = xExtent[1] - xExtent[0];
-  const dataHeight = yExtent[1] - yExtent[0];
+  const dataWidth = extent.x[1] - extent.x[0];
+  const dataHeight = extent.y[1] - extent.y[0];
 
   const scale = Math.min(width / dataWidth, height / dataHeight);
 

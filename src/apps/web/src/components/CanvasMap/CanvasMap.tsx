@@ -1,4 +1,4 @@
-import { select, ZoomTransform, zoom } from "d3";
+import { select, ZoomTransform, zoom, extent as d3extent } from "d3";
 import uniqueId from "lodash/uniqueId";
 import { useRef, useEffect, useMemo } from "react";
 import styled from "styled-components";
@@ -56,6 +56,12 @@ const CanvasMap = (props: Props) => {
   const canvas = useRef<HTMLCanvasElement>(null);
   const offscreenRef = useRef<OffscreenCanvas | null>(null);
   const hasInitialized = useRef(false);
+  const extent = useMemo(() => {
+    return {
+      x: d3extent(props.data, (d) => d.x) as [number, number],
+      y: d3extent(props.data, (d) => d.y) as [number, number],
+    };
+  }, [props.data]);
 
   useEffect(() => {
     if (!canvas.current) return;
@@ -91,6 +97,7 @@ const CanvasMap = (props: Props) => {
       oneBitMode,
       oneBitThreshold,
       data: props.data,
+      extent,
       color,
     }).catch((error) => {
       throw new Error("Error drawing on canvas: " + error);

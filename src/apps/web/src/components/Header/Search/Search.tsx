@@ -5,7 +5,7 @@ import useSWR from "swr";
 import { useShallow } from "zustand/react/shallow";
 import map from "../../../../asset/foreground.svg?parse";
 import { useStore } from "../../../store.ts";
-import { BoundingBox, Dropdown, Option } from "./Dropdown.tsx";
+import { BoundingBox, Dropdown, Option } from "./Dropdown/Dropdown.tsx";
 
 const worker = new ComlinkWorker<typeof import("./search.ts")>(
   new URL("./search.ts", import.meta.url),

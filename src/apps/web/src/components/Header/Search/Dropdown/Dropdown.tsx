@@ -6,7 +6,8 @@ import {
 } from "@headlessui/react";
 import { ChangeEvent, useMemo, useState, memo } from "react";
 import styled from "styled-components";
-import { i18n } from "../../../i18n.ts";
+import { i18n } from "../../../../i18n.ts";
+import Label, { Token } from "./Label.tsx";
 
 export type BoundingBox = {
   min: { x: number; y: number };
@@ -31,6 +32,11 @@ export type Option =
         x: number;
         y: number;
       }[];
+    }
+  | {
+      type: "query";
+      label: string;
+      id: string;
     };
 
 type Dropdown = {
@@ -53,8 +59,6 @@ const placeholders = [
   "logika rozmyta",
 ];
 
-type Token = { text: string; type: "regular" | "bold" };
-
 const tokenizeLabel = (label: string, query: string): Token[] => {
   const i = label.toLowerCase().indexOf(query.toLowerCase());
   if (i === -1) return [{ text: label, type: "regular" }];
@@ -70,29 +74,18 @@ const tokenizeLabel = (label: string, query: string): Token[] => {
   ].filter(({ text }) => text);
 };
 
-const Label = ({ tokens }: { tokens: Token[] }) => {
-  return (
-    <>
-      {tokens.map((token, index) => (
-        <Token key={index} $type={token.type}>
-          {token.text}
-        </Token>
-      ))}
-    </>
-  );
-};
-
 type OptionRowProps = {
   id: string;
   focus: boolean;
   selected: boolean;
   tokens: Token[];
+  type: "query" | "label" | "point";
 };
 
 const OptionRow = memo(
   (props: OptionRowProps) => (
     <ComboboxOption $focus={props.focus} $selected={props.selected}>
-      <Label tokens={props.tokens} />
+      <Label tokens={props.tokens} type={props.type} />
     </ComboboxOption>
   ),
   (prev, next) => {
@@ -176,18 +169,34 @@ export const Dropdown = (props: Dropdown) => {
             {hasNoResultsText ? (
               <NoResults>{noResultsText}</NoResults>
             ) : (
-              options.map((option) => (
-                <ComboboxOptionHeadless key={option.id} value={option}>
-                  {({ focus, selected }) => (
-                    <OptionRow
-                      id={option.id}
-                      focus={focus}
-                      selected={selected}
-                      tokens={option.tokens}
-                    />
-                  )}
-                </ComboboxOptionHeadless>
-              ))
+              <>
+                {query.length >= 3 && (
+                  <ComboboxOptionHeadless
+                    value={{ id: "dummy-id", name: query, type: "query" }}
+                  >
+                    {({ focus, selected }) => (
+                      <ComboboxOption $focus={focus} $selected={selected}>
+                        <Label type="query">
+                          {i18n("Szukaj")}: <strong>{query}</strong>
+                        </Label>
+                      </ComboboxOption>
+                    )}
+                  </ComboboxOptionHeadless>
+                )}
+                {options.map((option) => (
+                  <ComboboxOptionHeadless key={option.id} value={option}>
+                    {({ focus, selected }) => (
+                      <OptionRow
+                        type={option.type}
+                        id={option.id}
+                        focus={focus}
+                        selected={selected}
+                        tokens={option.tokens}
+                      />
+                    )}
+                  </ComboboxOptionHeadless>
+                ))}
+              </>
             )}
           </ComboboxOptions>
         </>
@@ -245,10 +254,4 @@ const ComboboxOption = styled.div<{
   color: #333;
   padding: 12px;
   background-color: ${({ $focus }) => ($focus ? "#eee" : "transparent")};
-`;
-
-const Token = styled.span<{
-  $type: "regular" | "bold";
-}>`
-  font-weight: ${({ $type }) => ($type === "bold" ? "bold" : "normal")};
 `;

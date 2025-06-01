@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
-    "lint": "tubro lint",
+    "lint": "turbo lint",
     "test": "turbo test",
     "commit": "cz"
   },

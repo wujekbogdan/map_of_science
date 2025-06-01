@@ -1,6 +1,6 @@
 {
   "name": "@map-of-science/eslint",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "exports": "./index.mjs",
@@ -8,10 +8,12 @@
     "globals": "^15.11.0",
     "typescript-eslint": "^8.11.0",
     "@eslint/js": "^9.13.0",
-    "eslint": "^9.13.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.14"
+  },
+  "peerDependencies": {
+    "eslint": "^9.13.0"
   },
   "bin": {
     "eslint": "./node_modules/eslint/bin/eslint.js"

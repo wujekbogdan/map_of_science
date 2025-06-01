@@ -81,6 +81,7 @@ const CanvasMaps = () => {
     allStores.forEach((store) => {
       store.setState((prev) => ({
         ...prev,
+        size: { width: 1000, height: 1000 },
         transform: { x: 0, y: 0, k: 1 },
       }));
     });

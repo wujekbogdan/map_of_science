@@ -12,3 +12,5 @@ packages:
   # - 'src/packages/*'
   # Development-only tooling (e.g. configs, linters, build tools)
   - 'src/dev/*'
+   
+strictPeerDependencies: true

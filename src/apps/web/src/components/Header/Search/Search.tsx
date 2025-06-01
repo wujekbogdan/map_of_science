@@ -118,7 +118,6 @@ export const Search = () => {
         id: id.toString(),
         label: `${name} [${clusters.length.toString()}]`,
         clusters,
-        boundingBox: getBoundingBox(clusters, mapSize),
       };
     }),
   ];
@@ -156,15 +155,17 @@ export const Search = () => {
   };
 
   const onSelectionChange = (option: Option) => {
-    switch (option.type) {
-      case "label":
-        setPointsToHighlight([]);
-        zoomToBoundingBox(option.boundingBox);
-        break;
-      case "point":
-        zoomToBoundingBox(option.boundingBox);
-        setPointsToHighlight(option.clusters.map(({ clusterId }) => clusterId));
-        break;
+    if (option.type === "label") {
+      setPointsToHighlight([]);
+      zoomToBoundingBox(option.boundingBox);
+      return;
+    }
+
+    if (option.type === "point" || option.type === "query") {
+      const boundingBox = getBoundingBox(option.clusters, mapSize);
+      zoomToBoundingBox(boundingBox);
+      setPointsToHighlight(option.clusters.map(({ clusterId }) => clusterId));
+      return;
     }
   };
 

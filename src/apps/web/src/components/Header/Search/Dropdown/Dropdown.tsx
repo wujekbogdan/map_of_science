@@ -14,6 +14,11 @@ export type BoundingBox = {
   max: { x: number; y: number };
   center: { x: number; y: number };
 };
+type Cluster = {
+  clusterId: number;
+  x: number;
+  y: number;
+};
 
 export type Option =
   | {
@@ -26,17 +31,13 @@ export type Option =
       type: "point";
       label: string;
       id: string;
-      boundingBox: BoundingBox;
-      clusters: {
-        clusterId: number;
-        x: number;
-        y: number;
-      }[];
+      clusters: Cluster[];
     }
   | {
       type: "query";
       label: string;
       id: string;
+      clusters: Cluster[];
     };
 
 type Dropdown = {
@@ -101,14 +102,17 @@ export const Dropdown = (props: Dropdown) => {
   const { options: rawOptions } = props;
   const [query, setQuery] = useState("");
   const [selection, setSelection] = useState<Option | undefined>(undefined);
-  const options = useMemo(
-    () =>
-      rawOptions.map((option) => ({
-        ...option,
-        tokens: tokenizeLabel(option.label, query),
-      })),
-    [rawOptions, query],
-  );
+  const { options, allClusters } = useMemo(() => {
+    const options = rawOptions.map((option) => ({
+      ...option,
+      tokens: tokenizeLabel(option.label, query),
+    }));
+    const allClusters = options
+      .filter((option) => option.type === "point")
+      .flatMap((option) => option.clusters);
+
+    return { options, allClusters };
+  }, [rawOptions, query]);
   const hasNoResultsText = query.length > 1 && options.length === 0;
   const noResultsText = (() => {
     if (query.length < 3) {
@@ -131,6 +135,12 @@ export const Dropdown = (props: Dropdown) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [query],
   );
+  const queryOption: Option = {
+    id: "dummy-id",
+    label: query,
+    type: "query",
+    clusters: allClusters,
+  };
 
   const onQueryChange = (event: ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value;
@@ -171,13 +181,12 @@ export const Dropdown = (props: Dropdown) => {
             ) : (
               <>
                 {query.length >= 3 && (
-                  <ComboboxOptionHeadless
-                    value={{ id: "dummy-id", name: query, type: "query" }}
-                  >
+                  <ComboboxOptionHeadless value={queryOption}>
                     {({ focus, selected }) => (
                       <ComboboxOption $focus={focus} $selected={selected}>
                         <Label type="query">
-                          {i18n("Szukaj")}: <strong>{query}</strong>
+                          {i18n("Szukaj")}: <strong>{query}</strong> [
+                          {allClusters.length}]
                         </Label>
                       </ComboboxOption>
                     )}

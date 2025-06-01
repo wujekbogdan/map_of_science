@@ -22,11 +22,13 @@ const Label = ({ tokens, type, children }: Props) => {
   return (
     <LabelRoot>
       <Icon src={types[type]} role="presentation" alt={type} />
-      {tokens?.map((token, index) => (
-        <Token key={index} $type={token.type}>
-          {token.text}
-        </Token>
-      ))}
+      <span>
+        {tokens?.map((token, index) => (
+          <Token key={index} $type={token.type}>
+            {token.text}
+          </Token>
+        ))}
+      </span>
       <span>{children}</span>
     </LabelRoot>
   );

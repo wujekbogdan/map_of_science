@@ -2,4 +2,4 @@
 "@map-of-science/root": minor
 ---
 
-Add repository root to the pnpm workspace to allow Changesets to version the root package.
+Create a dummy `@map-of-science/root` package as a workaround for Changesets to hold the changelog of the monorepo root package.

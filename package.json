@@ -1,5 +1,5 @@
 {
-  "name": "@map-of-science/root",
+  "name": "map-of-science",
   "version": "0.0.0",
   "private": true,
   "type": "module",

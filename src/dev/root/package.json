@@ -1,0 +1,7 @@
+{
+  "name": "@map-of-science/root",
+  "description": "A dummy package to hold the changelog of the monorepo root package.",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module"
+}

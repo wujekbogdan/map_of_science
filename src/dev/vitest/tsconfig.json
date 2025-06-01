@@ -1,0 +1,3 @@
+{
+  "extends": "@map-of-science/typescript/node"
+}

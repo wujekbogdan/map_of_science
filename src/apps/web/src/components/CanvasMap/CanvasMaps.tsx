@@ -14,7 +14,7 @@ const allStores = COLORS.map((color) => defineStore(color));
 
 type HeaderProps = {
   header: string;
-  onToggle: (enabled: boolean) => void;
+  onToggle?: (enabled: boolean) => void;
 };
 
 const Header = (props: HeaderProps) => {
@@ -22,10 +22,12 @@ const Header = (props: HeaderProps) => {
     <MapToggle>
       <label htmlFor={props.header}>{props.header}</label>
       <input
+        disabled={!props.onToggle}
         id={props.header}
         defaultChecked={true}
         type="checkbox"
         onChange={(event) => {
+          if (!props.onToggle) return;
           props.onToggle(event.target.checked);
         }}
       />
@@ -75,6 +77,15 @@ const CanvasMaps = () => {
   const [{ store: firstStore }, ...remainingStores] = stores;
   const [size] = firstStore(useShallow((s) => [s.size]));
 
+  const onReset = () => {
+    allStores.forEach((store) => {
+      store.setState((prev) => ({
+        ...prev,
+        transform: { x: 0, y: 0, k: 1 },
+      }));
+    });
+  };
+
   return isLoading ? (
     <>Loading...</>
   ) : (
@@ -84,8 +95,8 @@ const CanvasMaps = () => {
           <MenuItem>
             <TogglablePanel
               mode="hover"
-              header="Map 1"
-              initialState="expanded"
+              header={<Header header="Layer 1" />}
+              initialState="collapsed"
               isDropdown={true}
             >
               <EditorContainer>
@@ -110,20 +121,27 @@ const CanvasMaps = () => {
           ))}
         </Items>
 
-        <Count>
-          <label htmlFor="count">Layers count</label>
-          <input
-            id="count"
-            value={count}
-            type="number"
-            min="1"
-            max="5"
-            onChange={(e) => {
-              e.preventDefault();
-              setCount(+e.target.value);
-            }}
-          />
-        </Count>
+        <Utils>
+          <Util>
+            <button id="reset" onClick={onReset}>
+              Reset zoom/position
+            </button>
+          </Util>
+          <Util>
+            <label htmlFor="count">Layers count</label>
+            <input
+              id="count"
+              value={count}
+              type="number"
+              min="1"
+              max="5"
+              onChange={(e) => {
+                e.preventDefault();
+                setCount(+e.target.value);
+              }}
+            />
+          </Util>
+        </Utils>
       </Menu>
 
       <Layers>
@@ -173,9 +191,15 @@ const MapToggle = styled.div`
   }
 `;
 
-const Count = styled.div`
+const Utils = styled.div`
   display: flex;
+  justify-content: flex-end;
   padding: 8px;
+`;
+
+const Util = styled.div`
+  margin-left: 8px;
+  display: flex;
   align-items: center;
 
   label {

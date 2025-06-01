@@ -1,6 +1,6 @@
 import { select, ZoomTransform, zoom } from "d3";
 import uniqueId from "lodash/uniqueId";
-import { useRef, useEffect, useState, useMemo } from "react";
+import { useRef, useEffect, useMemo } from "react";
 import styled from "styled-components";
 import { useShallow } from "zustand/react/shallow";
 import { DataPoint } from "../../api/model";
@@ -30,24 +30,29 @@ type Props = {
 const CanvasMap = (props: Props) => {
   const id = useMemo(() => uniqueId(), []);
   const { draw } = useCanvasDrawer();
-  const [thresholds, size, blur, oneBitMode, oneBitThreshold, color, setSize] =
-    props.store(
-      useShallow((s) => [
-        s.thresholds,
-        s.size,
-        s.blur,
-        s.oneBitMode,
-        s.oneBitThreshold,
-        s.color,
-        s.setSize,
-      ]),
-    );
-
-  const [transform, setTransform] = useState({
-    x: 0,
-    y: 0,
-    k: 1,
-  });
+  const [
+    thresholds,
+    size,
+    transform,
+    blur,
+    oneBitMode,
+    oneBitThreshold,
+    color,
+    setSize,
+    setTransform,
+  ] = props.store(
+    useShallow((s) => [
+      s.thresholds,
+      s.size,
+      s.transform,
+      s.blur,
+      s.oneBitMode,
+      s.oneBitThreshold,
+      s.color,
+      s.setSize,
+      s.setTransform,
+    ]),
+  );
   const canvas = useRef<HTMLCanvasElement>(null);
   const offscreenRef = useRef<OffscreenCanvas | null>(null);
   const hasInitialized = useRef(false);

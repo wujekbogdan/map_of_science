@@ -1,5 +1,3 @@
-import debounce from "lodash/debounce";
-import { useMemo } from "react";
 import { HexColorPicker } from "react-colorful";
 import styled from "styled-components";
 import { useShallow } from "zustand/react/shallow";
@@ -17,7 +15,12 @@ export const ConfigEditor = (props: Props) => {
     oneBitMode,
     oneBitThreshold,
     color,
-    ...rawSetters
+    setThresholds,
+    setSize,
+    setBlur,
+    setOneBitThreshold,
+    setOneBitMode,
+    setColor,
   ] = props.store(
     useShallow((s) => [
       s.thresholds,
@@ -34,15 +37,6 @@ export const ConfigEditor = (props: Props) => {
       s.setColor,
     ]),
   );
-
-  const [
-    setThresholds,
-    setSize,
-    setBlur,
-    setOneBitThreshold,
-    setOneBitMode,
-    setColor,
-  ] = useMemo(() => rawSetters.map((fn) => debounce(fn, 300)), [rawSetters]);
 
   const update = (
     index: number,

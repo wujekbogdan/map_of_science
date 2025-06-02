@@ -1,3 +1,12 @@
+import {
+  useFloating,
+  useHover,
+  useInteractions,
+  useDismiss,
+  offset,
+  flip,
+  shift,
+} from "@floating-ui/react";
 import { ReactNode, useState } from "react";
 import styled from "styled-components";
 import { i18n } from "../../i18n.ts";
@@ -19,6 +28,36 @@ export const TogglablePanel = (props: Props) => {
   const [visibility, setVisibility] = useState<State>(props.initialState);
   const isExpanded = visibility === "expanded";
   const oppositeState = isExpanded ? "collapsed" : "expanded";
+  const isHoverMode = mode === "hover";
+
+  const { refs, floatingStyles, context } = useFloating({
+    open: isExpanded,
+    middleware: [offset(0), flip(), shift({ padding: 0 })],
+    onOpenChange: (open) => {
+      const newState = open ? "expanded" : "collapsed";
+      setVisibility(newState);
+      onToggle?.(newState);
+    },
+  });
+
+  const hover = useHover(context, {
+    enabled: mode === "hover",
+    delay: {
+      open: 50,
+      close: 0,
+    },
+  });
+  const dismiss = useDismiss(context, {
+    enabled: props.isDropdown,
+  });
+
+  const { getReferenceProps, getFloatingProps } = useInteractions([
+    hover,
+    dismiss,
+  ]);
+
+  const containerRef = isHoverMode ? refs.setReference : undefined;
+  const containerProps = isHoverMode ? { ...getReferenceProps() } : {};
 
   const onClick = () => {
     if (mode !== "click") return;
@@ -27,27 +66,28 @@ export const TogglablePanel = (props: Props) => {
     onToggle?.(oppositeState);
   };
 
-  const onHover = () => {
-    if (mode !== "hover") return;
-
-    setVisibility(oppositeState);
-    onToggle?.(oppositeState);
-  };
-
   const PanelComponent = props.isDropdown ? PanelPositionedAbsolutely : Panel;
 
   return (
-    <Container onMouseEnter={onHover} onMouseLeave={onHover}>
+    <Container ref={containerRef} {...containerProps}>
       <TitleBar $hovered={mode === "hover" && isExpanded}>
         <Title>{header}</Title>
         {mode === "click" && (
           <Toggle onClick={onClick} role="button">
-            <SrOnly>{isExpanded ? i18n("Minimize") : i18n("Minimize")}</SrOnly>
+            <SrOnly>{isExpanded ? i18n("Minimize") : i18n("Maximize")}</SrOnly>
             <Icon $expanded={isExpanded}>{isExpanded ? "▼" : "▲"}</Icon>
           </Toggle>
         )}
       </TitleBar>
-      {isExpanded && <PanelComponent>{children}</PanelComponent>}
+      {isExpanded && (
+        <PanelComponent
+          ref={refs.setFloating}
+          style={props.isDropdown ? floatingStyles : undefined}
+          {...getFloatingProps()}
+        >
+          {children}
+        </PanelComponent>
+      )}
     </Container>
   );
 };
@@ -60,7 +100,7 @@ const Container = styled.div`
 const SrOnly = styled.span`
   position: absolute;
   width: 1px;
-  height: 1px;999
+  height: 1px;
   padding: 0;
   margin: -1px;
   overflow: hidden;

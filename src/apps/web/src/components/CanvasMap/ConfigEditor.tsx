@@ -1,5 +1,6 @@
 import debounce from "lodash/debounce";
 import { useMemo } from "react";
+import { HexColorPicker } from "react-colorful";
 import styled from "styled-components";
 import { useShallow } from "zustand/react/shallow";
 import { defineStore, schema, Threshold } from "./store.ts";
@@ -233,19 +234,16 @@ export const ConfigEditor = (props: Props) => {
           />
           <span>{oneBitThreshold}</span>
         </FormControl>
-        <FormControl>
-          <input
-            disabled={!oneBitMode}
-            placeholder="Color"
-            type="color"
-            value={color}
-            onChange={(e) => {
-              e.preventDefault();
-              setColor(e.target.value);
-            }}
-          />
-        </FormControl>
       </Section>
+
+      {oneBitMode && (
+        <Section>
+          <Header>Color</Header>
+          <FormControl>
+            <HexColorPicker color={color} onChange={setColor} />
+          </FormControl>
+        </Section>
+      )}
 
       <Section>
         <Header>Settings</Header>

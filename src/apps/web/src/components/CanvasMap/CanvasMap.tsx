@@ -4,7 +4,7 @@ import { useRef, useEffect, useMemo, Ref, useImperativeHandle } from "react";
 import styled from "styled-components";
 import { useShallow } from "zustand/react/shallow";
 import { DataPoint } from "../../api/model";
-import { useCanvasDrawer } from "./canvasDrawer.ts";
+import { drawOnCanvas } from "./drawOnCanvas.ts";
 import { defineStore } from "./store.ts";
 
 type Transform = {
@@ -30,7 +30,6 @@ type Props = {
 
 const CanvasMap = (props: Props) => {
   const id = useMemo(() => uniqueId(), []);
-  const { draw } = useCanvasDrawer();
   const [
     thresholds,
     size,
@@ -55,7 +54,6 @@ const CanvasMap = (props: Props) => {
     ]),
   );
   const canvas = useRef<HTMLCanvasElement>(null);
-  const offscreenRef = useRef<OffscreenCanvas | null>(null);
   const hasInitialized = useRef(false);
   const extent = useMemo(() => {
     return {
@@ -80,9 +78,8 @@ const CanvasMap = (props: Props) => {
 
   useEffect(() => {
     if (!canvas.current) return;
-    offscreenRef.current ??= canvas.current.transferControlToOffscreen();
 
-    draw({
+    drawOnCanvas({
       id,
       transform: {
         x: transform.x,
@@ -90,9 +87,8 @@ const CanvasMap = (props: Props) => {
         k: transform.k,
       },
       blur: blur,
-      shouldTransfer: !hasInitialized.current,
       thresholds: thresholds,
-      canvas: offscreenRef.current,
+      canvas: canvas.current,
       width: size.width,
       height: size.height,
       oneBitMode,
@@ -100,8 +96,6 @@ const CanvasMap = (props: Props) => {
       data: props.data,
       extent,
       color,
-    }).catch((error) => {
-      throw new Error("Error drawing on canvas: " + error);
     });
 
     hasInitialized.current = true;
@@ -113,7 +107,6 @@ const CanvasMap = (props: Props) => {
     transform,
     oneBitThreshold,
     oneBitMode,
-    draw,
     color,
     id,
     extent,

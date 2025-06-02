@@ -9,6 +9,7 @@ import CanvasMap from "./CanvasMap.tsx";
 import ConfigEditor from "./ConfigEditor.tsx";
 import { defineStore } from "./store.ts";
 
+// const COLORS = ["#d8edd0"];
 const COLORS = ["#d8edd0", "#a3cd93", "#7aba5e", "#5db43d", "#4a9131"];
 const allStores = COLORS.map((color) => defineStore(color));
 

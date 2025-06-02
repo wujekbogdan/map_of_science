@@ -4,7 +4,7 @@ import { Threshold } from "./store.ts";
 
 type DrawOnCanvasArgs = {
   id: string;
-  canvas?: OffscreenCanvas;
+  canvas: HTMLCanvasElement;
   width: number;
   height: number;
   data: DataPoint[];
@@ -24,10 +24,8 @@ type DrawOnCanvasArgs = {
   };
 };
 
-const cache: Record<string, OffscreenCanvas> = {};
-
 type ToOneBitArgs = {
-  ctx: OffscreenCanvasRenderingContext2D;
+  ctx: CanvasRenderingContext2D;
   width: number;
   height: number;
   threshold: number;
@@ -64,13 +62,8 @@ const toOneBit = (args: ToOneBitArgs) => {
 };
 
 export const drawOnCanvas = (args: DrawOnCanvasArgs) => {
-  const canvas = cache[args.id] ?? args.canvas;
-  if (!canvas) {
-    throw new Error("Canvas is not provided or initialized");
-  }
-  cache[args.id] = canvas;
-
   const {
+    canvas,
     width,
     height,
     data,

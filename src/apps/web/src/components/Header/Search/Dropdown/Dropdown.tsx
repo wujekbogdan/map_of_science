@@ -6,12 +6,18 @@ import {
 } from "@headlessui/react";
 import { ChangeEvent, useMemo, useState, memo } from "react";
 import styled from "styled-components";
-import { i18n } from "../../../i18n.ts";
+import { i18n } from "../../../../i18n.ts";
+import Label, { Token } from "./Label.tsx";
 
 export type BoundingBox = {
   min: { x: number; y: number };
   max: { x: number; y: number };
   center: { x: number; y: number };
+};
+type Cluster = {
+  clusterId: number;
+  x: number;
+  y: number;
 };
 
 export type Option =
@@ -25,12 +31,13 @@ export type Option =
       type: "point";
       label: string;
       id: string;
-      boundingBox: BoundingBox;
-      clusters: {
-        clusterId: number;
-        x: number;
-        y: number;
-      }[];
+      clusters: Cluster[];
+    }
+  | {
+      type: "query";
+      label: string;
+      id: string;
+      clusters: Cluster[];
     };
 
 type Dropdown = {
@@ -53,8 +60,6 @@ const placeholders = [
   "logika rozmyta",
 ];
 
-type Token = { text: string; type: "regular" | "bold" };
-
 const tokenizeLabel = (label: string, query: string): Token[] => {
   const i = label.toLowerCase().indexOf(query.toLowerCase());
   if (i === -1) return [{ text: label, type: "regular" }];
@@ -70,29 +75,18 @@ const tokenizeLabel = (label: string, query: string): Token[] => {
   ].filter(({ text }) => text);
 };
 
-const Label = ({ tokens }: { tokens: Token[] }) => {
-  return (
-    <>
-      {tokens.map((token, index) => (
-        <Token key={index} $type={token.type}>
-          {token.text}
-        </Token>
-      ))}
-    </>
-  );
-};
-
 type OptionRowProps = {
   id: string;
   focus: boolean;
   selected: boolean;
   tokens: Token[];
+  type: "query" | "label" | "point";
 };
 
 const OptionRow = memo(
   (props: OptionRowProps) => (
     <ComboboxOption $focus={props.focus} $selected={props.selected}>
-      <Label tokens={props.tokens} />
+      <Label tokens={props.tokens} type={props.type} />
     </ComboboxOption>
   ),
   (prev, next) => {
@@ -108,14 +102,17 @@ export const Dropdown = (props: Dropdown) => {
   const { options: rawOptions } = props;
   const [query, setQuery] = useState("");
   const [selection, setSelection] = useState<Option | undefined>(undefined);
-  const options = useMemo(
-    () =>
-      rawOptions.map((option) => ({
-        ...option,
-        tokens: tokenizeLabel(option.label, query),
-      })),
-    [rawOptions, query],
-  );
+  const { options, allClusters } = useMemo(() => {
+    const options = rawOptions.map((option) => ({
+      ...option,
+      tokens: tokenizeLabel(option.label, query),
+    }));
+    const allClusters = options
+      .filter((option) => option.type === "point")
+      .flatMap((option) => option.clusters);
+
+    return { options, allClusters };
+  }, [rawOptions, query]);
   const hasNoResultsText = query.length > 1 && options.length === 0;
   const noResultsText = (() => {
     if (query.length < 3) {
@@ -138,6 +135,12 @@ export const Dropdown = (props: Dropdown) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [query],
   );
+  const queryOption: Option = {
+    id: "dummy-id",
+    label: query,
+    type: "query",
+    clusters: allClusters,
+  };
 
   const onQueryChange = (event: ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value;
@@ -176,18 +179,33 @@ export const Dropdown = (props: Dropdown) => {
             {hasNoResultsText ? (
               <NoResults>{noResultsText}</NoResults>
             ) : (
-              options.map((option) => (
-                <ComboboxOptionHeadless key={option.id} value={option}>
-                  {({ focus, selected }) => (
-                    <OptionRow
-                      id={option.id}
-                      focus={focus}
-                      selected={selected}
-                      tokens={option.tokens}
-                    />
-                  )}
-                </ComboboxOptionHeadless>
-              ))
+              <>
+                {query.length >= 3 && (
+                  <ComboboxOptionHeadless value={queryOption}>
+                    {({ focus, selected }) => (
+                      <ComboboxOption $focus={focus} $selected={selected}>
+                        <Label type="query">
+                          {i18n("Szukaj")}: <strong>{query}</strong> [
+                          {allClusters.length}]
+                        </Label>
+                      </ComboboxOption>
+                    )}
+                  </ComboboxOptionHeadless>
+                )}
+                {options.map((option) => (
+                  <ComboboxOptionHeadless key={option.id} value={option}>
+                    {({ focus, selected }) => (
+                      <OptionRow
+                        type={option.type}
+                        id={option.id}
+                        focus={focus}
+                        selected={selected}
+                        tokens={option.tokens}
+                      />
+                    )}
+                  </ComboboxOptionHeadless>
+                ))}
+              </>
             )}
           </ComboboxOptions>
         </>
@@ -245,10 +263,4 @@ const ComboboxOption = styled.div<{
   color: #333;
   padding: 12px;
   background-color: ${({ $focus }) => ($focus ? "#eee" : "transparent")};
-`;
-
-const Token = styled.span<{
-  $type: "regular" | "bold";
-}>`
-  font-weight: ${({ $type }) => ($type === "bold" ? "bold" : "normal")};
 `;

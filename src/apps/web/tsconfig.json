@@ -3,5 +3,8 @@
   "references": [
     { "path": "./tsconfig.react.json" },
     { "path": "./tsconfig.node.json" }
-  ]
+  ],
+  "compilerOptions": {
+    "plugins": [{ "name": "typescript-plugin-css-modules" }]
+  },
 }

@@ -5,7 +5,7 @@ import useSWR from "swr";
 import { useShallow } from "zustand/react/shallow";
 import map from "../../../../asset/foreground.svg?parse";
 import { useStore } from "../../../store.ts";
-import { BoundingBox, Dropdown, Option } from "./Dropdown.tsx";
+import { BoundingBox, Dropdown, Option } from "./Dropdown/Dropdown.tsx";
 
 const worker = new ComlinkWorker<typeof import("./search.ts")>(
   new URL("./search.ts", import.meta.url),
@@ -118,7 +118,6 @@ export const Search = () => {
         id: id.toString(),
         label: `${name} [${clusters.length.toString()}]`,
         clusters,
-        boundingBox: getBoundingBox(clusters, mapSize),
       };
     }),
   ];
@@ -156,15 +155,17 @@ export const Search = () => {
   };
 
   const onSelectionChange = (option: Option) => {
-    switch (option.type) {
-      case "label":
-        setPointsToHighlight([]);
-        zoomToBoundingBox(option.boundingBox);
-        break;
-      case "point":
-        zoomToBoundingBox(option.boundingBox);
-        setPointsToHighlight(option.clusters.map(({ clusterId }) => clusterId));
-        break;
+    if (option.type === "label") {
+      setPointsToHighlight([]);
+      zoomToBoundingBox(option.boundingBox);
+      return;
+    }
+
+    if (option.type === "point" || option.type === "query") {
+      const boundingBox = getBoundingBox(option.clusters, mapSize);
+      zoomToBoundingBox(boundingBox);
+      setPointsToHighlight(option.clusters.map(({ clusterId }) => clusterId));
+      return;
     }
   };
 

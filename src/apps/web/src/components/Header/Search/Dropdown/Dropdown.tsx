@@ -4,7 +4,7 @@ import {
   ComboboxOptions as ComboboxOptionsHeadless,
   ComboboxOption as ComboboxOptionHeadless,
 } from "@headlessui/react";
-import { ChangeEvent, useMemo, useState, memo } from "react";
+import { ChangeEvent, useMemo, useState, memo, useRef } from "react";
 import styled from "styled-components";
 import { i18n } from "../../../../i18n.ts";
 import Label, { Token } from "./Label.tsx";
@@ -20,25 +20,24 @@ type Cluster = {
   y: number;
 };
 
+type OptionBase = {
+  label: string;
+  keyword: string;
+  id: string;
+};
 export type Option =
-  | {
+  | (OptionBase & {
       type: "label";
-      label: string;
-      id: string;
       boundingBox: BoundingBox;
-    }
-  | {
+    })
+  | (OptionBase & {
       type: "point";
-      label: string;
-      id: string;
       clusters: Cluster[];
-    }
-  | {
+    })
+  | (OptionBase & {
       type: "query";
-      label: string;
-      id: string;
       clusters: Cluster[];
-    };
+    });
 
 type Dropdown = {
   options: Option[];
@@ -107,9 +106,14 @@ export const Dropdown = (props: Dropdown) => {
       ...option,
       tokens: tokenizeLabel(option.label, query),
     }));
-    const allClusters = options
-      .filter((option) => option.type === "point")
-      .flatMap((option) => option.clusters);
+    const allClusters = [
+      ...new Map(
+        options
+          .filter((option) => option.type === "point")
+          .flatMap((option) => option.clusters)
+          .map((cluster) => [cluster.clusterId, cluster]), // Guarantee uniqueness
+      ).values(),
+    ];
 
     return { options, allClusters };
   }, [rawOptions, query]);
@@ -125,20 +129,14 @@ export const Dropdown = (props: Dropdown) => {
 
     return i18n("Brak wyników");
   })();
-  const randomPlaceholder = useMemo(
-    () => placeholders[Math.floor(Math.random() * placeholders.length)],
-    // ESLint is incorrect here. Memoizing the function based on `query`
-    // ensures that the placeholder does not change on every render.
-    // The fact that `query` is not used in the function is irrelevant in this case.
-    // Adding `query` as a dependency results in the intended behavior -
-    // it re-randomizes the placeholder when the user clears the input.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [query],
+  const { current: randomPlaceholder } = useRef<string>(
+    placeholders[Math.floor(Math.random() * placeholders.length)],
   );
   const queryOption: Option = {
+    type: "query",
     id: "dummy-id",
     label: query,
-    type: "query",
+    keyword: query,
     clusters: allClusters,
   };
 
@@ -153,21 +151,20 @@ export const Dropdown = (props: Dropdown) => {
     if (!selection) return;
 
     setSelection(selection);
-    // setQuery(selection.label);
     props.onSelect(selection);
   };
 
   return (
-    <Combobox value={selection} onChange={onSelectionChange} immediate>
+    <Combobox value={selection} immediate onChange={onSelectionChange}>
       {({ open }) => (
-        <>
+        <div>
           <ComboboxInput
             autoComplete="off"
             $open={open}
             placeholder={i18n(
               `Wyszukaj na Mapie Nauki, np. "${randomPlaceholder}"`,
             )}
-            displayValue={(option: Option | null) => option?.label ?? query}
+            displayValue={(option: Option | null) => option?.keyword ?? query}
             onChange={onQueryChange}
           />
           <ComboboxOptions
@@ -208,7 +205,7 @@ export const Dropdown = (props: Dropdown) => {
               </>
             )}
           </ComboboxOptions>
-        </>
+        </div>
       )}
     </Combobox>
   );

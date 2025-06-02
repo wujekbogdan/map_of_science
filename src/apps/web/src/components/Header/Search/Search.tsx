@@ -109,6 +109,7 @@ export const Search = () => {
       type: "label" as const,
       id,
       label,
+      keyword: label,
       boundingBox,
     })),
     ...points.map(({ id, name, clusters }) => {
@@ -116,6 +117,7 @@ export const Search = () => {
       return {
         type: "point" as const,
         id: id.toString(),
+        keyword: name,
         label: `${name} [${clusters.length.toString()}]`,
         clusters,
       };

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, createRef } from "react";
 import styled from "styled-components";
 import useSWR from "swr";
 import { useShallow } from "zustand/react/shallow";
@@ -70,11 +70,12 @@ const CanvasMaps = () => {
           />
         </>
       ),
-      id: `map-${index + 1}`,
+      id: `layer-${index + 1}`,
       visible: visibility[index],
+      ref: createRef<{ download: () => void }>(),
     }));
   }, [count, visibility]);
-  const [{ store: firstStore }, ...remainingStores] = stores;
+  const [{ store: firstStore, ref: firstRef }, ...remainingStores] = stores;
   const [size] = firstStore(useShallow((s) => [s.size]));
 
   const onReset = () => {
@@ -145,6 +146,18 @@ const CanvasMaps = () => {
         </Utils>
       </Menu>
 
+      <Downloads>
+        {stores.map(({ ref, id }) => (
+          <Download
+            onClick={() => {
+              ref.current?.download();
+            }}
+          >
+            Download {id}
+          </Download>
+        ))}
+      </Downloads>
+
       <Layers>
         <Layer
           style={{
@@ -152,15 +165,16 @@ const CanvasMaps = () => {
           }}
         >
           <CanvasMap
+            ref={firstRef}
             data={dataAsArray}
             store={firstStore}
-            name="Map 1"
+            name="Layer 1"
             onTransformChange={setTransform}
           />
         </Layer>
         {remainingStores
           .filter((_, index) => visibility[index + 1])
-          .map(({ store, id }, index) => (
+          .map(({ store, ref, id }, index) => (
             <Layer
               key={id}
               style={{
@@ -168,6 +182,7 @@ const CanvasMaps = () => {
               }}
             >
               <CanvasMap
+                ref={ref}
                 key={id}
                 data={dataAsArray}
                 store={store}
@@ -240,6 +255,18 @@ const Layer = styled.div`
   top: 48px;
   left: 50%;
   transform: translateX(-50%);
+`;
+
+const Downloads = styled.div`
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+`;
+
+const Download = styled.button`
+  margin-top: 8px;
 `;
 
 export default CanvasMaps;

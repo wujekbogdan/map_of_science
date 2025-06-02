@@ -1,6 +1,6 @@
 import { select, ZoomTransform, zoom, extent as d3extent } from "d3";
 import uniqueId from "lodash/uniqueId";
-import { useRef, useEffect, useMemo } from "react";
+import { useRef, useEffect, useMemo, Ref, useImperativeHandle } from "react";
 import styled from "styled-components";
 import { useShallow } from "zustand/react/shallow";
 import { DataPoint } from "../../api/model";
@@ -14,6 +14,7 @@ type Transform = {
 };
 
 type Props = {
+  ref?: Ref<{ download: () => void }>;
   name: string;
   data: DataPoint[];
   store: ReturnType<typeof defineStore>;
@@ -115,6 +116,7 @@ const CanvasMap = (props: Props) => {
     draw,
     color,
     id,
+    extent,
   ]);
 
   useEffect(() => {
@@ -124,6 +126,18 @@ const CanvasMap = (props: Props) => {
     setSize(size);
     setTransform(transform);
   }, [props.fixed, setSize, setTransform]);
+
+  useImperativeHandle(props.ref, () => ({
+    download: () => {
+      if (!canvas.current) return;
+
+      const dataURL = canvas.current.toDataURL("image/png");
+      const link = document.createElement("a");
+      link.href = dataURL;
+      link.download = `${props.name || "canvas"}.png`;
+      link.click();
+    },
+  }));
 
   return (
     <Container>

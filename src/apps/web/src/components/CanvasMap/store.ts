@@ -15,11 +15,6 @@ export const schema = z.object({
     width: z.number(),
     height: z.number(),
   }),
-  transform: z.object({
-    x: z.number(),
-    y: z.number(),
-    k: z.number(),
-  }),
   oneBitMode: z.boolean(),
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/, {
     message:
@@ -28,7 +23,11 @@ export const schema = z.object({
   oneBitThreshold: z.number(),
 });
 
-export type Tramsform = z.infer<typeof schema.shape.transform>;
+type Transform = {
+  x: number;
+  y: number;
+  k: number;
+};
 export type Threshold = z.infer<typeof schema.shape.thresholds.element>;
 export type Size = z.infer<typeof schema.shape.size>;
 
@@ -54,7 +53,7 @@ export const defineStore = (color = "#000000") => {
     combine(defaults, (set) => ({
       setThresholds: (thresholds: Threshold[]) => set({ thresholds }),
       setSize: (size: Size) => set({ size }),
-      setTransform: (transform: Tramsform) => set({ transform }),
+      setTransform: (transform: Transform) => set({ transform }),
       setBlur: (blur: number) => set({ blur }),
       setOneBitThreshold: (oneBitThreshold: number) => set({ oneBitThreshold }),
       setOneBitMode: (oneBitMode: boolean) => set({ oneBitMode }),

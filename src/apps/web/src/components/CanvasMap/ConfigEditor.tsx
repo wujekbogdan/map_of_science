@@ -62,11 +62,14 @@ export const ConfigEditor = (props: Props) => {
       try {
         return JSON.parse(value);
       } catch {
+        console.error("Invalid JSON format");
         return "";
       }
     };
     const parsed = schema.safeParse(json());
+
     if (!parsed.success) {
+      console.error("Invalid configuration:", parsed.error);
       return;
     }
 
@@ -247,6 +250,7 @@ export const ConfigEditor = (props: Props) => {
           <Textarea
             rows={6}
             onChange={(e) => {
+              e.preventDefault();
               textareaOnChange(e.target.value);
             }}
             value={serializedFormState}

@@ -32,6 +32,7 @@ export const TogglablePanel = (props: Props) => {
 
   const { refs, floatingStyles, context } = useFloating({
     open: isExpanded,
+    placement: "bottom-start",
     middleware: [offset(0), flip(), shift({ padding: 0 })],
     onOpenChange: (open) => {
       const newState = open ? "expanded" : "collapsed";
@@ -43,7 +44,7 @@ export const TogglablePanel = (props: Props) => {
   const hover = useHover(context, {
     enabled: mode === "hover",
     delay: {
-      open: 50,
+      open: 0,
       close: 0,
     },
   });

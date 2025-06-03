@@ -77,6 +77,7 @@ export const ConfigEditor = (props: Props) => {
     setSize(data.size);
     setOneBitMode(data.oneBitMode);
     setOneBitThreshold(data.oneBitThreshold);
+    setColor(data.color);
   };
 
   const serializedFormState = JSON.stringify({
@@ -88,6 +89,7 @@ export const ConfigEditor = (props: Props) => {
     },
     oneBitMode,
     oneBitThreshold,
+    color,
   });
 
   return (

@@ -34,7 +34,7 @@ const partialDefaults = {
     max: 16,
     zoom: 0.5,
   },
-  maxDataPointsInViewport: 300,
+  maxDataPointsInViewport: 500,
 };
 
 const defaults: State = {

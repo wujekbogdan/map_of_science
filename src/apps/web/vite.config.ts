@@ -11,6 +11,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       checker({
+        overlay: env.VITE_CHECKER_OVERLAY === "true",
         typescript: {
           root: "./",
           tsconfigPath: "tsconfig.react.json",

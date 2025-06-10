@@ -114,6 +114,8 @@ export default function Map(props: Props) {
     desiredZoom,
     maxDataPointsInViewport,
     clustersToHighlight,
+    svgScaleFactor,
+    svgOffset,
   ] = useStore(
     useShallow((s) => [
       s.scaleFactor,
@@ -121,6 +123,8 @@ export default function Map(props: Props) {
       s.desiredZoom,
       s.maxDataPointsInViewport,
       s.pointsToHighlight,
+      s.temp__svgScaleFactor,
+      s.temp__svgOffset,
     ]),
   );
   const fetchLocalArticle = useArticleStore(
@@ -307,11 +311,8 @@ export default function Map(props: Props) {
     // const xRange = xMax - xMin;
     // const scaleFactor = xRange / viewBox.width;
     // scaleFactor = 0.0584202596593384;
-    const SCALE_FACTOR = 0.058;
-    const offset = {
-      x: -16.6,
-      y: 27,
-    };
+    const SCALE_FACTOR = svgScaleFactor;
+    const offset = svgOffset;
 
     const scale = SCALE_FACTOR * transform.k;
     const scaledWidth = viewBox.width * scale;
@@ -325,7 +326,7 @@ export default function Map(props: Props) {
       backgroundSize: `${scaledWidth}px ${scaledHeight}px`,
       backgroundPosition: `${bgX}px ${bgY}px`,
     };
-  }, [transform]);
+  }, [transform, svgOffset, svgScaleFactor]);
 
   return (
     <MapSvg

@@ -35,6 +35,11 @@ const partialDefaults = {
     zoom: 0.5,
   },
   maxDataPointsInViewport: 500,
+  temp__svgScaleFactor: 0.058,
+  temp__svgOffset: {
+    x: -16.6,
+    y: 27,
+  },
 };
 
 const defaults: State = {
@@ -94,6 +99,12 @@ export const useStore = create(
     },
     setPointsToHighlight: (clusterIds: number[]) => {
       set({ pointsToHighlight: clusterIds });
+    },
+    temp__setSvgScaleFactor: (svgScaleFactor: number) => {
+      set({ temp__svgScaleFactor: svgScaleFactor });
+    },
+    temp__setSvgOffset: (svgOffset: { x: number; y: number }) => {
+      set({ temp__svgOffset: svgOffset });
     },
   })),
 );

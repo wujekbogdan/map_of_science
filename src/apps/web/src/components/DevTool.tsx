@@ -19,6 +19,10 @@ export const DevTool = () => {
     setZoomStepFactor,
     maxDataPointsInViewport,
     setMaxDataPointsInViewport,
+    svgScaleFactor,
+    svgOffset,
+    setSvgOffset,
+    setSvgScaleFactor,
   ] = useStore(
     useShallow((state) => [
       state.currentZoom?.scale.toFixed(2) ?? 1,
@@ -30,6 +34,10 @@ export const DevTool = () => {
       state.setZoomStepFactor,
       state.maxDataPointsInViewport,
       state.setMaxDataPointsInViewport,
+      state.temp__svgScaleFactor,
+      state.temp__svgOffset,
+      state.temp__setSvgOffset,
+      state.temp__setSvgScaleFactor,
     ]),
   );
   const layers = ["layer1", "layer2", "layer3", "layer4"] as const;
@@ -125,6 +133,61 @@ export const DevTool = () => {
             <P>
               <Label>{i18n("Current Zoom")}</Label>
               <span>{zoom}</span>
+            </P>
+          </Panel>
+
+          <Panel>
+            <Header>{i18n("SVG")}</Header>
+            <P>
+              <FormControl>
+                <Label>{i18n("SVG scale factor")}</Label>
+                <Input
+                  type="number"
+                  step="0.001"
+                  min="0"
+                  max="1"
+                  value={svgScaleFactor}
+                  onChange={(e) => {
+                    setSvgScaleFactor(Number(e.target.value));
+                  }}
+                />
+              </FormControl>
+            </P>
+            <P>
+              <FormControl>
+                <Label>{i18n("SVG offset X")}</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="-1000"
+                  max="1000"
+                  value={svgOffset.x}
+                  onChange={(e) => {
+                    setSvgOffset({
+                      ...svgOffset,
+                      x: Number(e.target.value),
+                    });
+                  }}
+                />
+              </FormControl>
+            </P>
+            <P>
+              <FormControl>
+                <Label>{i18n("SVG offset Y")}</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="-1000"
+                  max="1000"
+                  value={svgOffset.y}
+                  onChange={(e) => {
+                    setSvgOffset({
+                      ...svgOffset,
+                      y: Number(e.target.value),
+                    });
+                  }}
+                />
+              </FormControl>
             </P>
           </Panel>
         </Panels>

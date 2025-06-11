@@ -9,6 +9,8 @@ import { useArticleStore, useStore } from "../store";
 import { useD3Zoom } from "../useD3Zoom.ts";
 import { useLayersOpacity } from "../useLayersOpacity.ts";
 import { DataPoints } from "./DataPoints/DataPoints.tsx";
+import backgroundImage from "./map-background.svg";
+import "./map.css";
 
 type Label = {
   id: string;
@@ -112,6 +114,8 @@ export default function Map(props: Props) {
     desiredZoom,
     maxDataPointsInViewport,
     clustersToHighlight,
+    svgScaleFactor,
+    svgOffset,
   ] = useStore(
     useShallow((s) => [
       s.scaleFactor,
@@ -119,6 +123,8 @@ export default function Map(props: Props) {
       s.desiredZoom,
       s.maxDataPointsInViewport,
       s.pointsToHighlight,
+      s.temp__svgScaleFactor,
+      s.temp__svgOffset,
     ]),
   );
   const fetchLocalArticle = useArticleStore(
@@ -288,8 +294,48 @@ export default function Map(props: Props) {
     props.dataPoints,
   ]);
 
+  const backgroundStyles = useMemo(() => {
+    if (!transform) {
+      return {};
+    }
+
+    // TODO: This is a copy/paste from the SVG. Let's parse it out from the SVG instead.
+    const viewBox = {
+      width: 18340.723,
+      height: 18561.087,
+    };
+
+    // const [xMin, xMax] = extent(
+    //   [...props.dataPoints.values()],
+    //   (point) => point.x,
+    // ) as [number, number];
+    // const xRange = xMax - xMin;
+    // const scaleFactor = xRange / viewBox.width;
+    // scaleFactor = 0.0584202596593384;
+    // TODO: We can't fully rely on the extent of the data points and the ratio between data points range and viewBox
+    // width because this calculation doesn't include the padding around the map
+    // We use the calculated scale factor as a base value that needs some manual adjustment.
+    // Let's sort it out so that we can rely on calculated values only.
+    const SCALE_FACTOR = svgScaleFactor;
+    const offset = svgOffset;
+
+    const scale = SCALE_FACTOR * transform.k;
+    const scaledWidth = viewBox.width * scale;
+    const scaledHeight = viewBox.height * scale;
+    const bgX = transform.x + offset.x * transform.k - scaledWidth / 2;
+    const bgY = transform.y + offset.y * transform.k - scaledHeight / 2;
+
+    return {
+      backgroundImage: `url(${backgroundImage})`,
+      backgroundRepeat: "no-repeat",
+      backgroundSize: `${scaledWidth}px ${scaledHeight}px`,
+      backgroundPosition: `${bgX}px ${bgY}px`,
+    };
+  }, [transform, svgOffset, svgScaleFactor]);
+
   return (
     <MapSvg
+      style={backgroundStyles}
       $visibility={mapVisibility}
       ref={svgRoot}
       width={props.size.width}
@@ -297,34 +343,6 @@ export default function Map(props: Props) {
       $zoom={zoom}
     >
       <g transform={transformValue} opacity={opacity.layer1}>
-        <g id={map.layer1.attributes.id} style={map.layer1.attributes.style}>
-          {map.layer1.children.map(({ path }) => (
-            <path
-              key={path.id}
-              id={path.id}
-              d={path.d}
-              style={path.style}
-              data-label={path.label}
-            />
-          ))}
-        </g>
-
-        <g
-          id={map.layer2.attributes.id}
-          style={map.layer2.attributes.style}
-          opacity={opacity.layer2}
-        >
-          {map.layer2.children.map(({ path }) => (
-            <path
-              key={path.id}
-              id={path.id}
-              d={path.d}
-              style={path.style}
-              data-label={path.label}
-            />
-          ))}
-        </g>
-
         <g>
           <DataPoints points={dataInViewport} concepts={props.concepts} />
 

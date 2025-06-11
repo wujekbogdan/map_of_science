@@ -2,6 +2,7 @@ import react from "@vitejs/plugin-react-swc";
 import { defineConfig, loadEnv } from "vite";
 import checker from "vite-plugin-checker";
 import { comlink } from "vite-plugin-comlink";
+import svgr from "vite-plugin-svgr";
 import svgMapParser from "./vite-plugin/svg-map-parser";
 
 export default defineConfig(({ mode }) => {
@@ -10,6 +11,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       checker({
+        overlay: env.VITE_CHECKER_OVERLAY === "true",
         typescript: {
           root: "./",
           tsconfigPath: "tsconfig.react.json",
@@ -18,6 +20,7 @@ export default defineConfig(({ mode }) => {
       react(),
       comlink(),
       svgMapParser(),
+      svgr(),
     ],
     base: env.VITE_BASE_URL,
     root: "src",

@@ -299,6 +299,7 @@ export default function Map(props: Props) {
       return {};
     }
 
+    // TODO: This is a copy/paste from the SVG. Let's parse it out from the SVG instead.
     const viewBox = {
       width: 18340.723,
       height: 18561.087,
@@ -311,6 +312,10 @@ export default function Map(props: Props) {
     // const xRange = xMax - xMin;
     // const scaleFactor = xRange / viewBox.width;
     // scaleFactor = 0.0584202596593384;
+    // TODO: We can't fully rely on the extent of the data points and the ratio between data points range and viewBox
+    // width because this calculation doesn't include the padding around the map
+    // We use the calculated scale factor as a base value that needs some manual adjustment.
+    // Let's sort it out so that we can rely on calculated values only.
     const SCALE_FACTOR = svgScaleFactor;
     const offset = svgOffset;
 

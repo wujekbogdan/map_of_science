@@ -4,7 +4,7 @@ import { IframeArticle } from "./IframeArticle.tsx";
 import { LocalArticle } from "./LocalArticle.tsx";
 
 export const Article = () => {
-  const { type, id, article, reset } = useArticleStore();
+  const { type, id, article, videos, reset } = useArticleStore();
 
   if (!type) {
     return null;
@@ -14,7 +14,7 @@ export const Article = () => {
     type === "iframe" ? (
       <IframeArticle id={id} />
     ) : (
-      <LocalArticle html={article} />
+      <LocalArticle html={article} videos={videos} />
     );
 
   return (

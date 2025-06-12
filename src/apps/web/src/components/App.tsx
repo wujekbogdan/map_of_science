@@ -50,9 +50,10 @@ function App() {
            * undefined. It's just an issue with SWR typing. SWR doesn't narrow
            * the type of data based on the isLoading value.
            * */
-          cityLabels={data?.labels ?? []}
+          cityLabels={data?.cityLabels ?? []}
           dataPoints={data?.dataPoints ?? new Map()}
           concepts={data?.concepts ?? new Map()}
+          youtube={data?.youtube ?? new Map()}
           map={map}
         />
       )}

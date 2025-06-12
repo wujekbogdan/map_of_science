@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { combine } from "zustand/middleware";
 import { fetchArticle } from "./api";
-import { Concept, DataPoint } from "./api/model";
+import { Concept, DataPoint, YoutubeVideo } from "./api/model";
 
 type Zoom = { x: number; y: number; scale: number };
 type PartialDefaults = typeof partialDefaults;
@@ -110,34 +110,36 @@ export const useStore = create(
 );
 
 type ArticleState =
-  | { id: null; type: null; article: null }
-  | { id: null; type: "local"; article: string }
-  | { id: number; type: "iframe"; article: null };
+  | { id: null; type: null; article: null; videos: YoutubeVideo[] }
+  | { id: null; type: "local"; article: string | null; videos: YoutubeVideo[] }
+  | { id: number; type: "iframe"; article: null; videos: YoutubeVideo[] };
 
 type ArticleActions = {
   reset: () => void;
   setRemoteArticleId: (id: number) => void;
   fetchLocalArticle: (label: string) => Promise<void>;
+  setVideos: (videos: YoutubeVideo[]) => void;
 };
 
 export const useArticleStore = create<ArticleState & ArticleActions>((set) => ({
   id: null,
   type: null,
   article: null,
+  // TODO: Videos and local articles should not be handled separately.
+  // Fetch logic should be encapsulated in the store, so that videos and articles can be fetched together rather
+  // than set from the outside.
+  videos: [],
   reset: () => {
-    set({ id: null, type: null, article: null });
+    set({ id: null, type: null, article: null, videos: [] });
   },
   setRemoteArticleId: (id: number) => {
     set({ id, type: "iframe", article: null });
   },
   fetchLocalArticle: async (label: string) => {
     const articleHTML = await fetchArticle(label);
-
-    if (!articleHTML) {
-      set({ id: null, type: null, article: null });
-      return;
-    }
-
     set({ id: null, type: "local", article: articleHTML });
+  },
+  setVideos: (videos: YoutubeVideo[]) => {
+    set({ videos, id: null, type: "local" });
   },
 }));

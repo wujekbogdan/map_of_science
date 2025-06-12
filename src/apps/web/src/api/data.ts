@@ -1,6 +1,12 @@
 import { z } from "zod";
-import { DataSchema, ConceptSchema, CityLabelSchema } from "./model";
-import { loadAsMap } from "./utils.ts";
+import {
+  DataSchema,
+  ConceptSchema,
+  CityLabelSchema,
+  YoutubeVideoSchema,
+  YoutubeVideo,
+} from "./model";
+import { loadAsArray, loadAsMap } from "./utils.ts";
 
 // TODO: move this out from here. It does not belong to the API layer.
 // It's more of a service layer.
@@ -27,6 +33,11 @@ export const loadData = async () => {
     getKey: (item) => item.clusterId,
   });
 
+  const loadingYoutubeData = loadAsArray({
+    url: new URL("../../asset/youtube.tsv", import.meta.url).href,
+    schema: YoutubeVideoSchema(z),
+  });
+
   // We're awaiting the labels promise only because at this point we don't care about concepts yet
   const rawLabels = await loadingLabels;
 
@@ -40,7 +51,7 @@ export const loadData = async () => {
   ]);
 
   // Populate labels with x,y coordinates coming from data points
-  const labels = [...rawLabels.values()]
+  const cityLabels = [...rawLabels.values()]
     .map(({ clusterId, label }) => {
       const point = dataPoints.get(clusterId);
       return {
@@ -58,9 +69,28 @@ export const loadData = async () => {
     ),
   );
 
+  // TODO: Indexing videos by labelId isn't great. We need to give labels proper ids.
+  const labelToVideos = new Map<string, YoutubeVideo[]>(
+    Object.entries(
+      (await loadingYoutubeData).reduce<Record<string, YoutubeVideo[]>>(
+        (acc, video) => {
+          return video.labelIds.reduce<Record<string, YoutubeVideo[]>>(
+            (innerAcc, labelId) => ({
+              ...innerAcc,
+              [labelId]: [...(innerAcc[labelId] ?? []), video],
+            }),
+            acc,
+          );
+        },
+        {},
+      ),
+    ),
+  );
+
   return {
     concepts,
-    labels,
+    cityLabels,
     dataPoints: dataPointsOrdered,
+    youtube: labelToVideos,
   };
 };

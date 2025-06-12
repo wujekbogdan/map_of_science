@@ -25,9 +25,13 @@ const markdownToHtml = async (markdown: string) => {
 };
 
 export const fetchArticle = async (label: string) => {
-  const labelId = labelTextToLabelId(label);
+  if (!isArticleAvailable(label)) {
+    return null;
+  }
 
+  const labelId = labelTextToLabelId(label);
   const path = (await articles[labelId]()).default;
+
   if (!path) {
     throw new Error(`Article not found: ${labelId}`);
   }

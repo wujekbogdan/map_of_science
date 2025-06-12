@@ -3,8 +3,7 @@ import { CSSProperties, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { useShallow } from "zustand/react/shallow";
 import { MapSvgRepresentation } from "../../vite-plugin/svg-map-parser.ts";
-import { isArticleAvailable } from "../api/article";
-import { Concept, DataPoint as Point } from "../api/model";
+import { Concept, DataPoint as Point, YoutubeVideo } from "../api/model";
 import { useArticleStore, useStore } from "../store";
 import { useD3Zoom } from "../useD3Zoom.ts";
 import { useLayersOpacity } from "../useLayersOpacity.ts";
@@ -20,23 +19,23 @@ type Label = {
   fontSize: number;
   opacity: number;
   level: 1 | 2 | 3 | 4;
-  hasArticle: boolean;
+  videos: YoutubeVideo[];
   onClick?: OnLabelClick;
 };
 
-type OnLabelClick = (label: Pick<Label, "text" | "x" | "y">) => void;
+type OnLabelClick = (label: Pick<Label, "text" | "x" | "y" | "videos">) => void;
 
 const Label = (props: Label) => {
-  const onClick =
-    props.hasArticle && props.onClick
-      ? () => {
-          props.onClick?.({
-            text: props.text,
-            x: props.x,
-            y: props.y,
-          });
-        }
-      : undefined;
+  const onClick = props.onClick
+    ? () => {
+        props.onClick?.({
+          text: props.text,
+          x: props.x,
+          y: props.y,
+          videos: props.videos,
+        });
+      }
+    : undefined;
 
   return (
     <LabelText
@@ -45,7 +44,6 @@ const Label = (props: Label) => {
       alignmentBaseline="middle"
       x={props.x}
       y={props.y}
-      $hasArticle={props.hasArticle}
       $fontSize={props.fontSize}
       $opacity={props.opacity}
       $level={props.level}
@@ -101,13 +99,14 @@ type Props = {
   }[];
   dataPoints: Map<number, Point>;
   concepts: Map<number, Concept>;
+  youtube: Map<string, YoutubeVideo[]>;
   on?: {
     labelClick?: OnLabelClick;
   };
 };
 
 export default function Map(props: Props) {
-  const { map, cityLabels, on } = props;
+  const { map, cityLabels } = props;
   const [
     scaleFactor,
     fontSize,
@@ -127,8 +126,9 @@ export default function Map(props: Props) {
       s.temp__svgOffset,
     ]),
   );
-  const fetchLocalArticle = useArticleStore(
-    ({ fetchLocalArticle }) => fetchLocalArticle,
+
+  const [fetchLocalArticle, setVideos] = useArticleStore(
+    useShallow((s) => [s.fetchLocalArticle, s.setVideos]),
   );
 
   const svgRoot = useRef<SVGSVGElement>(null);
@@ -244,16 +244,7 @@ export default function Map(props: Props) {
     ...cityLabelsScaled,
   ].map((label) => ({
     ...label,
-    hasArticle: isArticleAvailable(label.text),
-    onClick: () => {
-      if (on?.labelClick) {
-        on.labelClick({
-          text: replaceHash(label.text),
-          x: label.x,
-          y: label.y,
-        });
-      }
-    },
+    videos: props.youtube.get(label.text) ?? [],
   }));
 
   const dataInViewport = !transform
@@ -355,7 +346,8 @@ export default function Map(props: Props) {
               {...label}
               id={label.key}
               key={label.key}
-              onClick={({ text }) => {
+              onClick={({ text, videos }) => {
+                setVideos(videos);
                 void fetchLocalArticle(text);
               }}
             />
@@ -401,9 +393,8 @@ const LabelText = styled.text.attrs<{
   },
 }))<{
   $level: 1 | 2 | 3 | 4;
-  $hasArticle: boolean;
 }>`
-  cursor: ${(props) => (props.$hasArticle ? "pointer" : "default")};
+  cursor: pointer;
   font-weight: bold;
   // TODO: It can be, very likely, replaced with a simplified text-shadow
   text-shadow:
@@ -418,8 +409,8 @@ const LabelText = styled.text.attrs<{
     0 0 5px #f2efe9,
     0 0 5px #f2efe9;
   fill: ${(props) => labelFillColor(props.$level)};
+
   &:hover {
-    fill: ${(props) =>
-      props.$hasArticle ? "#4A90E2" : labelFillColor(props.$level)};
+    fill: #4a90e2;
   }
 `;

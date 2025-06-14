@@ -7,6 +7,10 @@ services:
     restart: always
     ports:
       - "8080:80"
+    profiles: ["web", "app"]
+    depends_on:
+      - api
+
   api:
     container_name: api
     build:
@@ -15,3 +19,23 @@ services:
     restart: always
     ports:
       - "3001:3001"
+    profiles: ["api", "app"]
+    depends_on:
+      - db
+
+  db:
+    container_name: db
+    image: postgres:17-alpine3.22
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    profiles: ["api", "app"]
+
+volumes:
+  db_data:

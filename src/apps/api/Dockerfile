@@ -19,12 +19,16 @@ COPY --from=pruner /app/out/json/ .
 RUN pnpm install --frozen-lockfile
 COPY --from=pruner /app/out/full/ .
 RUN pnpm turbo build
+RUN find . -name node_modules -type d -prune -exec rm -rf '{}' +
+RUN pnpm install --prod
 
 FROM base AS runner
 WORKDIR /app
 RUN addgroup --system --gid 1001 app
 RUN adduser --system --uid 1001 app
 USER app
-COPY --from=builder /app .
+COPY --from=builder /app/src/apps/api/dist ./dist
+COPY --from=builder /app/src/apps/api/node_modules ./node_modules
+COPY --from=builder /app/src/apps/api/package.json ./package.json
 
-CMD node src/apps/api/dist/index.js
+CMD node dist/index.js

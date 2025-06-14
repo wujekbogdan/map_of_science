@@ -1,12 +1,12 @@
 services:
-  web:
-    container_name: web
-    build:
-      context: .
-      dockerfile: ./src/apps/web/Dockerfile
-    restart: always
-    ports:
-      - "8080:80"
+#  web:
+#    container_name: web
+#    build:
+#      context: .
+#      dockerfile: ./src/apps/web/Dockerfile
+#    restart: always
+#    ports:
+#      - "8080:80"
   api:
     container_name: api
     build:

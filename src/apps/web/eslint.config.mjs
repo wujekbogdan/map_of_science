@@ -1,3 +1,3 @@
-import { defineConfig } from "@map-of-science/eslint";
+import { defineReactConfig } from "@map-of-science/eslint";
 
-export default defineConfig();
+export default defineReactConfig();

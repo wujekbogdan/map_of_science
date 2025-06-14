@@ -1,6 +1,6 @@
 FROM node:22.15.0-alpine3.20 AS base
 
-FROM base as pnpm
+FROM base AS pnpm
 RUN apk update
 RUN apk add --no-cache libc6-compat
 ENV PNPM_HOME="/pnpm"

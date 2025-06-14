@@ -46,13 +46,6 @@ importers:
         version: 2.5.4
 
   src/apps/api:
-    dependencies:
-      '@types/node':
-        specifier: ^22.15.18
-        version: 22.15.18
-      lodash:
-        specifier: ^4.17.21
-        version: 4.17.21
     devDependencies:
       '@map-of-science/eslint':
         specifier: workspace:*
@@ -66,6 +59,9 @@ importers:
       '@types/lodash':
         specifier: ^4.17.17
         version: 4.17.17
+      '@types/node':
+        specifier: ^22.15.18
+        version: 22.15.18
       eslint:
         specifier: ^9.13.0
         version: 9.28.0(jiti@2.4.2)

@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     "./node": "./tsconfig.node.json",
+    "./vite": "./tsconfig.vite.json",
     "./react": "./tsconfig.react.json"
   },
   "peerDependencies": {

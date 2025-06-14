@@ -1,26 +1,25 @@
 FROM node:22.15.0-alpine3.20 AS base
 
-FROM base AS builder
-
-WORKDIR /home/node
-
-# Copy just the package.json and package-lock.json to utilize Docker's caching mechanism and cache the npm install step.
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-
-ENV HUSKY=0
+FROM base AS pnpm
+RUN apk update
+RUN apk add --no-cache libc6-compat
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
-RUN #corepack prepare --activate
-RUN pnpm i --frozen-lockfile
 
+FROM pnpm AS pruner
+WORKDIR /app
+RUN pnpm add -g turbo
 COPY . .
+RUN turbo prune @map-of-science/web --docker
 
-RUN export HUSKY=0
-RUN pnpm build
+FROM pnpm AS builder
+WORKDIR /app
+COPY --from=pruner /app/out/json/ .
+RUN pnpm install --frozen-lockfile
+COPY --from=pruner /app/out/full/ .
+RUN pnpm turbo build
 
-# Use a separate image as a runner to reduce the final image size.
 FROM nginx:1.27.2-alpine AS runner
-
-COPY --from=builder /home/node/dist /usr/share/nginx/html
-
-# The app doesn't include any backend, so we need to serve the app using a standalone server.
+COPY --from=builder /app/src/apps/web/dist /usr/share/nginx/html
 CMD ["nginx", "-g", "daemon off;"]

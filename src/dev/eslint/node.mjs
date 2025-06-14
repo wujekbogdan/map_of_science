@@ -11,6 +11,9 @@ export const defineConfig = () =>
     tsEslint.configs.stylisticTypeChecked,
     nodePlugin.configs["flat/recommended-script"],
     {
+      ignores: ["dist"],
+    },
+    {
       languageOptions: {
         parserOptions: {
           projectService: true,

@@ -11,7 +11,7 @@ FROM pnpm AS pruner
 WORKDIR /app
 RUN pnpm add -g turbo
 COPY . .
-RUN turbo prune @map-of-science/web --docker
+RUN turbo prune @map-of-science/api --docker
 
 FROM pnpm AS builder
 WORKDIR /app
@@ -20,6 +20,11 @@ RUN pnpm install --frozen-lockfile
 COPY --from=pruner /app/out/full/ .
 RUN pnpm turbo build
 
-FROM nginx:1.27.2-alpine AS runner
-COPY --from=builder /app/src/apps/web/dist /usr/share/nginx/html
-CMD ["nginx", "-g", "daemon off;"]
+FROM base AS runner
+WORKDIR /app
+RUN addgroup --system --gid 1001 app
+RUN adduser --system --uid 1001 app
+USER app
+COPY --from=builder /app .
+
+CMD node src/apps/api/dist/index.js

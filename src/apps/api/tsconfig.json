@@ -1,0 +1,7 @@
+{
+  "extends": "@map-of-science/typescript/node",
+  "compilerOptions": {
+    "outDir": "dist",
+  },
+  "include": ["src"],
+}

@@ -49,8 +49,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
       - run: docker buildx build \
-          -f ./src/apps/web/Dockerfile . 
-          --cache-from type=gha 
+          -f ./src/apps/web/Dockerfile . \
+          --cache-from type=gha \
           --cache-to type=gha
 
   build-api:
@@ -59,6 +59,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
       - run: docker buildx build \
-          -f ./src/apps/api/Dockerfile .
-          --cache-from type=gha
+          -f ./src/apps/api/Dockerfile . \
+          --cache-from type=gha \
           --cache-to type=gha

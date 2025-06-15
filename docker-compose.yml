@@ -28,14 +28,29 @@ services:
     image: postgres:17-alpine3.22
     restart: always
     environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_DB: ${DB_NAME:-postgres}
     ports:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
     profiles: ["api", "app"]
+
+  migration:
+    container_name: migration
+    image: flyway/flyway:11.9.1-alpine
+    profiles: ["api", "app"]
+    volumes:
+      - ./src/apps/api/sql:/migrations/
+    environment:
+      FLYWAY_URL: jdbc:postgresql://db:5432/${DB_NAME:-postgres}
+      FLYWAY_USER: ${DB_USER:-postgres}
+      FLYWAY_PASSWORD: ${DB_PASSWORD:-password}
+      FLYWAY_LOCATIONS: filesystem:/flyway/sql
+    command: migrate
+    depends_on:
+      - db
 
 volumes:
   db_data:

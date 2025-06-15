@@ -22,6 +22,7 @@ services:
     profiles: ["api", "app"]
     depends_on:
       - db
+      - migration
 
   db:
     container_name: db
@@ -35,6 +36,7 @@ services:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+      - ./src/apps/api/sql/data:/csv
     profiles: ["api", "app"]
 
   migration:
@@ -47,7 +49,7 @@ services:
       FLYWAY_URL: jdbc:postgresql://db:5432/${DB_NAME:-postgres}
       FLYWAY_USER: ${DB_USER:-postgres}
       FLYWAY_PASSWORD: ${DB_PASSWORD:-password}
-      FLYWAY_LOCATIONS: filesystem:/flyway/sql
+      FLYWAY_LOCATIONS: filesystem:/migrations
     command: migrate
     depends_on:
       - db
